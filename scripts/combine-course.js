@@ -122,11 +122,6 @@ authors: ['default']
     data.push(`# ${topic.title}`);
     data.push(`${topic.content}`);
   }
-
-  fs.writeFileSync(
-    `data/blog/blog-${course_slug}.generated.mdx`,
-    data.join('\n'),
-  );
 }
 
 function combineGithub(course_slug, topics) {

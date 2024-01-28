@@ -14,13 +14,6 @@ import { AuthorFrontMatter } from 'types/AuthorFrontMatter';
 import { PostFrontMatter } from 'types/PostFrontMatter';
 import { Toc } from 'types/Toc';
 
-const editUrl = fileName =>
-  `${siteMetadata.siteRepo}/blob/master/data/courses/${fileName}`;
-const discussUrl = slug =>
-  `https://mobile.twitter.com/search?q=${encodeURIComponent(
-    `${siteMetadata.siteUrl}/blog/${slug}`,
-  )}`;
-
 interface Props {
   frontMatter: PostFrontMatter;
   authorDetails: AuthorFrontMatter[];
@@ -71,7 +64,7 @@ export default function CourseLayout({
             className='divide-y divide-gray-100 pb-8 dark:divide-gray-800 xl:grid xl:grid-cols-4 xl:gap-x-6 xl:divide-y-0'
             style={{ gridTemplateRows: 'auto 1fr' }}
           >
-            <dl className='pt-6 pb-10 xl:sticky xl:top-0 xl:border-b xl:border-gray-100 xl:pt-11 xl:dark:border-gray-800'>
+            <dl className='pb-10 pt-6 xl:sticky xl:top-0 xl:border-b xl:border-gray-100 xl:pt-11 xl:dark:border-gray-800'>
               <dt className='sr-only'>Authors</dt>
               <dd>
                 <ul className='flex justify-center space-x-8 sm:space-x-12 xl:block xl:space-x-0 xl:space-y-8'>
@@ -122,17 +115,11 @@ export default function CourseLayout({
                   alt='banner'
                 />
               )}
-              <div className='prose max-w-none !border-t-0 pt-6 pb-8 dark:prose-dark'>
+              <div className='prose max-w-none !border-t-0 pb-8 pt-6 dark:prose-dark'>
                 <TOCInline toc={toc} asDisclosure />
                 {children}
               </div>
-              <div className='pt-6 pb-6 text-sm text-gray-700 dark:text-gray-300'>
-                <Link href={discussUrl(slug)} rel='nofollow'>
-                  {'Discuss on Twitter'}
-                </Link>
-                {` • `}
-                <Link href={editUrl(fileName)}>{'View on GitHub'}</Link>
-              </div>
+              <div className='pb-6 pt-6 text-sm text-gray-700 dark:text-gray-300'></div>
               <Comments frontMatter={frontMatter} />
             </div>
             <footer>

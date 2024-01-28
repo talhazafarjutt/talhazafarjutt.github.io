@@ -26,7 +26,6 @@ export default function PostLayout({
 
   return (
     <SectionContainer>
-      <BlogSEO url={`${siteMetadata.siteUrl}/blog/${slug}`} {...frontMatter} />
       <ScrollTopAndComment />
       <article className='fade-in'>
         <div>
@@ -50,35 +49,11 @@ export default function PostLayout({
             style={{ gridTemplateRows: 'auto 1fr' }}
           >
             <div className='divide-y-2 divide-gray-100 dark:divide-gray-800 xl:col-span-3 xl:row-span-2 xl:pb-0'>
-              <div className='prose max-w-none pt-10 pb-8 dark:prose-dark'>
+              <div className='prose max-w-none pb-8 pt-10 dark:prose-dark'>
                 {children}
               </div>
             </div>
             <Comments frontMatter={frontMatter} />
-            <footer>
-              <div className='flex flex-col text-sm font-medium sm:flex-row sm:justify-between sm:text-base'>
-                {prev && (
-                  <div className='pt-4 xl:pt-8'>
-                    <Link
-                      href={`/blog/${prev.slug}`}
-                      className='text-primary-500 hover:text-primary-600 dark:hover:text-primary-400'
-                    >
-                      &larr; {prev.title}
-                    </Link>
-                  </div>
-                )}
-                {next && (
-                  <div className='pt-4 xl:pt-8'>
-                    <Link
-                      href={`/blog/${next.slug}`}
-                      className='text-primary-500 hover:text-primary-600 dark:hover:text-primary-400'
-                    >
-                      {next.title} &rarr;
-                    </Link>
-                  </div>
-                )}
-              </div>
-            </footer>
           </div>
         </div>
       </article>
