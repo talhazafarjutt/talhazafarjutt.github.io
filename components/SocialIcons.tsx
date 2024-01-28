@@ -53,20 +53,10 @@ function resolveIcon(entry: Tuple<string>): React.ReactNode {
       icon = <GithubIcon {...props} />;
       break;
 
-    case ContactType.youtube:
-      icon = <YoutubeIcon {...props} />;
-      break;
-
     case ContactType.email:
       icon = <MailIcon {...props} />;
       break;
 
-    case ContactType.buymeacoffee:
-      icon = <BuymeacoffeeIcon {...props} />;
-      break;
-    case ContactType.googlescholar:
-      icon = <Googlescholar {...props} />;
-      break;
     default:
       break;
   }
