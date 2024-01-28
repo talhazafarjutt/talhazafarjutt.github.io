@@ -1,22 +1,26 @@
 ---
-name: Karan Pratap Singh
-shortname: Karan
+name: Asad Ullah Tariq
+shortname: Asad
 avatar: /static/avatar.jpg
 occupation: Software Engineer
-company: Guardian Life
-resume: /static/karan_resume.pdf
-email: contact@karanpratapsingh.com
-twitter: https://twitter.com/karan_6864
-linkedin: https://www.linkedin.com/in/karan99
-github: https://github.com/karanpratapsingh
+company: RipeSeed
+resume: /static/asad_ullah_tariq.pdf
+email: asadullahtariq89@gmail.com
+twitter: https://twitter.com/asadullahaut
+linkedin: https://www.linkedin.com/in/muhammadasadullahtariq/
+github: https://github.com/muhammadasadullahtariq
 ---
 
-A software engineer who aims to evolve, innovate, and inspire through technology.
+Hey there 👋
 
-Currently, I am working as a Senior Software Engineer at [Guardian Life](https://www.guardianlife.com).
+I'm a passionate Software Engineer who thrives on the challenges of both mobile application development and backend construction. My journey in the tech world has led me to wear many hats - I've delved into the intricacies of web and mobile application development, and even navigated the complex landscape of DevOps.
 
-Previously, I was a Software Engineer at [Curebase](https://www.curebase.com) where I contributed to the creation of a decentralized clinical trial platform and scaling infrastructure with an emphasis on security, HIPAA compliance, and GDPR compliance.
+Currently, I am working as a Software Engineer at [Ripeseed](https://ripeseed.io/) where I'm countributing to the development of cloud-based web and mobile applications. I'm using technologies like React, React Native, Flutter, GraphQL, Node.js, and AWS to build scalable and secure applications.
 
-Prior to that, I worked with the Digitization Program Office (DPO) at the [Smithsonian Institution](https://www.si.edu) as a consulting Full Stack Engineer in collaboration with the Office of the Chief Information Officer (OCIO).
+Previously, I worked as Software Engineer at [9melon](https://9melons.com) where I contributed to the creation of a mobile application for a client. I worked on the development of the application's frontend using React Native and its backend using Node.js and MongoDB.
 
-Outside of work, I've written more than 50 technical articles that have received over 1 million views. I've self-published two books, worked on US patents, and made contributions to open-source projects like Meta's [React Native (v0.60)](https://reactnative.dev/blog/2019/06/12/react-native-open-source-update).
+I am also working as a freelancer and have worked on a number of projects. I have developed mobile applications using React Native and Flutter. I have also worked on the development of web applications using React and Node.js. Freelancing has helped me to improve my communication skills and taught me how to work with clients.
+
+I also developed my own mobile application using React Native. The application is available on both Google Play Store and Apple App Store. The application helped me to learn the process of building applications and creating templates for my own use and for the community.
+
+Besides this, I also contributed to open source projects and developed a package for [react native](https://www.npmjs.com/package/react-native-split-flap).
