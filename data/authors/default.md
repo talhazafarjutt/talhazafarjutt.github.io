@@ -1,10 +1,10 @@
 ---
 name: Asad Ullah Tariq
-shortname: Asad
+shortname: Asad Ullah
 avatar: /static/avatar.jpg
-occupation: Software Engineer
+occupation: Full Stack Mobile Developer
 company: RipeSeed
-resume: /static/asad_ullah_tariq.pdf
+resume: /static/Muhammad Asad Ullah Tariq.pdf
 email: asadullahtariq89@gmail.com
 twitter: https://twitter.com/asadullahaut
 linkedin: https://www.linkedin.com/in/muhammadasadullahtariq/
