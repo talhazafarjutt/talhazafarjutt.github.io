@@ -16,17 +16,17 @@ export interface Contact {
 }
 
 export const contact: Contact = {
-  twitter: 'asadullahaut',
-  site: 'muhammadasadullahtariq.github.io',
-  calendly: 'https://calendly.com/asadullahtariq',
+  twitter: 'talhazafarjutt',
+  site: 'talhazafarjutt.github.io',
+  calendly: 'https://calendly.com/talha-zafar-j',
   links: {
-    github: 'https://github.com/muhammadasadullahtariq',
-    linkedin: 'https://linkedin.com/in/muhammadasadullahtariq',
+    github: 'https://github.com/talhazafarjutt',
+    linkedin: 'https://linkedin.com/in/talhazafarsoftwareengineer',
     // googlescholar:
     //   'https://scholar.google.com/citations?user=8wIfeAsAAAAJ&hl=en',
-    twitter: 'https://twitter.com/asadullahaut',
+    twitter: 'https://twitter.com/talhazafarjutt',
     //youtube: 'https://www.youtube.com/c/KaranPratapSingh',
-    email: 'mailto:asadullahtariq89@gmail.com',
+    email: 'mailto:talha.zafar.j@gmail.com',
     // buymeacoffee: 'https://www.buymeacoffee.com/karanps',
   },
 };
