@@ -1,7 +1,7 @@
 const siteMetadata = {
-  title: 'Asad Ullah Tariq',
-  author: 'Asad Ullah Tariq',
-  headerTitle: 'Asad Ullah Tariq',
+  title: 'Talha Zafar',
+  author: 'Talha Zafar',
+  headerTitle: 'Talha Zafar',
   description:
     'A software engineer who aims to evolve, innovate, and inspire through technology.',
   language: 'en-us',

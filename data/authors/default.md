@@ -1,21 +1,21 @@
 ---
-name: Asad Ullah Tariq
-shortname: Asad Ullah
+name: Talha Zafar
+shortname: Talha
 avatar: /static/avatar.jpg
-occupation: Full Stack Mobile Developer
-company: RipeSeed
+occupation: Backend Developer
+company: Bool Mind
 resume: /static/Muhammad Asad Ullah Tariq.pdf
 email: asadullahtariq89@gmail.com
 twitter: https://twitter.com/asadullahaut
-linkedin: https://www.linkedin.com/in/muhammadasadullahtariq/
-github: https://github.com/muhammadasadullahtariq
+linkedin: https://www.linkedin.com/in/talhazafarsoftwareengineer/
+github: https://github.com/talhazafarjutt
 ---
 
 Hey there 👋
 
 I'm a passionate Software Engineer who thrives on the challenges of both mobile application development and backend construction. My journey in the tech world has led me to wear many hats - I've delved into the intricacies of web and mobile application development, and even navigated the complex landscape of DevOps.
 
-Currently, I am working as a Software Engineer at [Ripeseed](https://ripeseed.io/) where I'm countributing to the development of cloud-based web and mobile applications. I'm using technologies like React, React Native, Flutter, GraphQL, Node.js, and AWS to build scalable and secure applications.
+Currently, I am working as a Software Engineer at [Bool Mind](https://boolmind.com/) where I'm countributing to the development of cloud-based web and mobile applications. I'm using technologies like React, React Native, Flutter, GraphQL, Node.js, and AWS to build scalable and secure applications.
 
 Previously, I worked as Software Engineer at [9melon](https://9melons.com) where I contributed to the creation of a mobile application for a client. I worked on the development of the application's frontend using React Native and its backend using Node.js and MongoDB.
 
