@@ -1,7 +1,7 @@
 ---
 name: Talha Zafar
 shortname: Talha
-avatar: /static/avatar.jpg
+avatar: /static/profilePic.jpg
 occupation: Backend Developer
 company: Bool Mind
 resume: /static/TalhaResume.pdf
