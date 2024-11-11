@@ -77,19 +77,19 @@ export const StackInfo: Record<Stack, StackInfoMap> = {
     color: Colors.javascript,
   },
   [Stack.go]: {
-    value: 'Go',
+    value: 'Service Oriented Architecture',
     color: Colors.go,
   },
   [Stack.react]: {
-    value: 'React',
+    value: 'Micro Services',
     color: Colors.react,
   },
   [Stack.reactnative]: {
-    value: 'React Native',
+    value: 'gRPC',
     color: Colors.reactnative,
   },
   [Stack.nextjs]: {
-    value: 'Nextjs',
+    value: 'Nestjs',
     color: Colors.nextjs,
   },
   [Stack.graphql]: {
@@ -117,19 +117,19 @@ export const StackInfo: Record<Stack, StackInfoMap> = {
     color: Colors.django,
   },
   [Stack.nats]: {
-    value: 'NATS',
+    value: 'FastAPI',
     color: Colors.nats,
   },
   [Stack.kafka]: {
-    value: 'Kafka',
+    value: 'Flask',
     color: Colors.kafka,
   },
   [Stack.arangodb]: {
-    value: 'ArangoDB',
+    value: 'SQL',
     color: Colors.arangodb,
   },
   [Stack.postgres]: {
-    value: 'Postgres',
+    value: 'NoSQL',
     color: Colors.postgres,
   },
   [Stack.redis]: {
@@ -153,7 +153,7 @@ export const StackInfo: Record<Stack, StackInfoMap> = {
     color: Colors.docker,
   },
   [Stack.kubernetes]: {
-    value: 'Kubernetes',
+    value: 'CI/CD',
     color: Colors.kubernetes,
   },
   [Stack.terraform]: {
@@ -161,7 +161,7 @@ export const StackInfo: Record<Stack, StackInfoMap> = {
     color: Colors.terraform,
   },
   [Stack.openAI]: {
-    value: 'OpenAI',
+    value: 'yarn',
     color: Colors.opensource,
   },
   [Stack.prompt]: {
