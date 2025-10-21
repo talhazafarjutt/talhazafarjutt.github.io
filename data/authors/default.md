@@ -13,13 +13,13 @@ github: https://github.com/talhazafarjutt
 
 ### Hey there 👋
 
-I'm Talha Zafar, a dedicated Back-End Engineering Specialist with over 3 years of experience in developing high-performance, scalable systems for web applications. My journey in tech has been shaped by my passion for backend development, cloud solutions, and building efficient microservices architectures. From leveraging powerful technologies like Python, Nest.js, and Django, to architecting robust and secure infrastructures on AWS and GCP, I thrive on solving complex problems and delivering solutions that drive impactful results.
+I'm Talha Zafar, a dedicated Back-End Engineering Specialist and DevSecOps Engineer with over 4 years of experience in developing and deploying high-performance, scalable systems for web applications. My journey in tech has been shaped by my passion for backend development, cloud solutions, and building efficient microservices architectures. From leveraging powerful technologies like Python, Nest.js, and Django, to architecting robust and secure infrastructures on AWS and GCP with comprehensive security practices, I thrive on solving complex problems and delivering solutions that drive impactful results.
 
 #### 🎯 What I Do
 
-Currently, I am a Software Engineer at [BoolMind](https://boolmind.com/), where I contribute to the creation of scalable, cloud-based applications that meet the highest standards of performance and reliability. My role involves designing APIs, developing microservices, and ensuring secure communication across our systems. Using technologies like Python, Flask, and Nest.js, I've been able to optimize processes and introduce efficiencies that benefit our clients and increase investor interest.
+Currently, I am a Software Engineer and DevSecOps Engineer at [BoolMind](https://boolmind.com/), where I contribute to the creation of scalable, cloud-based applications that meet the highest standards of performance and reliability. My role involves designing APIs, developing microservices, and ensuring secure communication across our systems. Using technologies like Python, Flask, FastApi, Django and Nest.js(Node), I've been able to optimize processes and introduce efficiencies that benefit our clients and increase investor interest. I also implement comprehensive DevSecOps practices to ensure all deployments are secure and reliable.
 
-In addition to my work on APIs and microservices, I've had the opportunity to architect a monolithic Flask-based backend system, increasing data processing speed by 45% and reducing server load by 20%. This enhancement has proven invaluable in providing a smoother user experience while optimizing resource usage. I enjoy working on projects where I can integrate modern technologies to improve outcomes, whether it's through streamlining processes with CI/CD pipelines or ensuring high responsiveness with asynchronous programming.
+In addition to my work on APIs and microservices, I've had the opportunity to architect a monolithic and microservices Flask-based backend system, increasing data processing speed by 12% and reducing server load by 20%. This enhancement has proven invaluable in providing a smoother user experience while optimizing resource usage. I enjoy working on projects where I can integrate modern technologies to improve outcomes, whether it's through streamlining processes with CI/CD pipelines or ensuring high responsiveness with asynchronous programming.
 
 #### 💼 My Professional Journey
 
@@ -35,6 +35,7 @@ My tech stack includes a wide array of tools and frameworks:
 - **Architecture**: Microservices, Monolithic, Event-Driven Architecture
 - **Databases**: PostgreSQL, MongoDB, MySQL
 - **Cloud and Tools**: AWS, GCP, Docker, Redis, CI/CD, Celery, Jira, Git, Linux
+- **DevSecOps**: GitHub Actions, SonarQube, Nginx, Prometheus, Grafana, Secure Deployment Pipelines, SAST & DAST testing
 
 I bring a strong foundation in cloud infrastructures and database management, both SQL and NoSQL. I have experience with design patterns, system design, and implementing RESTful APIs that are optimized for efficiency and security. My experience spans across both traditional monolithic and modern microservices architectures, allowing me to approach projects with flexibility and adaptability.
 
@@ -48,6 +49,12 @@ Here are some examples of my impactful contributions, without revealing specific
 - Improved application performance by utilizing asynchronous programming and optimizing queries in FastAPI, while enhancing responsiveness through Celery task queues.
 
 - Scaled a backend infrastructure for high-traffic applications, with features like Redis caching to minimize database load and Docker containerization to streamline deployments.
+
+- Implemented comprehensive DevSecOps practices including CI/CD pipelines with GitHub Actions, SAST and DAST testing with SonarQube to ensure only secure code is deployed, and automated deployment processes with Nginx configuration.
+
+- Optimized Docker files for better performance and security, and configured domain settings for production environments.
+
+- Integrated Prometheus and Grafana for comprehensive server monitoring, ensuring system reliability and quick incident response.
 
 - Developed a secure file storage and management system with real-time synchronization, role-based permissions, and robust authentication, enabling efficient data handling and enhanced security.
 
