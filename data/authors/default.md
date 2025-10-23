@@ -13,13 +13,12 @@ github: https://github.com/talhazafarjutt
 
 ### Hey there 👋
 
-I'm Talha Zafar, a dedicated Back-End Engineering Specialist and DevSecOps Engineer with over 4 years of experience in developing and deploying high-performance, scalable systems for web applications. My journey in tech has been shaped by my passion for backend development, cloud solutions, and building efficient microservices architectures. From leveraging powerful technologies like Python, Nest.js, and Django, to architecting robust and secure infrastructures on AWS and GCP with comprehensive security practices, I thrive on solving complex problems and delivering solutions that drive impactful results.
+I'm Talha Zafar, a dedicated Back-End Engineering Specialist and DevSecOps Expertise with over 4 years of experience in developing and deploying high-performance, scalable systems for web applications. My journey in tech has been shaped by my passion for secure backend development and building efficient microservices architectures. From leveraging powerful technologies like Python, Nest.js, and Django, to architecting robust and secure infrastructures on AWS and with comprehensive security practices, I thrive on solving complex problems and delivering solutions that drive impactful results.
 
 #### 🎯 What I Do
 
 Currently, I am a Software Engineer and DevSecOps expertise at [BoolMind](https://boolmind.com/), where I contribute to the creation of scalable, cloud-based applications that meet the highest standards of performance and reliability. My role involves designing APIs, developing microservices, and ensuring secure communication across our systems. Using technologies like Python, Flask, FastApi, Django and Nest.js(Node), I've been able to optimize processes and introduce efficiencies that benefit our clients and increase investor interest. I also implement comprehensive DevSecOps practices to ensure all deployments are secure and reliable.
 
-In addition to my work on APIs and microservices, I've had the opportunity to architect a monolithic and microservices Flask-based backend system, increasing data processing speed by 12% and reducing server load by 20%. This enhancement has proven invaluable in providing a smoother user experience while optimizing resource usage. I enjoy working on projects where I can integrate modern technologies to improve outcomes, whether it's through streamlining processes with CI/CD pipelines or ensuring high responsiveness with asynchronous programming.
 
 #### 💼 My Professional Journey
 
