@@ -58,7 +58,6 @@ Here are some examples of my impactful contributions, without revealing specific
 
 - Developed a secure file storage and management system with real-time synchronization, role-based permissions, and robust authentication, enabling efficient data handling and enhanced security.
 
-- Converted GraphQL APIs into REST APIs, refactored backend code, and optimized database schemas, leading to better system performance and simplified query handling.
 
 #### 🧑‍🤝‍🧑 Team Collaboration and Leadership
 
