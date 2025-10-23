@@ -35,7 +35,19 @@ My tech stack includes a wide array of tools and frameworks:
 - **Architecture**: Microservices, Monolithic, Event-Driven Architecture
 - **Databases**: PostgreSQL, MongoDB, MySQL
 - **Cloud and Tools**: AWS, GCP, Docker, Redis, CI/CD, Celery, Jira, Git, Linux
-- **DevSecOps**: GitHub Actions, SonarQube, Nginx, Prometheus, Grafana, Secure Deployment Pipelines, SAST & DAST testing
+
+#### 🔒 DevSecOps & Security Engineering
+
+**Comprehensive DevSecOps Pipeline Implementation**
+- **CI/CD Pipeline**: Automated GitHub Actions workflow with multi-stage security scanning
+- **Security Scanning**: Integrated SAST (SonarQube, Bandit), SCA (Safety), and container scanning (Trivy), ZAP for DAST
+- **Code Quality**: SonarQube integration with custom quality gates and security hotspots
+- **Container Security**: Docker security hardening with multi-stage builds and vulnerability scanning
+- **Infrastructure Security**: Nginx reverse proxy with SSL/TLS termination and security headers
+- **Monitoring & Observability**: Prometheus metrics collection and Grafana dashboards
+- **Security Compliance**: Implemented OWASP security practices and secure coding standards
+
+**Technologies**: GitHub Actions, SonarQube, Docker, Nginx, Prometheus, Grafana, Let's Encrypt, UFW Firewall
 
 I bring a strong foundation in cloud infrastructures and database management, both SQL and NoSQL. I have experience with design patterns, system design, and implementing RESTful APIs that are optimized for efficiency and security. My experience spans across both traditional monolithic and modern microservices architectures, allowing me to approach projects with flexibility and adaptability.
 
