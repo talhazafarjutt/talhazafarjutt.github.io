@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Talha Zafar — Resume</title>
+<style>
+@page { size: A4; margin: 14mm 16mm 14mm 16mm; }
+@media print {
+  body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .page-break { page-break-before: always; }
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, Arial, sans-serif;
+  font-size: 9.2pt;
+  line-height: 1.55;
+  color: #1e293b;
+  background: #fff;
+}
+a { color: #0284c7; text-decoration: none; }
+
+/* ── HEADER ── */
+.header { border-bottom: 2.5px solid #0284c7; padding-bottom: 10px; margin-bottom: 12px; }
+.name { font-size: 22pt; font-weight: 700; color: #0f172a; letter-spacing: -0.5px; line-height: 1; }
+.role { font-size: 10pt; color: #0284c7; font-weight: 500; margin-top: 2px; margin-bottom: 7px; }
+.contacts { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 8.2pt; color: #475569; }
+.contacts span::before { content: '• '; color: #0284c7; }
+.contacts span:first-child::before { content: ''; }
+
+/* ── SECTION ── */
+.section { margin-bottom: 13px; }
+.sec-title {
+  font-size: 8pt; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.12em; color: #0284c7;
+  border-bottom: 1px solid #bae6fd;
+  padding-bottom: 2px; margin-bottom: 7px;
+}
+
+/* ── SUMMARY ── */
+.summary { font-size: 8.8pt; color: #334155; line-height: 1.6; }
+
+/* ── EXPERIENCE ── */
+.exp-item { margin-bottom: 10px; }
+.exp-item:last-child { margin-bottom: 0; }
+.exp-header { display: flex; justify-content: space-between; align-items: baseline; }
+.exp-title { font-size: 9.5pt; font-weight: 700; color: #0f172a; }
+.exp-dates { font-size: 7.8pt; color: #64748b; white-space: nowrap; }
+.exp-company { font-size: 8.2pt; color: #0284c7; font-weight: 500; margin-bottom: 3px; }
+.exp-ul { list-style: none; padding-left: 0; }
+.exp-ul li { font-size: 8.5pt; color: #334155; padding-left: 10px; position: relative; margin-bottom: 1.5px; line-height: 1.5; }
+.exp-ul li::before { content: '▸'; position: absolute; left: 0; color: #0284c7; font-size: 7pt; top: 2px; }
+.exp-tags { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 4px; }
+.etag { font-size: 7pt; padding: 1px 5px; background: #f0f9ff; color: #0369a1; border: 1px solid #bae6fd; border-radius: 3px; }
+
+/* ── SKILLS ── */
+.skills-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px 24px; }
+.skill-row { display: flex; gap: 6px; align-items: baseline; }
+.skill-cat { font-size: 7.8pt; font-weight: 700; color: #0f172a; white-space: nowrap; min-width: 88px; }
+.skill-val { font-size: 7.8pt; color: #475569; line-height: 1.5; }
+
+/* ── PROJECTS ── */
+.proj-item { margin-bottom: 7px; }
+.proj-title { font-size: 8.8pt; font-weight: 700; color: #0f172a; display: inline; }
+.proj-desc { font-size: 8.3pt; color: #475569; }
+
+/* ── EDUCATION ── */
+.edu-row { display: flex; justify-content: space-between; }
+.edu-deg { font-size: 9pt; font-weight: 700; color: #0f172a; }
+.edu-dates { font-size: 7.8pt; color: #64748b; }
+.edu-inst { font-size: 8.2pt; color: #0284c7; }
+.edu-note { font-size: 7.8pt; color: #64748b; margin-top: 2px; }
+
+/* ── LANGUAGES / EXTRA ── */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 0 24px; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="name">Talha Zafar</div>
+  <div class="role">Senior Backend Engineer &nbsp;·&nbsp; DevOps &amp; Infrastructure Engineer</div>
+  <div class="contacts">
+    <span>+92 307 357 6146</span>
+    <span>talha.zafar.j@gmail.com</span>
+    <span>linkedin.com/in/talhazafarj</span>
+    <span>github.com/talhazafarj</span>
+    <span>Lahore, Pakistan &nbsp;·&nbsp; Open to remote / on-site / hybrid</span>
+  </div>
+</div>
+
+<!-- SUMMARY -->
+<div class="section">
+  <div class="sec-title">Professional Summary</div>
+  <p class="summary">
+    Backend and infrastructure engineer with <strong>4+ years</strong> of production experience designing and operating high-throughput distributed systems. Proven track record delivering microservices architectures, RESTful and gRPC APIs, and event-driven pipelines using <strong>Python (FastAPI, Flask, Django)</strong> and <strong>Node.js (NestJS)</strong>. Hands-on expertise in containerisation (Docker, Kubernetes/K3s), PostgreSQL/MongoDB data modelling, Redis caching, and cloud infrastructure on AWS and GCP. Deep DevSecOps background: bare-metal GPU cluster management, HashiCorp Vault secrets management, OWASP hardening, SAST/DAST pipelines. Currently contributing to AI agent and LLM deployment platforms on bare-metal GPU clusters. Fluent in English (C1) and Urdu (native).
+  </p>
+</div>
+
+<!-- EXPERIENCE -->
+<div class="section">
+  <div class="sec-title">Professional Experience</div>
+
+  <div class="exp-item">
+    <div class="exp-header">
+      <div class="exp-title">DevOps &amp; Infrastructure Engineer</div>
+      <div class="exp-dates">Jan 2026 – Present</div>
+    </div>
+    <div class="exp-company">Augai &nbsp;|&nbsp; Infrastructure &amp; Security Consulting &nbsp;|&nbsp; Remote</div>
+    <ul class="exp-ul">
+      <li>Sole infrastructure owner for bare-metal Ubuntu 22.04 server: 4× NVIDIA Tesla V100 GPUs, K3s Kubernetes, 8+ LXD developer containers — maintaining 99.8% uptime.</li>
+      <li>Designed K3s cluster from scratch: nginx ingress controller, cert-manager Let's Encrypt TLS automation, CoreDNS internal service discovery, GPU passthrough configuration.</li>
+      <li>Deployed HashiCorp Vault (AppRole auth, policy-based access control, dynamic secret leasing) as isolated LXD container — GDPR data residency compliant.</li>
+      <li>Executed full security hardening: forensic log audit (server confirmed clean), iptables stateful firewall, fail2ban brute-force protection, kernel update lockdown, rsyslog centralised logging.</li>
+      <li>Built GitHub Actions CI/CD pipelines with integrated SAST (SonarQube), container image scanning (Trivy), and secret detection (Gitleaks).</li>
+      <li>Configured Zabbix monitoring with K8s pod dashboards and Gmail SMTP alerting for 15+ infrastructure components.</li>
+    </ul>
+    <div class="exp-tags">
+      <span class="etag">K3s / Kubernetes</span><span class="etag">HashiCorp Vault</span><span class="etag">LXD</span><span class="etag">iptables</span><span class="etag">Zabbix</span><span class="etag">GitHub Actions</span><span class="etag">Trivy</span><span class="etag">Gitleaks</span><span class="etag">vLLM</span><span class="etag">cert-manager</span>
+    </div>
+  </div>
+
+  <div class="exp-item">
+    <div class="exp-header">
+      <div class="exp-title">Backend Engineer</div>
+      <div class="exp-dates">Jan 2024 – Dec 2025</div>
+    </div>
+    <div class="exp-company">BoolMind &nbsp;|&nbsp; AI &amp; Automation Platform &nbsp;|&nbsp; Remote</div>
+    <ul class="exp-ul">
+      <li>Architected production microservices backend for an AI agent platform handling <strong>10k+ daily API requests</strong> with sub-100ms P95 latency using FastAPI and asyncio.</li>
+      <li>Designed gRPC-based inter-service communication across 6 independent services, reducing internal API overhead by 40% vs REST.</li>
+      <li>Built Redis-backed job queuing and caching layer, cutting database read load by 60% and enabling real-time agent state synchronisation.</li>
+      <li>Deployed LLM inference infrastructure on 4× Tesla V100: vLLM serving Qwen2.5-Coder-32B, FastAPI load-balancing router, nginx API gateway with API key authentication.</li>
+      <li>Implemented OWASP Top 10 mitigations, ECDH key exchange, and Attribute-Based Encryption (ABE) for multi-tenant data isolation.</li>
+      <li>Engineered Stripe payment security hardening after a carding attack: Radar fraud rules, Redis rate-limiting, HMAC inter-service auth — zero fraudulent transactions post-deployment.</li>
+    </ul>
+    <div class="exp-tags">
+      <span class="etag">FastAPI</span><span class="etag">gRPC</span><span class="etag">Redis</span><span class="etag">PostgreSQL</span><span class="etag">OWASP</span><span class="etag">ECDH</span><span class="etag">ABE</span><span class="etag">vLLM</span><span class="etag">asyncio</span><span class="etag">Docker</span>
+    </div>
+  </div>
+
+  <div class="exp-item">
+    <div class="exp-header">
+      <div class="exp-title">Junior Backend Engineer</div>
+      <div class="exp-dates">Sep 2022 – Dec 2023</div>
+    </div>
+    <div class="exp-company">Techleadz &nbsp;|&nbsp; Software Development Agency &nbsp;|&nbsp; Lahore, Pakistan</div>
+    <ul class="exp-ul">
+      <li>Developed and scaled RESTful APIs using Django REST Framework and NestJS for SaaS products with 50k+ registered users.</li>
+      <li>Designed PostgreSQL schemas for multi-tenant SaaS with row-level security and optimised indexing, reducing query time by 35%.</li>
+      <li>Built MongoDB document models using Beanie ODM for high-write analytics workloads handling 500k+ daily events.</li>
+      <li>Integrated Stripe, Firebase, and OAuth2 for payment, notifications, and authentication — end-to-end feature ownership.</li>
+    </ul>
+    <div class="exp-tags">
+      <span class="etag">Django</span><span class="etag">NestJS</span><span class="etag">PostgreSQL</span><span class="etag">MongoDB</span><span class="etag">Redis</span><span class="etag">Stripe</span><span class="etag">Firebase</span><span class="etag">OAuth2</span>
+    </div>
+  </div>
+</div>
+
+<!-- SKILLS -->
+<div class="section">
+  <div class="sec-title">Technical Skills</div>
+  <div class="skills-grid">
+    <div class="skill-row"><div class="skill-cat">Languages</div><div class="skill-val">Python, TypeScript, JavaScript, Go, Bash</div></div>
+    <div class="skill-row"><div class="skill-cat">Container / Orch.</div><div class="skill-val">Kubernetes (K3s), LXD, Docker, Docker Compose, Helm, nginx Ingress</div></div>
+    <div class="skill-row"><div class="skill-cat">Frameworks</div><div class="skill-val">FastAPI, Django, Django REST, Flask, NestJS, Express.js</div></div>
+    <div class="skill-row"><div class="skill-cat">CI/CD</div><div class="skill-val">GitHub Actions, SonarQube (SAST), Trivy, Gitleaks, rolling deployments</div></div>
+    <div class="skill-row"><div class="skill-cat">Databases</div><div class="skill-val">PostgreSQL, MongoDB, Redis, MySQL · SQLAlchemy, Beanie, Mongoose</div></div>
+    <div class="skill-row"><div class="skill-cat">Linux / Networking</div><div class="skill-val">Ubuntu 22.04, iptables, fail2ban, bond interfaces, NAT, SSH hardening</div></div>
+    <div class="skill-row"><div class="skill-cat">Cloud</div><div class="skill-val">AWS (EC2, S3, RDS, Lambda, IAM), GCP, VPC, security groups</div></div>
+    <div class="skill-row"><div class="skill-cat">Security</div><div class="skill-val">OWASP Top 10, HashiCorp Vault, ECDH, ABE, JWT hardening, HMAC</div></div>
+    <div class="skill-row"><div class="skill-cat">APIs &amp; Protocols</div><div class="skill-val">REST, gRPC, WebSockets, GraphQL, OAuth2, JWT, OpenAPI/Swagger</div></div>
+    <div class="skill-row"><div class="skill-cat">AI / MLOps</div><div class="skill-val">vLLM, NVIDIA V100 GPU passthrough, LLM inference routing, FastAPI serving</div></div>
+    <div class="skill-row"><div class="skill-cat">Monitoring</div><div class="skill-val">Zabbix, Grafana, Prometheus, rsyslog, structured logging</div></div>
+    <div class="skill-row"><div class="skill-cat">TLS / Certs</div><div class="skill-val">cert-manager, Let's Encrypt, ACME automation, nginx TLS termination</div></div>
+  </div>
+</div>
+
+<!-- PROJECTS -->
+<div class="section">
+  <div class="sec-title">Selected Projects</div>
+  <div class="proj-item">
+    <span class="proj-title">LLM Inference Platform (Codsy) — </span>
+    <span class="proj-desc">Production multi-GPU cluster on 4× Tesla V100. K3s orchestration, vLLM per GPU, nginx API gateway with API key auth, FastAPI load-balancer, drop-in Python SDK. Serving live LLM traffic for active development team.</span>
+  </div>
+  <div class="proj-item">
+    <span class="proj-title">Zero-Trust Secrets Pipeline — </span>
+    <span class="proj-desc">HashiCorp Vault in LXD with AppRole auth, granular policy-based secret access, dynamic credential rotation for SSH and SonarQube CI/CD. GDPR data residency compliant.</span>
+  </div>
+  <div class="proj-item">
+    <span class="proj-title">AI Agent Microservices Platform — </span>
+    <span class="proj-desc">6-service gRPC microservices backend with Redis job queuing, ECDH + ABE multi-tenant isolation, sub-100ms P95 at 10k+ daily requests.</span>
+  </div>
+</div>
+
+<!-- EDUCATION + LANGUAGES -->
+<div class="two-col">
+  <div class="section">
+    <div class="sec-title">Education</div>
+    <div class="edu-row">
+      <div class="edu-deg">B.Sc. Computer Science</div>
+      <div class="edu-dates">2018 – 2022</div>
+    </div>
+    <div class="edu-inst">FAST-NUCES (National University of Computer &amp; Emerging Sciences) — Lahore</div>
+    <div class="edu-note">Relevant: OS, Computer Networks, Distributed Systems, Databases, Cybersecurity</div>
+  </div>
+  <div class="section">
+    <div class="sec-title">Languages &amp; Availability</div>
+    <div style="font-size:8.2pt;color:#334155;line-height:1.7">
+      <strong>English</strong> — C1, Full professional &amp; technical fluency<br>
+      <strong>Urdu</strong> — Native<br>
+      <strong>Work model:</strong> On-site · Hybrid · Remote<br>
+      <strong>Notice period:</strong> 1 month (negotiable)
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

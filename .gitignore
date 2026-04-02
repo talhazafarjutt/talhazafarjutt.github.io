@@ -1,7 +1,10 @@
 # Resume documents — kept local, never commit (contain personal contact info)
 *.docx
 *.doc
+
+# PDFs — except the public resume
 *.pdf
+!talha_zafar_resume.pdf
 
 # OS junk
 .DS_Store
