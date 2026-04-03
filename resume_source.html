@@ -2,413 +2,599 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Talha Zafar</title>
+<title>Talha Zafar – Resume</title>
 <style>
 /* ── PRINT ENGINE ── */
 @page { size: A4 portrait; margin: 0; }
-* { margin: 0; padding: 0; box-sizing: border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+*, *::before, *::after {
+  margin: 0; padding: 0; box-sizing: border-box;
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+}
 
 /* ── ROOT ── */
 :root {
-  --dark:    #0b0f1e;
-  --dark2:   #111827;
-  --cyan:    #00d4e8;
-  --purple:  #8b5cf6;
-  --green:   #10b981;
-  --amber:   #f59e0b;
-  --white:   #ffffff;
-  --off:     #f7f9fc;
-  --text:    #1e293b;
-  --mid:     #475569;
-  --light:   #94a3b8;
-  --border:  #e2e8f0;
+  --accent:   #0284c7;
+  --accent-light: #e0f2fe;
+  --text:     #1e293b;
+  --mid:      #475569;
+  --muted:    #64748b;
+  --border:   #e2e8f0;
+  --bg:       #ffffff;
+  --tag-bg:   #f1f5f9;
+  --tag-text: #475569;
+  --tag-border: #cbd5e1;
 }
 
-/* ── LAYOUT ── */
-html, body { width: 210mm; min-height: 297mm; font-family: 'Segoe UI', -apple-system, Arial, sans-serif; background: var(--white); }
-
-/* Top gradient bar */
-.top-bar {
-  width: 100%;
-  height: 4px;
-  background: linear-gradient(90deg, var(--cyan) 0%, var(--purple) 60%, var(--amber) 100%);
+/* ── PAGE / BODY ── */
+html, body {
+  width: 210mm;
+  background: var(--bg);
+  font-family: 'Segoe UI', -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 9pt;
+  color: var(--text);
+  line-height: 1.5;
 }
 
-.page { display: flex; min-height: calc(297mm - 4px); }
-
-/* ── SIDEBAR ── */
-.sidebar {
-  width: 69mm;
-  background: var(--dark);
-  padding: 9mm 6.5mm 9mm 7mm;
-  display: flex;
-  flex-direction: column;
-  gap: 6mm;
-  position: relative;
-  overflow: hidden;
-  flex-shrink: 0;
+body {
+  padding: 10mm 12mm 10mm 12mm;
 }
 
-/* decorative circles */
-.sidebar::before {
-  content: '';
-  position: absolute; top: -18mm; right: -18mm;
-  width: 55mm; height: 55mm;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(0,212,232,0.1) 0%, transparent 70%);
-}
-.sidebar::after {
-  content: '';
-  position: absolute; bottom: 15mm; left: -20mm;
-  width: 60mm; height: 60mm;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(139,92,246,0.08) 0%, transparent 70%);
+/* ── HEADER ── */
+.header {
+  margin-bottom: 6mm;
+  padding-bottom: 5mm;
+  border-bottom: 1.5px solid var(--border);
 }
 
-/* name block */
-.s-name {
+.header-name {
   font-size: 18pt;
   font-weight: 800;
-  color: var(--white);
-  line-height: 1.05;
-  letter-spacing: -0.5px;
-  position: relative;
-  z-index: 1;
-}
-.s-name-under {
-  width: 32px;
-  height: 3px;
-  background: linear-gradient(90deg, var(--cyan), var(--purple));
-  border-radius: 2px;
-  margin-top: 4px;
-}
-.s-role {
-  font-size: 7.2pt;
-  color: var(--cyan);
-  font-weight: 500;
-  letter-spacing: 0.03em;
-  margin-top: 5px;
-  line-height: 1.5;
-  position: relative;
-  z-index: 1;
+  color: var(--text);
+  letter-spacing: -0.3px;
+  line-height: 1.1;
+  margin-bottom: 2px;
 }
 
-/* sidebar section label */
-.s-label {
-  font-size: 6.5pt;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  color: var(--cyan);
-  border-bottom: 1px solid rgba(0,212,232,0.2);
-  padding-bottom: 3px;
+.header-title {
+  font-size: 9pt;
+  color: var(--accent);
+  font-weight: 500;
   margin-bottom: 5px;
 }
 
-/* contact */
-.s-contact { display: flex; flex-direction: column; gap: 3.5px; position: relative; z-index: 1; }
-.s-contact-row { display: flex; align-items: center; gap: 5px; font-size: 7.2pt; color: #94a3b8; line-height: 1.45; }
-.s-contact-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--cyan); flex-shrink: 0; opacity: 0.7; }
+.header-contact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 18px;
+  font-size: 8pt;
+  color: var(--muted);
+}
 
-/* skill groups */
-.s-skills { position: relative; z-index: 1; }
-.s-skill-group { margin-bottom: 4.5px; }
-.s-skill-name { font-size: 6.8pt; font-weight: 700; color: #cbd5e1; margin-bottom: 3px; }
-.s-chips { display: flex; flex-wrap: wrap; gap: 2.5px; }
-.chip {
-  font-size: 5.8pt;
-  padding: 1.5px 5px;
-  border-radius: 3px;
+.header-contact span {
+  white-space: nowrap;
+}
+
+/* ── SECTION ── */
+.section {
+  margin-bottom: 5.5mm;
+}
+
+.section-title {
+  font-size: 7pt;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.13em;
+  color: var(--accent);
+  border-left: 3px solid var(--accent);
+  padding-left: 6px;
+  margin-bottom: 4px;
+  line-height: 1.4;
+}
+
+.section-divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 1px 0 5px 0;
+}
+
+/* ── SUMMARY ── */
+.summary {
+  font-size: 8.5pt;
+  color: var(--mid);
+  line-height: 1.65;
+}
+
+.summary strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* ── EXPERIENCE ── */
+.exp-item {
+  margin-bottom: 6mm;
+}
+
+.exp-item:last-child {
+  margin-bottom: 0;
+}
+
+.exp-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 2px;
+  margin-bottom: 1px;
+}
+
+.exp-title {
+  font-size: 9.5pt;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.exp-dates {
+  font-size: 8pt;
+  color: var(--muted);
   font-weight: 500;
   white-space: nowrap;
 }
-.chip.c  { background: rgba(0,212,232,0.12);   color: #67e8f9; border: 0.5px solid rgba(0,212,232,0.2); }
-.chip.p  { background: rgba(139,92,246,0.15);  color: #c4b5fd; border: 0.5px solid rgba(139,92,246,0.2); }
-.chip.gn { background: rgba(16,185,129,0.12);  color: #6ee7b7; border: 0.5px solid rgba(16,185,129,0.2); }
-.chip.am { background: rgba(245,158,11,0.12);  color: #fcd34d; border: 0.5px solid rgba(245,158,11,0.2); }
-.chip.rd { background: rgba(239,68,68,0.12);   color: #fca5a5; border: 0.5px solid rgba(239,68,68,0.2); }
 
-/* education in sidebar */
-.s-edu { position: relative; z-index: 1; }
-.s-edu-deg { font-size: 7.5pt; font-weight: 700; color: var(--white); line-height: 1.3; }
-.s-edu-inst { font-size: 6.5pt; color: var(--cyan); margin-top: 1.5px; }
-.s-edu-dates { font-size: 6pt; color: #64748b; margin-top: 1px; }
-
-/* languages */
-.s-lang { position: relative; z-index: 1; }
-.s-lang-row { display: flex; justify-content: space-between; align-items: center; padding: 2.5px 0; }
-.s-lang-name { font-size: 7pt; font-weight: 600; color: #cbd5e1; }
-.s-lang-level {
-  font-size: 5.8pt; padding: 1px 5px; border-radius: 2px;
-  background: rgba(0,212,232,0.1); color: var(--cyan);
-  border: 0.5px solid rgba(0,212,232,0.2);
+.exp-dates.current {
+  color: #059669;
+  background: #dcfce7;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 7.5pt;
+  border: 0.5px solid #bbf7d0;
 }
 
-/* availability */
-.s-avail { position: relative; z-index: 1; }
-.s-avail-row { display: flex; align-items: center; gap: 4px; font-size: 6.5pt; color: #94a3b8; padding: 1.5px 0; }
-.s-avail-row .dot-green { width: 5px; height: 5px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+.exp-company {
+  font-size: 8.5pt;
+  color: var(--accent);
+  font-weight: 500;
+  margin-bottom: 3.5px;
+}
 
-/* ── MAIN CONTENT ── */
-.main {
-  flex: 1;
-  padding: 9mm 8mm 9mm 8mm;
-  background: var(--off);
+.exp-ul {
+  list-style: none;
+  margin-bottom: 4px;
+}
+
+.exp-ul li {
+  font-size: 8pt;
+  color: var(--mid);
+  padding: 1.5px 0 1.5px 12px;
+  position: relative;
+  line-height: 1.55;
+}
+
+.exp-ul li::before {
+  content: '▸';
+  position: absolute;
+  left: 0;
+  color: var(--accent);
+  font-size: 7pt;
+  top: 2.5px;
+}
+
+.exp-ul li strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* ── TECH TAGS ── */
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  margin-top: 4px;
+}
+
+.tag {
+  font-size: 7pt;
+  padding: 1.5px 6px;
+  background: var(--tag-bg);
+  color: var(--tag-text);
+  border: 0.5px solid var(--tag-border);
+  border-radius: 3px;
+  white-space: nowrap;
+}
+
+/* ── SKILLS ── */
+.skills-grid {
   display: flex;
   flex-direction: column;
-  gap: 5.5mm;
+  gap: 3.5px;
 }
 
-/* section */
-.m-section { }
-.m-label {
-  font-size: 6.5pt; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 0.14em; color: #0284c7;
-  display: flex; align-items: center; gap: 5px;
-  margin-bottom: 5px;
+.skill-row {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 8pt;
+  line-height: 1.55;
 }
-.m-label::before {
-  content: '';
-  display: inline-block;
-  width: 14px; height: 2px;
-  background: linear-gradient(90deg, #00d4e8, #8b5cf6);
-  border-radius: 1px;
+
+.skill-label {
+  font-weight: 700;
+  color: var(--text);
+  min-width: 50mm;
   flex-shrink: 0;
-}
-.m-label::after {
-  content: '';
-  flex: 1; height: 0.5px;
-  background: #dde5f0;
+  font-size: 8pt;
 }
 
-/* summary */
-.m-summary {
-  font-size: 8.2pt; color: var(--mid);
-  line-height: 1.7;
-  background: white;
-  padding: 6px 8px;
-  border-radius: 4px;
-  border-left: 2.5px solid #00d4e8;
-}
-.m-summary strong { color: #0f172a; font-weight: 600; }
-
-/* experience */
-.exp-item { margin-bottom: 7.5px; padding-bottom: 7.5px; border-bottom: 0.5px solid #e9eef5; }
-.exp-item:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
-.exp-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1px; }
-.exp-title { font-size: 8.8pt; font-weight: 700; color: var(--text); }
-.exp-badge {
-  font-size: 5.8pt; padding: 1.5px 5px; border-radius: 3px;
-  white-space: nowrap; flex-shrink: 0;
-}
-.exp-badge.now { background: rgba(16,185,129,0.1); color: #059669; border: 0.5px solid rgba(16,185,129,0.25); }
-.exp-badge.past { background: #f1f5f9; color: #64748b; border: 0.5px solid #dde5f0; }
-.exp-co { font-size: 7.5pt; color: #0284c7; font-weight: 500; margin-bottom: 3.5px; }
-.exp-ul { list-style: none; }
-.exp-ul li {
-  font-size: 7.8pt; color: var(--mid);
-  padding: 1.2px 0 1.2px 10px; position: relative; line-height: 1.55;
-}
-.exp-ul li::before { content: '▸'; position: absolute; left: 0; color: #0284c7; font-size: 6.5pt; top: 2.5px; }
-.exp-ul li strong { color: var(--text); font-weight: 600; }
-.exp-tags { display: flex; flex-wrap: wrap; gap: 2.5px; margin-top: 3.5px; }
-.etag {
-  font-size: 6pt; padding: 1px 4.5px;
-  background: white; color: #475569;
-  border: 0.5px solid #dde5f0; border-radius: 3px;
+.skill-value {
+  color: var(--mid);
+  font-size: 8pt;
+  line-height: 1.55;
 }
 
-/* projects */
-.proj-item { margin-bottom: 5px; padding-left: 7px; border-left: 2px solid; }
-.proj-item:nth-child(1) { border-color: #00d4e8; }
-.proj-item:nth-child(2) { border-color: #8b5cf6; }
-.proj-item:nth-child(3) { border-color: #10b981; }
-.proj-title { font-size: 8pt; font-weight: 700; color: var(--text); }
-.proj-desc { font-size: 7.5pt; color: var(--mid); line-height: 1.55; margin-top: 1px; }
+/* ── PROJECTS ── */
+.project-item {
+  margin-bottom: 4.5mm;
+  padding-left: 8px;
+  border-left: 2.5px solid var(--accent);
+}
+
+.project-item:last-child {
+  margin-bottom: 0;
+}
+
+.project-title {
+  font-size: 9pt;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+
+.project-desc {
+  font-size: 8pt;
+  color: var(--mid);
+  line-height: 1.55;
+}
+
+/* ── EDUCATION ── */
+.edu-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 2px;
+  margin-bottom: 1px;
+}
+
+.edu-degree {
+  font-size: 9pt;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.edu-dates {
+  font-size: 8pt;
+  color: var(--muted);
+}
+
+.edu-institution {
+  font-size: 8.5pt;
+  color: var(--accent);
+  font-weight: 500;
+  margin-bottom: 2px;
+}
+
+.edu-coursework {
+  font-size: 8pt;
+  color: var(--mid);
+  line-height: 1.55;
+}
+
+/* ── TWO-COL FOOTER INFO ── */
+.two-col {
+  display: flex;
+  gap: 10mm;
+}
+
+.two-col > div {
+  flex: 1;
+}
+
+/* ── LANGUAGES ── */
+.lang-row {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 8pt;
+  margin-bottom: 2px;
+}
+
+.lang-name {
+  font-weight: 700;
+  color: var(--text);
+  min-width: 30mm;
+}
+
+.lang-level {
+  color: var(--mid);
+}
+
+/* ── ADDITIONAL ── */
+.additional-list {
+  list-style: none;
+}
+
+.additional-list li {
+  font-size: 8pt;
+  color: var(--mid);
+  padding: 1.5px 0 1.5px 12px;
+  position: relative;
+  line-height: 1.55;
+}
+
+.additional-list li::before {
+  content: '▸';
+  position: absolute;
+  left: 0;
+  color: var(--accent);
+  font-size: 7pt;
+  top: 2.5px;
+}
 </style>
 </head>
 <body>
 
-<!-- TOP GRADIENT BAR -->
-<div class="top-bar"></div>
-
-<div class="page">
-
-  <!-- ════════════ SIDEBAR ════════════ -->
-  <div class="sidebar">
-
-    <!-- Name -->
-    <div>
-      <div class="s-name">Talha<br>Zafar</div>
-      <div class="s-name-under"></div>
-      <div class="s-role">Senior Backend Engineer<br>DevOps &amp; Infrastructure Engineer</div>
-    </div>
-
-    <!-- Contact -->
-    <div class="s-contact">
-      <div class="s-label">Contact</div>
-      <div class="s-contact-row"><div class="s-contact-dot"></div>+92 307 357 6146</div>
-      <div class="s-contact-row"><div class="s-contact-dot"></div>talha.zafar.j@gmail.com</div>
-      <div class="s-contact-row"><div class="s-contact-dot"></div>linkedin.com/in/talhazafarj</div>
-      <div class="s-contact-row"><div class="s-contact-dot"></div>github.com/talhazafarj</div>
-      <div class="s-contact-row"><div class="s-contact-dot"></div>Lahore, Pakistan</div>
-    </div>
-
-    <!-- Skills -->
-    <div class="s-skills">
-      <div class="s-label">Technical Skills</div>
-      <div class="s-skill-group">
-        <div class="s-skill-name">Backend &amp; APIs</div>
-        <div class="s-chips">
-          <span class="chip c">Python</span><span class="chip c">FastAPI</span><span class="chip c">Django</span>
-          <span class="chip c">Flask</span><span class="chip c">NestJS</span><span class="chip c">Node.js</span>
-          <span class="chip c">gRPC</span><span class="chip c">REST</span><span class="chip c">GraphQL</span>
-          <span class="chip c">asyncio</span><span class="chip c">Go</span><span class="chip c">TypeScript</span>
-        </div>
-      </div>
-      <div class="s-skill-group" style="margin-top:4px">
-        <div class="s-skill-name">DevOps &amp; Infra</div>
-        <div class="s-chips">
-          <span class="chip p">Kubernetes</span><span class="chip p">K3s</span><span class="chip p">Docker</span>
-          <span class="chip p">LXD</span><span class="chip p">GitHub Actions</span><span class="chip p">nginx</span>
-          <span class="chip p">cert-manager</span><span class="chip p">Helm</span><span class="chip p">Bash</span>
-          <span class="chip p">Linux</span><span class="chip p">iptables</span><span class="chip p">fail2ban</span>
-        </div>
-      </div>
-      <div class="s-skill-group" style="margin-top:4px">
-        <div class="s-skill-name">Data &amp; Cloud</div>
-        <div class="s-chips">
-          <span class="chip gn">PostgreSQL</span><span class="chip gn">MongoDB</span><span class="chip gn">Redis</span>
-          <span class="chip gn">AWS</span><span class="chip gn">GCP</span><span class="chip gn">SQLAlchemy</span>
-          <span class="chip gn">Beanie</span><span class="chip gn">vLLM</span><span class="chip gn">V100 GPU</span>
-        </div>
-      </div>
-      <div class="s-skill-group" style="margin-top:4px">
-        <div class="s-skill-name">Security &amp; Monitoring</div>
-        <div class="s-chips">
-          <span class="chip am">OWASP Top 10</span><span class="chip am">Vault</span><span class="chip am">ECDH</span>
-          <span class="chip am">ABE</span><span class="chip am">HMAC</span><span class="chip am">JWT</span>
-          <span class="chip am">Trivy</span><span class="chip am">Gitleaks</span><span class="chip am">Zabbix</span>
-          <span class="chip am">SonarQube</span><span class="chip am">Grafana</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Education -->
-    <div class="s-edu">
-      <div class="s-label">Education</div>
-      <div class="s-edu-deg">B.Sc. Computer Science</div>
-      <div class="s-edu-inst">FAST-NUCES — Lahore</div>
-      <div class="s-edu-dates">2018 – 2022 &nbsp;·&nbsp; OS · Networks · Distributed Systems</div>
-    </div>
-
-    <!-- Languages -->
-    <div class="s-lang">
-      <div class="s-label">Languages</div>
-      <div class="s-lang-row"><span class="s-lang-name">English</span><span class="s-lang-level">C1 Professional</span></div>
-      <div class="s-lang-row"><span class="s-lang-name">Urdu</span><span class="s-lang-level">Native</span></div>
-    </div>
-
-    <!-- Availability -->
-    <div class="s-avail">
-      <div class="s-label">Availability</div>
-      <div class="s-avail-row"><div class="dot-green"></div>Open to new opportunities</div>
-      <div class="s-avail-row"><div class="dot-green"></div>On-site · Hybrid · Remote</div>
-      <div class="s-avail-row"><div class="dot-green"></div>Notice: 1 month (negotiable)</div>
-      <div class="s-avail-row"><div class="dot-green"></div>talhazafarjutt.github.io</div>
-    </div>
-
+<!-- ══════════════════════════════════════════════════ HEADER -->
+<div class="header">
+  <div class="header-name">Talha Zafar</div>
+  <div class="header-title">Senior Backend Engineer &nbsp;|&nbsp; DevOps &amp; Infrastructure Engineer</div>
+  <div class="header-contact">
+    <span>+92 307 357 6146</span>
+    <span>talha.zafar.j@gmail.com</span>
+    <span>linkedin.com/in/talhazafarj</span>
+    <span>github.com/talhazafarj</span>
+    <span>talhazafarjutt.github.io</span>
+    <span>Lahore, Pakistan &nbsp;|&nbsp; Open to on-site, hybrid, or remote</span>
   </div>
-  <!-- ════════════ END SIDEBAR ════════════ -->
-
-  <!-- ════════════ MAIN ════════════ -->
-  <div class="main">
-
-    <!-- Summary -->
-    <div class="m-section">
-      <div class="m-label">Professional Summary</div>
-      <div class="m-summary">
-        Backend and infrastructure engineer with <strong>4+ years</strong> production experience in high-throughput distributed systems. Expert in <strong>Python microservices</strong> (FastAPI, Django, Flask) and <strong>Node.js/NestJS</strong>. Sole bare-metal infrastructure owner operating 4× <strong>NVIDIA Tesla V100 GPU cluster</strong>, K3s Kubernetes, and zero-trust secrets pipelines. Deep DevSecOps background: OWASP hardening, HashiCorp Vault, SAST/DAST CI/CD. Currently building AI agent platforms and LLM inference infrastructure at production scale.
-      </div>
-    </div>
-
-    <!-- Experience -->
-    <div class="m-section">
-      <div class="m-label">Professional Experience</div>
-
-      <div class="exp-item">
-        <div class="exp-row">
-          <div class="exp-title">DevOps &amp; Infrastructure Engineer</div>
-          <div class="exp-badge now">Jan 2026 – Present</div>
-        </div>
-        <div class="exp-co">Augai &nbsp;·&nbsp; Infrastructure &amp; Security Consulting &nbsp;·&nbsp; Remote</div>
-        <ul class="exp-ul">
-          <li>Sole infra owner for bare-metal Ubuntu 22.04 server: <strong>4× V100 GPUs</strong>, K3s Kubernetes, 8+ LXD containers — maintaining <strong>99.8% uptime</strong>.</li>
-          <li>Designed K3s cluster: nginx ingress, cert-manager TLS automation, CoreDNS service discovery, GPU passthrough.</li>
-          <li>Deployed HashiCorp Vault (AppRole auth, dynamic secrets) in isolated LXD container — <strong>GDPR data residency</strong> compliant.</li>
-          <li>Full security hardening: forensic audit (clean), iptables firewall, fail2ban, kernel lockdown, rsyslog centralised across all containers.</li>
-          <li>GitHub Actions CI/CD with SAST (SonarQube), container scanning (Trivy), and secret detection (Gitleaks).</li>
-        </ul>
-        <div class="exp-tags">
-          <span class="etag">K3s</span><span class="etag">HashiCorp Vault</span><span class="etag">LXD</span><span class="etag">iptables</span><span class="etag">Zabbix</span><span class="etag">GitHub Actions</span><span class="etag">Trivy</span><span class="etag">vLLM</span><span class="etag">cert-manager</span>
-        </div>
-      </div>
-
-      <div class="exp-item">
-        <div class="exp-row">
-          <div class="exp-title">Backend Engineer</div>
-          <div class="exp-badge past">Jan 2024 – Dec 2025</div>
-        </div>
-        <div class="exp-co">BoolMind &nbsp;·&nbsp; AI &amp; Automation Platform &nbsp;·&nbsp; Remote</div>
-        <ul class="exp-ul">
-          <li>Architected production microservices backend: <strong>10k+ daily requests</strong>, <strong>sub-100ms P95</strong> latency, FastAPI + asyncio.</li>
-          <li>gRPC inter-service communication across 6 services — <strong>40% less overhead</strong> vs REST; Redis caching cut DB load by <strong>60%</strong>.</li>
-          <li>Deployed LLM inference on 4× V100: vLLM serving Qwen2.5-Coder-32B, FastAPI load-balancer, nginx API gateway.</li>
-          <li>Implemented OWASP Top 10, ECDH key exchange, ABE encryption for multi-tenant data isolation.</li>
-          <li>Stripe security hardening post-carding attack: Radar rules, Redis rate-limiting, HMAC auth — <strong>zero fraud post-deployment</strong>.</li>
-        </ul>
-        <div class="exp-tags">
-          <span class="etag">FastAPI</span><span class="etag">gRPC</span><span class="etag">Redis</span><span class="etag">PostgreSQL</span><span class="etag">OWASP</span><span class="etag">ECDH</span><span class="etag">ABE</span><span class="etag">vLLM</span><span class="etag">asyncio</span>
-        </div>
-      </div>
-
-      <div class="exp-item">
-        <div class="exp-row">
-          <div class="exp-title">Junior Backend Engineer</div>
-          <div class="exp-badge past">Sep 2022 – Dec 2023</div>
-        </div>
-        <div class="exp-co">Techleadz &nbsp;·&nbsp; Software Development Agency &nbsp;·&nbsp; Lahore</div>
-        <ul class="exp-ul">
-          <li>Built and scaled RESTful APIs (Django REST, NestJS) for SaaS products with <strong>50k+ registered users</strong>.</li>
-          <li>PostgreSQL multi-tenant schemas with row-level security — <strong>35% query time reduction</strong>; MongoDB Beanie ODM for <strong>500k+ daily events</strong>.</li>
-          <li>Integrated Stripe, Firebase, OAuth2 for payments, notifications, and authentication end-to-end.</li>
-        </ul>
-        <div class="exp-tags">
-          <span class="etag">Django</span><span class="etag">NestJS</span><span class="etag">PostgreSQL</span><span class="etag">MongoDB</span><span class="etag">Redis</span><span class="etag">Stripe</span><span class="etag">OAuth2</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Projects -->
-    <div class="m-section">
-      <div class="m-label">Key Projects</div>
-      <div class="proj-item">
-        <div class="proj-title">LLM Inference Platform (Codsy)</div>
-        <div class="proj-desc">Production multi-GPU cluster on 4× Tesla V100 with K3s orchestration, vLLM per GPU, nginx API gateway, FastAPI load-balancer, and drop-in Python SDK. Serving live LLM traffic for active development team.</div>
-      </div>
-      <div class="proj-item">
-        <div class="proj-title">Zero-Trust Secrets Pipeline</div>
-        <div class="proj-desc">HashiCorp Vault in LXD with AppRole auth, dynamic credential rotation for SSH and SonarQube CI/CD. Granular policy-based access — GDPR data residency compliant.</div>
-      </div>
-      <div class="proj-item">
-        <div class="proj-title">AI Agent Microservices Platform</div>
-        <div class="proj-desc">6-service gRPC backend with Redis job queuing, ECDH + ABE multi-tenant isolation. Sub-100ms P95 latency at 10k+ daily API requests.</div>
-      </div>
-    </div>
-
-  </div>
-  <!-- ════════════ END MAIN ════════════ -->
-
 </div>
+
+<!-- ══════════════════════════════════════════════════ SUMMARY -->
+<div class="section">
+  <div class="section-title">Professional Summary</div>
+  <hr class="section-divider">
+  <p class="summary">
+    Backend and infrastructure engineer with <strong>4+ years of production experience</strong> designing and operating
+    high-throughput distributed systems. Proven track record delivering microservices architectures, RESTful and gRPC APIs,
+    and event-driven pipelines using <strong>Python (FastAPI, Flask, Django)</strong> and <strong>Node.js (NestJS)</strong>.
+    Hands-on expertise in containerisation (Docker, Kubernetes/K3s), PostgreSQL/MongoDB data modelling, Redis caching, and
+    cloud infrastructure on <strong>AWS and GCP</strong>. Deep DevSecOps background: bare-metal GPU cluster management,
+    HashiCorp Vault secrets management, OWASP hardening, SAST/DAST pipelines. Currently contributing to AI agent and LLM
+    deployment platforms on bare-metal GPU clusters. Fluent in English (C1) and Urdu (native).
+  </p>
+</div>
+
+<!-- ══════════════════════════════════════════════════ EXPERIENCE -->
+<div class="section">
+  <div class="section-title">Professional Experience</div>
+  <hr class="section-divider">
+
+  <!-- Augai -->
+  <div class="exp-item">
+    <div class="exp-header">
+      <div class="exp-title">DevOps &amp; Infrastructure Engineer</div>
+      <div class="exp-dates current">Jan 2026 – Present</div>
+    </div>
+    <div class="exp-company">Augai &nbsp;·&nbsp; Infrastructure &amp; Security Consulting &nbsp;·&nbsp; Remote</div>
+    <ul class="exp-ul">
+      <li>Sole infrastructure owner for bare-metal Ubuntu 22.04 production server running a <strong>4× NVIDIA Tesla V100 GPU cluster</strong>, K3s Kubernetes, and 8+ LXD developer containers — maintaining <strong>99.8% uptime</strong>.</li>
+      <li>Designed K3s cluster from scratch: nginx ingress controller, cert-manager with Let's Encrypt TLS automation, CoreDNS internal service discovery, and GPU passthrough configuration.</li>
+      <li>Deployed <strong>HashiCorp Vault</strong> (AppRole auth, policy-based access control) as isolated LXD container for encrypted secrets management across CI/CD pipelines — <strong>GDPR data residency compliant</strong>.</li>
+      <li>Executed full security hardening: forensic log audit (server confirmed clean), iptables stateful firewall, fail2ban brute-force protection, kernel update lockdown, rsyslog centralised logging across all containers.</li>
+      <li>Built GitHub Actions CI/CD pipelines with integrated SAST (SonarQube), container image scanning (Trivy), and secret detection (Gitleaks).</li>
+      <li>Configured Zabbix monitoring with Kubernetes pod dashboards and Gmail SMTP alerting for 15+ infrastructure components; resolved MySQL binary log disk exhaustion.</li>
+      <li>Resolved LXD container internet access and VS Code Remote tunnel connectivity for 5 engineers via <strong>MASQUERADE NAT rules</strong> on bond0 interface.</li>
+    </ul>
+    <div class="tags">
+      <span class="tag">K3s</span>
+      <span class="tag">HashiCorp Vault</span>
+      <span class="tag">LXD</span>
+      <span class="tag">Ubuntu 22.04</span>
+      <span class="tag">iptables</span>
+      <span class="tag">fail2ban</span>
+      <span class="tag">cert-manager</span>
+      <span class="tag">CoreDNS</span>
+      <span class="tag">nginx Ingress</span>
+      <span class="tag">Zabbix</span>
+      <span class="tag">GitHub Actions</span>
+      <span class="tag">SonarQube</span>
+      <span class="tag">Trivy</span>
+      <span class="tag">Gitleaks</span>
+      <span class="tag">rsyslog</span>
+      <span class="tag">NVIDIA V100</span>
+    </div>
+  </div>
+
+  <!-- BoolMind -->
+  <div class="exp-item">
+    <div class="exp-header">
+      <div class="exp-title">Backend Engineer</div>
+      <div class="exp-dates">Jan 2024 – Dec 2025</div>
+    </div>
+    <div class="exp-company">BoolMind &nbsp;·&nbsp; AI &amp; Automation Platform &nbsp;·&nbsp; Remote</div>
+    <ul class="exp-ul">
+      <li>Architected and delivered a production microservices backend for an AI agent platform, handling <strong>10k+ daily API requests</strong> with <strong>sub-100ms P95 latency</strong> using FastAPI and asynchronous Python (asyncio).</li>
+      <li>Designed and implemented <strong>gRPC-based inter-service communication</strong> across 6 independent services, reducing internal API overhead by <strong>40%</strong> compared to REST.</li>
+      <li>Built Redis-backed job queuing and caching layer, cutting database read load by <strong>60%</strong> and enabling real-time agent state synchronisation.</li>
+      <li>Deployed LLM inference infrastructure on 4× Tesla V100 GPU server: vLLM serving Qwen2.5-Coder-32B, FastAPI load-balancing router across 4 GPU instances, nginx API gateway with API key authentication.</li>
+      <li>Implemented OWASP Top 10 mitigations, ECDH key exchange, and Attribute-Based Encryption (ABE) for tenant data isolation across the multi-tenant API layer.</li>
+      <li>Engineered Stripe payment security hardening after a carding attack: Radar fraud rules, Redis-based rate limiting per IP/card, HMAC inter-service authentication — <strong>zero fraudulent transactions post-deployment</strong>.</li>
+      <li>Delivered a Python drop-in client library for the LLM API consumed by 5 frontend developers, reducing integration time from days to hours.</li>
+    </ul>
+    <div class="tags">
+      <span class="tag">FastAPI</span>
+      <span class="tag">asyncio</span>
+      <span class="tag">gRPC</span>
+      <span class="tag">Redis</span>
+      <span class="tag">PostgreSQL</span>
+      <span class="tag">Python</span>
+      <span class="tag">vLLM</span>
+      <span class="tag">nginx</span>
+      <span class="tag">OWASP Top 10</span>
+      <span class="tag">ECDH</span>
+      <span class="tag">ABE</span>
+      <span class="tag">HMAC</span>
+      <span class="tag">Stripe Radar</span>
+      <span class="tag">Docker</span>
+    </div>
+  </div>
+
+  <!-- Techleadz -->
+  <div class="exp-item">
+    <div class="exp-header">
+      <div class="exp-title">Junior Backend Engineer</div>
+      <div class="exp-dates">Sep 2022 – Dec 2023</div>
+    </div>
+    <div class="exp-company">Techleadz &nbsp;·&nbsp; Software Development Agency &nbsp;·&nbsp; Lahore, Pakistan</div>
+    <ul class="exp-ul">
+      <li>Developed and scaled RESTful APIs using Django REST Framework and Node.js (NestJS) for SaaS products with <strong>50k+ registered users</strong>.</li>
+      <li>Designed PostgreSQL schemas for multi-tenant SaaS applications, implementing row-level security and optimised indexing strategies reducing query time by <strong>35%</strong>.</li>
+      <li>Built MongoDB document models using Beanie ODM for high-write analytics workloads, handling <strong>500k+ daily events</strong>.</li>
+      <li>Integrated third-party payment, notification, and authentication services (Stripe, Firebase, OAuth2), delivering end-to-end feature ownership.</li>
+      <li>Participated in sprint-based Agile delivery, consistently hitting sprint commitments and contributing to architectural design reviews.</li>
+      <li>Deployed and maintained applications on Linux VPS: nginx reverse proxy, SSL, systemd service management.</li>
+      <li>Wrote Dockerfiles and Docker Compose configurations for development and staging environments.</li>
+    </ul>
+    <div class="tags">
+      <span class="tag">Django</span>
+      <span class="tag">Django REST Framework</span>
+      <span class="tag">NestJS</span>
+      <span class="tag">Node.js</span>
+      <span class="tag">PostgreSQL</span>
+      <span class="tag">MongoDB</span>
+      <span class="tag">Beanie</span>
+      <span class="tag">Redis</span>
+      <span class="tag">Stripe</span>
+      <span class="tag">Firebase</span>
+      <span class="tag">OAuth2</span>
+      <span class="tag">Docker</span>
+      <span class="tag">nginx</span>
+      <span class="tag">systemd</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════ TECHNICAL SKILLS -->
+<div class="section">
+  <div class="section-title">Technical Skills</div>
+  <hr class="section-divider">
+  <div class="skills-grid">
+    <div class="skill-row">
+      <div class="skill-label">Languages</div>
+      <div class="skill-value">Python, TypeScript, JavaScript, Go, Bash</div>
+    </div>
+    <div class="skill-row">
+      <div class="skill-label">Frameworks</div>
+      <div class="skill-value">FastAPI, Django, Django REST Framework, Flask, NestJS, Node.js, Express.js</div>
+    </div>
+    <div class="skill-row">
+      <div class="skill-label">Databases &amp; ORMs</div>
+      <div class="skill-value">PostgreSQL, MongoDB, Redis, MySQL &nbsp;·&nbsp; SQLAlchemy, Django ORM, Beanie, Mongoose</div>
+    </div>
+    <div class="skill-row">
+      <div class="skill-label">APIs &amp; Protocols</div>
+      <div class="skill-value">REST, gRPC, WebSockets, GraphQL, OAuth2, JWT, OpenAPI/Swagger</div>
+    </div>
+    <div class="skill-row">
+      <div class="skill-label">Cloud &amp; DevOps</div>
+      <div class="skill-value">AWS (EC2, S3, Lambda, RDS, IAM), GCP, Docker, Kubernetes (K3s), GitHub Actions CI/CD</div>
+    </div>
+    <div class="skill-row">
+      <div class="skill-label">Container &amp; Orchestration</div>
+      <div class="skill-value">K3s, LXD, Docker Compose, Helm, nginx Ingress, CoreDNS, cert-manager</div>
+    </div>
+    <div class="skill-row">
+      <div class="skill-label">Security</div>
+      <div class="skill-value">OWASP Top 10, ECDH, ABE encryption, JWT hardening, HMAC, SAST/DAST</div>
+    </div>
+    <div class="skill-row">
+      <div class="skill-label">Secrets &amp; Compliance</div>
+      <div class="skill-value">HashiCorp Vault (AppRole, dynamic secrets, policies), GDPR data residency</div>
+    </div>
+    <div class="skill-row">
+      <div class="skill-label">Linux &amp; Networking</div>
+      <div class="skill-value">Ubuntu 22.04, iptables, fail2ban, MASQUERADE NAT, bond interfaces, SSH hardening, systemd</div>
+    </div>
+    <div class="skill-row">
+      <div class="skill-label">Monitoring</div>
+      <div class="skill-value">Zabbix, Grafana, Prometheus, Trivy, Gitleaks, SonarQube, rsyslog</div>
+    </div>
+    <div class="skill-row">
+      <div class="skill-label">AI / MLOps</div>
+      <div class="skill-value">vLLM, LLM deployment, FastAPI inference routing, GPU cluster management (NVIDIA V100)</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════ PROJECTS -->
+<div class="section">
+  <div class="section-title">Key Projects</div>
+  <hr class="section-divider">
+
+  <div class="project-item">
+    <div class="project-title">LLM Inference Platform (Codsy)</div>
+    <div class="project-desc">Designed and deployed a production-grade multi-GPU LLM inference cluster on 4× Tesla V100 hardware. Built FastAPI load-balancing router, nginx reverse proxy with API key authentication, vLLM engine management, and drop-in Python SDK. Serves an active developer team of 5+.</div>
+  </div>
+
+  <div class="project-item">
+    <div class="project-title">Zero-Trust Secrets Management (HashiCorp Vault)</div>
+    <div class="project-desc">Designed and deployed Vault in an LXD container with AppRole auth, policy-based secret access, and dynamic credential rotation for SSH and SonarQube CI/CD pipelines. GDPR data residency compliant.</div>
+  </div>
+
+  <div class="project-item">
+    <div class="project-title">AI Agent Microservices Platform</div>
+    <div class="project-desc">Production microservices backend for AI automation — 6 gRPC-connected services, Redis job queuing, ECDH + ABE multi-tenant isolation, sub-100ms P95 latency at 10k+ daily requests.</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════ EDUCATION -->
+<div class="section">
+  <div class="section-title">Education</div>
+  <hr class="section-divider">
+  <div class="edu-header">
+    <div class="edu-degree">Bachelor of Science in Computer Science</div>
+    <div class="edu-dates">2018 – 2022</div>
+  </div>
+  <div class="edu-institution">FAST-NUCES (National University of Computer &amp; Emerging Sciences) &nbsp;·&nbsp; Lahore, Pakistan</div>
+  <div class="edu-coursework">Relevant coursework: Data Structures &amp; Algorithms, Operating Systems, Computer Networks, Database Systems, Software Engineering, Distributed Systems, Cybersecurity</div>
+</div>
+
+<!-- ══════════════════════════════════════════════════ LANGUAGES & ADDITIONAL -->
+<div class="section">
+  <div class="two-col">
+
+    <div>
+      <div class="section-title">Languages</div>
+      <hr class="section-divider">
+      <div class="lang-row">
+        <div class="lang-name">English</div>
+        <div class="lang-level">C1 – Professional Working Proficiency (full technical and business fluency)</div>
+      </div>
+      <div class="lang-row">
+        <div class="lang-name">Urdu</div>
+        <div class="lang-level">Native</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-title">Additional</div>
+      <hr class="section-divider">
+      <ul class="additional-list">
+        <li><strong>Work Model:</strong> Open to on-site, hybrid, or fully remote positions in Lahore or Pakistan-wide</li>
+        <li><strong>Notice Period:</strong> 1 month (negotiable)</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
 </body>
 </html>
