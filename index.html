@@ -430,6 +430,46 @@ body.cc #cd{transform:translate(-50%,-50%) scale(.4)}
 .cal-note{font-family:var(--mono);font-size:.62rem;color:var(--m);text-align:center;opacity:.7}
 
 /* ─────────────────────────────
+   BLOG
+───────────────────────────── */
+#blog{padding:100px 0;background:var(--s1)}
+.blog-header{margin-bottom:3rem}
+.blog-header .sec-tag{justify-content:flex-start}
+.blog-header h2{font-size:clamp(2rem,3.5vw,2.8rem);font-weight:800;letter-spacing:-.02em;margin-top:.4rem}
+.blog-header h2 span{background:linear-gradient(135deg,var(--c),var(--p));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.blog-header p{color:var(--m);font-size:.9rem;margin-top:.6rem;font-family:var(--mono)}
+.blog-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1.5rem}
+.blog-card{background:var(--card2);border:1px solid var(--b);border-radius:12px;overflow:hidden;transition:border-color .3s;display:flex;flex-direction:column}
+.blog-card:hover{border-color:var(--bh)}
+.bc-top{padding:1.4rem 1.4rem 0}
+.bc-meta{display:flex;align-items:center;justify-content:space-between;margin-bottom:.85rem;flex-wrap:wrap;gap:.5rem}
+.bc-tags{display:flex;gap:.35rem;flex-wrap:wrap}
+.bc-info{font-family:var(--mono);font-size:.62rem;color:var(--m);display:flex;align-items:center;gap:.4rem}
+.bc-dot{opacity:.4}
+.bc-title{font-size:1.05rem;font-weight:700;color:var(--t);line-height:1.35;margin-bottom:.65rem}
+.bc-excerpt{font-size:.865rem;color:var(--m);line-height:1.75;margin-bottom:1.1rem}
+.bc-full{border-top:1px solid var(--b);display:none}
+.bc-full.open{display:block}
+.bc-full-inner{padding:1.4rem}
+.bc-full-inner h4{font-size:.72rem;font-weight:700;color:var(--c);text-transform:uppercase;letter-spacing:.12em;font-family:var(--mono);margin:1.4rem 0 .5rem;padding-left:8px;border-left:2px solid var(--c)}
+.bc-full-inner h4:first-child{margin-top:0}
+.bc-full-inner p{font-size:.865rem;color:var(--d);line-height:1.85;margin-bottom:.65rem}
+.bc-full-inner strong{color:var(--t);font-weight:600}
+.bc-full-inner ul{list-style:none;margin:.35rem 0 .75rem}
+.bc-full-inner ul li{font-size:.865rem;color:var(--d);padding:.2rem 0 .2rem 1.1rem;position:relative;line-height:1.7}
+.bc-full-inner ul li::before{content:'▸';position:absolute;left:0;color:var(--c);font-size:.6rem;top:.42rem}
+.bc-pre{background:rgba(0,0,0,.35);border:1px solid var(--b);border-radius:8px;padding:.85rem 1.1rem;overflow-x:auto;margin:.4rem 0 .9rem}
+.bc-pre code{font-family:var(--mono);font-size:.72rem;color:var(--c);line-height:1.75;display:block;white-space:pre}
+.bc-result{background:linear-gradient(135deg,var(--cd),var(--pd));border:1px solid var(--bh);border-radius:8px;padding:.9rem 1rem;margin:1rem 0 .4rem;font-size:.82rem;color:var(--t);line-height:1.7}
+.bc-result strong{color:var(--c)}
+[data-theme="light"] .bc-pre{background:rgba(3,105,161,.06)}
+[data-theme="light"] .bc-pre code{color:var(--c)}
+.bc-bottom{padding:.9rem 1.4rem 1.25rem;margin-top:auto}
+.bc-toggle{font-family:var(--mono);font-size:.72rem;color:var(--c);background:var(--cd);border:1px solid rgba(0,229,255,.2);border-radius:6px;padding:.45rem .9rem;cursor:pointer;transition:all .25s;display:inline-flex;align-items:center;gap:.4rem}
+.bc-toggle:hover{background:rgba(0,229,255,.18);border-color:var(--bh)}
+.bc-toggle.open{color:var(--m);background:rgba(0,0,0,.1);border-color:var(--b)}
+
+/* ─────────────────────────────
    FOOTER
 ───────────────────────────── */
 footer{background:var(--s1);border-top:1px solid var(--b);padding:1.6rem 0}
@@ -449,6 +489,7 @@ footer{background:var(--s1);border-top:1px solid var(--b);padding:1.6rem 0}
   .pipe-item{grid-template-columns:1fr}.pipe-meta{border-right:none;border-bottom:1px solid var(--b);padding:1rem 0}
   .pipe-item::before{display:none}.pipe-card{margin-left:0}
   .proj-grid{grid-template-columns:1fr 1fr}
+  .blog-grid{grid-template-columns:1fr}
   .contact-grid{grid-template-columns:1fr}
   .impact-grid{grid-template-columns:repeat(2,1fr)}
   .impact-item:nth-child(2){border-right:none}.impact-item:nth-child(3){border-top:1px solid var(--b)}
@@ -513,6 +554,7 @@ footer{background:var(--s1);border-top:1px solid var(--b);padding:1.6rem 0}
       <li><a href="#skills">Skills</a></li>
       <li><a href="#experience">Experience</a></li>
       <li><a href="#projects">Projects</a></li>
+      <li><a href="#blog">Blog</a></li>
       <li><a href="#contact" class="nav-cta">Schedule a Call →</a></li>
     </ul>
     <button class="theme-btn" id="themeBtn" aria-label="Toggle theme">
@@ -800,6 +842,308 @@ footer{background:var(--s1);border-top:1px solid var(--b);padding:1.6rem 0}
   </div>
 </section>
 
+<!-- BLOG -->
+<section id="blog">
+  <div class="w">
+    <div class="blog-header ri">
+      <div class="sec-tag">writing</div>
+      <h2>Technical <span>Blog</span></h2>
+      <p>Real war stories from production systems — GPU clusters, security incidents, and architecture decisions.</p>
+    </div>
+    <div class="blog-grid">
+
+      <!-- BLOG 1 — GPU / AI Infra -->
+      <article class="blog-card ri">
+        <div class="bc-top">
+          <div class="bc-meta">
+            <div class="bc-tags"><span class="tag-p">GPU</span><span class="tag-p">vLLM</span><span class="tag-p">K3s</span><span class="tag-g">Infrastructure</span></div>
+            <div class="bc-info"><span class="bc-date">Mar 2026</span><span class="bc-dot">·</span><span class="bc-read">10 min read</span></div>
+          </div>
+          <h3 class="bc-title">Running LLM Inference on 4× Tesla V100 — Bare Metal to Production</h3>
+          <p class="bc-excerpt">AWS p3.8xlarge (4× V100) costs ~$8,800/month. We own the hardware. Here's the full stack: K3s, vLLM, FastAPI load-balancer, nginx API key auth — serving 10,000+ daily requests at sub-400ms P95.</p>
+        </div>
+        <div class="bc-full">
+          <div class="bc-full-inner">
+            <h4>The Why: Cloud GPUs Are Expensive</h4>
+            <p>AWS p3.8xlarge (4× V100, 16GB each) costs $12.24/hour — $8,800/month for 24/7 availability. We owned the hardware. Colocation + electricity brought the effective monthly cost to ~$180. The decision was straightforward.</p>
+            <h4>OS & CUDA Setup</h4>
+            <p><strong>Ubuntu 22.04 LTS</strong> — not 24.04. CUDA driver stability and nvidia-container-toolkit package availability were better tested on 22.04 at the time of setup. We installed CUDA 12.x and the NVIDIA Container Toolkit to allow Docker and K3s pods to access the GPUs.</p>
+            <pre class="bc-pre"><code>distribution=$(. /etc/os-release; echo $ID$VERSION_ID)
+curl -s -L https://nvidia.github.io/libnvidia-container/gpgkey | apt-key add -
+apt install nvidia-cuda-toolkit nvidia-container-toolkit
+systemctl restart docker</code></pre>
+            <h4>K3s: Lightweight Kubernetes on One Server</h4>
+            <p>Full Kubernetes felt like overkill for a single physical node. K3s runs the same Kubernetes API surface at a fraction of the resource overhead. We deployed:</p>
+            <ul>
+              <li><strong>nginx Ingress Controller</strong> — external traffic routing</li>
+              <li><strong>cert-manager + Let's Encrypt</strong> — automatic TLS, zero manual certificate management</li>
+              <li><strong>CoreDNS</strong> — internal service discovery across LXD containers and K3s pods</li>
+              <li><strong>NVIDIA Device Plugin</strong> — exposes <code>nvidia.com/gpu</code> as a schedulable resource</li>
+            </ul>
+            <p>Each vLLM worker pod requests exactly <code>nvidia.com/gpu: 1</code>, so K3s handles GPU allocation automatically.</p>
+            <h4>vLLM + Qwen2.5-Coder-32B</h4>
+            <p>Qwen2.5-Coder-32B needs ~60GB VRAM in BF16. With 4× 16GB = 64GB total, there's just enough headroom for KV cache. <code>tensor_parallel_size=4</code> splits the model across all four V100s using NVLink-style communication over PCIe.</p>
+            <pre class="bc-pre"><code>from vllm import LLM, SamplingParams
+
+llm = LLM(
+    model="Qwen/Qwen2.5-Coder-32B-Instruct",
+    tensor_parallel_size=4,
+    gpu_memory_utilization=0.91,
+    max_model_len=8192
+)</code></pre>
+            <p>Keep <code>gpu_memory_utilization</code> at 0.90–0.92. Going higher causes OOM crashes during KV cache spikes on long-context requests.</p>
+            <h4>FastAPI Load-Balancing Router</h4>
+            <p>Each GPU worker runs as an independent vLLM OpenAI-compatible server on a different port. A FastAPI router round-robins across them with health checks — no traffic goes to a worker still loading the model (cold start is 3–4 minutes).</p>
+            <pre class="bc-pre"><code>worker_pool = cycle(["http://llm-worker-0:8000",
+                     "http://llm-worker-1:8000",
+                     "http://llm-worker-2:8000",
+                     "http://llm-worker-3:8000"])
+
+@app.post("/v1/completions")
+async def complete(req: Request, api_key: str = Depends(verify_key)):
+    target = next(worker_pool)
+    async with httpx.AsyncClient(timeout=120) as client:
+        r = await client.post(f"{target}/v1/completions",
+                              content=await req.body(),
+                              headers=req.headers)
+    return Response(content=r.content, media_type="application/json")</code></pre>
+            <h4>nginx: API Key Auth + Rate Limiting</h4>
+            <pre class="bc-pre"><code>upstream llm_upstream {
+    server llm-router:8080;
+}
+location /v1/ {
+    auth_request     /auth;
+    proxy_pass       http://llm_upstream;
+    limit_req        zone=per_key burst=10 nodelay;
+    proxy_read_timeout 120s;
+}</code></pre>
+            <div class="bc-result">
+              <strong>Results:</strong> 10,000+ daily completions served · Cold start ~3.5 min · P95 token generation ~400ms for 256-token output · Monthly infra cost ~$180 vs ~$8,800 cloud equivalent
+            </div>
+            <h4>Key Takeaways</h4>
+            <ul>
+              <li>K3s + NVIDIA device plugin works on single-node bare metal with zero special config</li>
+              <li><code>tensor_parallel_size</code> must match physical GPU count for V100 PCIe topology</li>
+              <li>Health-check poll the worker before routing — model load takes time and silently fails requests otherwise</li>
+              <li>LXD containers for dev isolation + K3s for production on the same host works well; use CoreDNS to bridge them</li>
+            </ul>
+          </div>
+        </div>
+        <div class="bc-bottom"><button class="bc-toggle">Read Article →</button></div>
+      </article>
+
+      <!-- BLOG 2 — Stripe Carding Attack -->
+      <article class="blog-card ri" style="transition-delay:.1s">
+        <div class="bc-top">
+          <div class="bc-meta">
+            <div class="bc-tags"><span class="tag-a">Security</span><span class="tag-a">Stripe</span><span class="tag-c">Redis</span></div>
+            <div class="bc-info"><span class="bc-date">Feb 2026</span><span class="bc-dot">·</span><span class="bc-read">6 min read</span></div>
+          </div>
+          <h3 class="bc-title">Stopping a Live Stripe Carding Attack — Zero Fraud Post-Deployment</h3>
+          <p class="bc-excerpt">400+ failed charges in two hours, all $0.99, all from Eastern Europe. We went from 12% fraud rate to 0.02% with three layers: Stripe Radar rules, Redis rate limiting per IP/BIN, and HMAC inter-service authentication.</p>
+        </div>
+        <div class="bc-full">
+          <div class="bc-full-inner">
+            <h4>What is a Carding Attack?</h4>
+            <p>Attackers buy lists of stolen card numbers and run automated scripts to test them in small amounts — usually $0.50–$1.00 — against real merchant endpoints. Cards that succeed are "live" and get sold at a premium. You only notice when Stripe emails you about elevated dispute rates.</p>
+            <h4>How We Found Out</h4>
+            <p>Our Stripe dashboard showed <strong>400+ failed charges in a 2-hour window</strong>: all $0.99, multiple IPs from Eastern Europe, all hitting the same <code>/api/checkout</code> endpoint, all with different card numbers. Classic carding signature.</p>
+            <h4>Layer 1: Stripe Radar Rules</h4>
+            <p>Radar's rule DSL lets you block or review charges based on risk signals. We added three rules immediately:</p>
+            <pre class="bc-pre"><code># Block high-risk country + low amount
+block if: :ip_country: in ('RU', 'UA', 'RO', 'BG', 'BY') and :amount_in_cents: &lt; 200
+
+# Block velocity per IP
+block if: charge_count_per_ip_hourly &gt; 3
+
+# Review first-time international cards
+review if: :is_new_card: = true and :card_country: != 'PK' and :amount_in_cents: &lt; 500</code></pre>
+            <p>This cut ~60% of the attack volume at Stripe's edge before charges were even attempted.</p>
+            <h4>Layer 2: Redis Rate Limiting Per IP + BIN</h4>
+            <p>Radar handles Stripe-side, but we needed to stop requests reaching our API at all. Token bucket per IP + card BIN prefix (first 6 digits — identifies the issuing bank):</p>
+            <pre class="bc-pre"><code>async def check_rate_limit(ip: str, card_bin: str) -&gt; bool:
+    key = f"checkout:{ip}:{card_bin[:6]}"
+    count = await redis.incr(key)
+    if count == 1:
+        await redis.expire(key, 3600)  # 1-hour window
+    if count &gt; 3:
+        raise HTTPException(429, "Too many payment attempts")
+    return True</code></pre>
+            <p>Rate limiting on <strong>BIN prefix</strong> — not just full card number — catches attackers cycling through different cards from the same issuing bank, which is a common evasion pattern.</p>
+            <h4>Layer 3: HMAC Inter-Service Authentication</h4>
+            <p>The payment service should only be callable from our own backend — not directly from any external client. We added HMAC-SHA256 request signing between services:</p>
+            <pre class="bc-pre"><code>def sign_request(payload: bytes, secret: str) -&gt; str:
+    return hmac.new(
+        secret.encode(), payload, hashlib.sha256
+    ).hexdigest()
+
+# Verification middleware
+async def verify_hmac(request: Request):
+    sig = request.headers.get("X-Signature")
+    body = await request.body()
+    expected = sign_request(body, SHARED_SECRET)
+    if not hmac.compare_digest(sig or "", expected):
+        raise HTTPException(401, "Invalid signature")</code></pre>
+            <p>Any request without a valid HMAC from a known internal service is rejected before it touches the payment logic or Stripe.</p>
+            <div class="bc-result">
+              <strong>Result:</strong> Fraud rate 12% → 0.02% · Zero fraudulent transactions post-deployment · No legitimate customer blocked · Full mitigation deployed in under 4 hours
+            </div>
+            <h4>What We Learned</h4>
+            <ul>
+              <li>Configure Radar rules proactively — reactive setup during an active attack is stressful</li>
+              <li>Rate limit on BIN prefix (first 6 digits), not just full card — attackers cycle cards from the same bank</li>
+              <li>HMAC between your own services is cheap to add and eliminates an entire attack surface entirely</li>
+              <li>Keep a Stripe webhook endpoint logging all events — the audit trail is invaluable for post-incident analysis</li>
+            </ul>
+          </div>
+        </div>
+        <div class="bc-bottom"><button class="bc-toggle">Read Article →</button></div>
+      </article>
+
+      <!-- BLOG 3 — gRPC vs REST -->
+      <article class="blog-card ri" style="transition-delay:.15s">
+        <div class="bc-top">
+          <div class="bc-meta">
+            <div class="bc-tags"><span class="tag-c">gRPC</span><span class="tag-c">FastAPI</span><span class="tag-c">Microservices</span></div>
+            <div class="bc-info"><span class="bc-date">Jan 2026</span><span class="bc-dot">·</span><span class="bc-read">7 min read</span></div>
+          </div>
+          <h3 class="bc-title">gRPC vs REST in Production — How We Cut Internal API Overhead by 40%</h3>
+          <p class="bc-excerpt">Six microservices, all talking REST over HTTP/1.1. A single agent task triggered 5 synchronous cross-service calls. Here's what we measured, how we migrated, and when gRPC is — and isn't — the right call.</p>
+        </div>
+        <div class="bc-full">
+          <div class="bc-full-inner">
+            <h4>The Problem</h4>
+            <p>The AI agent platform had 6 services: API Gateway, Agent Orchestrator, Task Queue, LLM Router, User Service, and Billing. All REST over HTTP/1.1. A single agent task execution path: Gateway → Orchestrator → LLM Router → Task Queue → back to Orchestrator. <strong>Five round-trips</strong>, each with JSON serialisation overhead, connection setup, and no streaming.</p>
+            <h4>Why gRPC?</h4>
+            <ul>
+              <li><strong>Protocol Buffers</strong>: binary serialisation — ~3–10× smaller payloads than JSON, faster to serialise/deserialise</li>
+              <li><strong>HTTP/2</strong>: connection multiplexing — one persistent connection, no per-request TCP overhead</li>
+              <li><strong>Server-side streaming</strong>: LLM token streaming over gRPC is natural; over REST it requires SSE or websockets</li>
+              <li><strong>Typed contracts</strong>: <code>.proto</code> files as source of truth — no more runtime JSON field mismatches</li>
+            </ul>
+            <h4>The .proto Contract</h4>
+            <pre class="bc-pre"><code>syntax = "proto3";
+
+service AgentService {
+  rpc ExecuteTask(TaskRequest) returns (TaskResponse);
+  rpc StreamOutput(TaskRequest) returns (stream OutputChunk);
+}
+
+message TaskRequest {
+  string task_id    = 1;
+  string agent_id   = 2;
+  string prompt     = 3;
+  map&lt;string, string&gt; metadata = 4;
+}
+
+message OutputChunk {
+  string content    = 1;
+  bool   is_final   = 2;
+}</code></pre>
+            <h4>Migration Strategy — No Big-Bang Rewrite</h4>
+            <p>We didn't rewrite everything at once. We ran gRPC alongside REST: added gRPC servers to each service, moved service-to-service calls first, left the public-facing API as REST. Each service could still be tested via REST during the transition. Migration took two weeks with zero downtime.</p>
+            <h4>Python gRPC with asyncio</h4>
+            <pre class="bc-pre"><code>import grpc
+from grpc.aio import Channel
+
+class AgentClient:
+    def __init__(self, channel: Channel):
+        self.stub = AgentServiceStub(channel)
+
+    async def execute(self, task: TaskRequest) -&gt; TaskResponse:
+        return await self.stub.ExecuteTask(task, timeout=30)
+
+    async def stream(self, task: TaskRequest):
+        async for chunk in self.stub.StreamOutput(task):
+            yield chunk.content</code></pre>
+            <div class="bc-result">
+              <strong>Numbers:</strong> Internal latency avg 12ms → 7ms (−42%) · Payload size avg 1.4KB → 340 bytes (−76%) · P95 end-to-end agent task 180ms → 108ms · Connection overhead eliminated via HTTP/2 multiplexing
+            </div>
+            <h4>When NOT to Use gRPC</h4>
+            <ul>
+              <li><strong>Public APIs</strong>: browsers can't use gRPC natively (grpc-web is a workaround but adds complexity)</li>
+              <li><strong>Simple infrequent CRUD</strong>: proto compilation overhead isn't worth it for 10 req/day endpoints</li>
+              <li><strong>Mixed-language teams new to proto</strong>: debugging binary protocol traffic is harder than JSON — invest in tooling first</li>
+            </ul>
+            <h4>Takeaway</h4>
+            <p>For service-to-service calls within the same infrastructure, gRPC is almost always the right choice. Keep REST for public APIs and external partner integrations where client diversity matters.</p>
+          </div>
+        </div>
+        <div class="bc-bottom"><button class="bc-toggle">Read Article →</button></div>
+      </article>
+
+      <!-- BLOG 4 — Vault + GDPR -->
+      <article class="blog-card ri" style="transition-delay:.2s">
+        <div class="bc-top">
+          <div class="bc-meta">
+            <div class="bc-tags"><span class="tag-a">Vault</span><span class="tag-a">Security</span><span class="tag-g">GDPR</span></div>
+            <div class="bc-info"><span class="bc-date">Dec 2025</span><span class="bc-dot">·</span><span class="bc-read">8 min read</span></div>
+          </div>
+          <h3 class="bc-title">Zero-Trust Secrets with HashiCorp Vault — GDPR-Compliant on Bare Metal</h3>
+          <p class="bc-excerpt">Secrets in .env files, CI environment variables, and SSH keys in repos — the flat permission model that most teams live with. Here's how we replaced all of it with AppRole auth, policy-based access, and on-prem secret residency for GDPR compliance.</p>
+        </div>
+        <div class="bc-full">
+          <div class="bc-full-inner">
+            <h4>The Problem with .env Files</h4>
+            <p>Every project has them. The issues compound quietly: <code>.env</code> accidentally committed once (it happens), CI environment variables visible to every engineer in the org, database passwords copy-pasted into Slack for "quick sharing", SSH keys that were never rotated after an engineer left. This isn't zero-trust — it's a flat, unaudited permission model.</p>
+            <h4>Why Self-Hosted Vault Over Cloud Secrets Managers?</h4>
+            <p>AWS Secrets Manager and GCP Secret Manager are excellent products. But our GDPR data residency requirement meant customer-related secrets couldn't live in AWS us-east-1 or route through US infrastructure. <strong>Vault in an LXD container on our German-hosted bare-metal server</strong> solved this: secrets never leave the jurisdiction, audit logs are on-prem, and there's no dependency on a cloud provider's API uptime.</p>
+            <h4>AppRole Authentication</h4>
+            <p>AppRole is designed for machine-to-machine auth. Each service gets a <code>role_id</code> (public, like a username) and a <code>secret_id</code> (private, short-lived — like a one-time password):</p>
+            <pre class="bc-pre"><code>vault write auth/approle/role/api-service \
+    token_policies="api-service-policy" \
+    secret_id_ttl=1h \
+    token_ttl=30m \
+    token_max_ttl=2h</code></pre>
+            <p>The CI/CD pipeline fetches a fresh <code>secret_id</code> per run. It expires in 1 hour. Even if it leaks from a build log, the attack window is narrow and auditable.</p>
+            <h4>Policy-Based Access Control — Least Privilege</h4>
+            <p>Each service can only read its own secrets. The LLM service cannot read the billing service's Stripe keys. Period.</p>
+            <pre class="bc-pre"><code># api-service-policy.hcl
+path "secret/data/api-service/*" {
+  capabilities = ["read"]
+}
+
+# billing-service-policy.hcl
+path "secret/data/billing/*" {
+  capabilities = ["read"]
+}
+# No cross-service reads — ever.</code></pre>
+            <h4>CI/CD Integration — GitHub Actions</h4>
+            <p>Secrets are fetched at runtime, not baked into the image or stored in GitHub Secrets:</p>
+            <pre class="bc-pre"><code>- name: Fetch secrets from Vault
+  run: |
+    SECRET_ID=$(vault write -f \
+      auth/approle/role/sonar/secret-id \
+      -format=json | jq -r '.data.secret_id')
+
+    TOKEN=$(vault write auth/approle/login \
+      role_id=${{ secrets.ROLE_ID }} \
+      secret_id=$SECRET_ID \
+      -format=json | jq -r '.auth.client_token')
+
+    echo "SONAR_TOKEN=$(vault kv get \
+      -field=token secret/sonar)" &gt;&gt; $GITHUB_ENV</code></pre>
+            <h4>GDPR: Why Data Residency Matters for Secrets</h4>
+            <p>GDPR Article 32 requires appropriate technical measures for the security of processing. If your encryption keys and database credentials route through a US cloud provider's API to be fetched, you've introduced a cross-border data flow risk. <strong>On-prem Vault eliminates this entirely</strong> — the secret retrieval call never leaves your server rack.</p>
+            <div class="bc-result">
+              <strong>Result:</strong> Zero .env files in production · Secret rotation = one Vault write (services pick it up on next token refresh) · Every secret access is audited with timestamp, service identity, and IP · Full GDPR Article 32 compliance documented
+            </div>
+            <h4>Key Takeaways</h4>
+            <ul>
+              <li>Start with AppRole + short-lived secret_ids — it's the right auth method for CI/CD and services</li>
+              <li>Write policies before you write secrets — least privilege from day one</li>
+              <li>Enable Vault audit logging immediately; it's the paper trail that matters during incidents</li>
+              <li>If GDPR applies to you, self-hosted Vault is a legitimate compliance argument — document it explicitly</li>
+            </ul>
+          </div>
+        </div>
+        <div class="bc-bottom"><button class="bc-toggle">Read Article →</button></div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
 <!-- CONTACT -->
 <section id="contact">
   <div class="w">
@@ -1007,6 +1351,17 @@ const hc=document.getElementById('hc');if(hc)hexObs.observe(hc);
 document.querySelectorAll('.mag').forEach(w=>{
   w.addEventListener('mousemove',e=>{const r=w.getBoundingClientRect(),x=(e.clientX-r.left-r.width/2)*.28,y=(e.clientY-r.top-r.height/2)*.28;w.style.transform=`translate(${x}px,${y}px)`});
   w.addEventListener('mouseleave',()=>w.style.transform='');
+});
+
+/* ── BLOG TOGGLE ── */
+document.querySelectorAll('.bc-toggle').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const full=btn.closest('.blog-card').querySelector('.bc-full');
+    const open=full.classList.toggle('open');
+    btn.textContent=open?'Close Article ↑':'Read Article →';
+    btn.classList.toggle('open',open);
+    if(open)full.scrollIntoView({behavior:'smooth',block:'nearest'});
+  });
 });
 
 /* ── NAV ── */
