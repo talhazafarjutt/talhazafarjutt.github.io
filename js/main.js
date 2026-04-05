@@ -150,17 +150,6 @@ document.querySelectorAll('.mag').forEach(w=>{
   w.addEventListener('mouseleave',()=>w.style.transform='');
 });
 
-/* ── BLOG TOGGLE ── */
-document.querySelectorAll('.bc-toggle').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    const full=btn.closest('.blog-card').querySelector('.bc-full');
-    const open=full.classList.toggle('open');
-    btn.textContent=open?'Close Article ↑':'Read Article →';
-    btn.classList.toggle('open',open);
-    if(open)full.scrollIntoView({behavior:'smooth',block:'nearest'});
-  });
-});
-
 /* ── CALENDLY ── */
 const calBtn=document.getElementById('calBtn');
 if(calBtn)calBtn.addEventListener('click',()=>Calendly.initPopupWidget({url:'https://calendly.com/talha-zafar-j/30min'}));

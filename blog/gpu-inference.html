@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="How I set up a 4× NVIDIA Tesla V100 GPU cluster on bare metal for LLM inference — K3s, vLLM, FastAPI load balancer, nginx API auth.">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<title>Running LLM Inference on 4× Tesla V100 — Talha Zafar</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%2300e5ff'/%3E%3Cstop offset='1' stop-color='%23a855f7'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='13' fill='%2305050f'/%3E%3Crect x='1.5' y='1.5' width='61' height='61' rx='12' fill='none' stroke='url(%23g)' stroke-width='2'/%3E%3Ctext x='7' y='42' font-family='monospace' font-weight='700' font-size='24' fill='%2300e5ff'%3E%3E_%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+<div id="prog"></div>
+<nav id="nav">
+  <div class="nav-bar">
+    <div class="nav-dots"><span class="nd-r"></span><span class="nd-y"></span><span class="nd-g"></span></div>
+    <a href="/" class="nav-logo">talha<em>.</em>zafar</a>
+    <div class="blog-nav-right">
+      <a href="/#blog" class="back-link">← All Articles</a>
+      <button class="theme-btn" id="themeBtn" aria-label="Toggle theme"><svg class="moon-ico" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg> <svg class="sun-ico" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button>
+    </div>
+  </div>
+</nav>
+<header class="bp-header">
+  <div class="w">
+    <div class="bp-tags ri">
+      <span class="tag-p">GPU</span><span class="tag-p">vLLM</span><span class="tag-p">K3s</span><span class="tag-g">Infrastructure</span>
+    </div>
+    <h1 class="bp-title ri">Running LLM Inference on 4× Tesla V100 — Bare Metal to Production</h1>
+    <div class="bp-meta ri"><span>Mar 2026</span><span class="bp-meta-dot">·</span><span>10 min read</span><span class="bp-meta-dot">·</span><span>Talha Zafar</span></div>
+  </div>
+</header>
+<main class="bp-body">
+  <div class="w">
+    <p class="bp-p ri">AWS p3.8xlarge (4× V100, 16GB each) costs $12.24/hour — <strong>$8,800/month</strong> for 24/7 availability. We owned the hardware. Colocation + electricity brought the effective monthly cost to ~$180. Here's the full stack that serves our LLM inference platform in production.</p>
+
+    <h4 class="bp-h4 ri">The Why: Cloud GPUs Are Expensive</h4>
+    <p class="bp-p">AWS p3.8xlarge gives you 4× V100 at $12.24/hr. That's $8,800/month for always-on availability. Owning bare metal with hosted colocation cuts that to electricity and depreciation — in our case, ~$180/month effective cost. The ROI calculation was easy.</p>
+
+    <h4 class="bp-h4">OS & CUDA Setup</h4>
+    <p class="bp-p"><strong>Ubuntu 22.04 LTS</strong> — not 24.04. CUDA driver stability and nvidia-container-toolkit package availability were better tested on 22.04 at the time of setup. We installed CUDA 12.x and the NVIDIA Container Toolkit to allow Docker and K3s pods to access the physical GPUs.</p>
+    <pre class="bp-pre"><code>distribution=$(. /etc/os-release; echo $ID$VERSION_ID)
+curl -s -L https://nvidia.github.io/libnvidia-container/gpgkey | apt-key add -
+apt install nvidia-cuda-toolkit nvidia-container-toolkit
+systemctl restart docker
+# Verify GPU visibility
+nvidia-smi</code></pre>
+
+    <h4 class="bp-h4">K3s: Lightweight Kubernetes on One Server</h4>
+    <p class="bp-p">Full Kubernetes felt like overkill for a single physical node. K3s runs the same Kubernetes API surface at a fraction of the resource overhead. We deployed:</p>
+    <ul class="bp-ul">
+      <li><strong>nginx Ingress Controller</strong> — external traffic routing with TLS termination</li>
+      <li><strong>cert-manager + Let's Encrypt</strong> — automatic TLS, zero manual certificate management</li>
+      <li><strong>CoreDNS</strong> — internal service discovery across LXD containers and K3s pods</li>
+      <li><strong>NVIDIA Device Plugin</strong> — exposes <code>nvidia.com/gpu</code> as a schedulable Kubernetes resource</li>
+    </ul>
+    <p class="bp-p">Each vLLM worker pod requests exactly <code>nvidia.com/gpu: 1</code> in its resource spec, so K3s handles GPU allocation without any manual assignment.</p>
+    <pre class="bp-pre"><code># k3s-install with GPU support
+curl -sfL https://get.k3s.io | sh -
+# Apply NVIDIA device plugin
+kubectl apply -f https://raw.githubusercontent.com/NVIDIA/k8s-device-plugin/main/nvidia-device-plugin.yml
+# Verify GPU scheduling works
+kubectl describe nodes | grep nvidia.com/gpu</code></pre>
+
+    <h4 class="bp-h4">vLLM + Qwen2.5-Coder-32B</h4>
+    <p class="bp-p">Qwen2.5-Coder-32B needs ~60GB VRAM in BF16 precision. With 4× 16GB = 64GB total, there's just enough headroom for the KV cache. <code>tensor_parallel_size=4</code> splits the model across all four V100s using PCIe communication.</p>
+    <pre class="bp-pre"><code>from vllm import LLM, SamplingParams
+
+llm = LLM(
+    model="Qwen/Qwen2.5-Coder-32B-Instruct",
+    tensor_parallel_size=4,
+    gpu_memory_utilization=0.91,
+    max_model_len=8192,
+    dtype="bfloat16"
+)</code></pre>
+    <p class="bp-p">Keep <code>gpu_memory_utilization</code> at 0.90–0.92. Going higher causes OOM crashes during KV cache spikes on long-context requests — we learned this the hard way after hitting 0.95.</p>
+
+    <h4 class="bp-h4">FastAPI Load-Balancing Router</h4>
+    <p class="bp-p">Each GPU worker runs as an independent vLLM OpenAI-compatible server on a different port. A FastAPI router round-robins across them with health checks — no traffic goes to a worker still loading the model (cold start is 3–4 minutes).</p>
+    <pre class="bp-pre"><code>from itertools import cycle
+import httpx
+from fastapi import FastAPI, Request, Response, Depends
+
+app = FastAPI()
+worker_pool = cycle([
+    "http://llm-worker-0:8000",
+    "http://llm-worker-1:8000",
+    "http://llm-worker-2:8000",
+    "http://llm-worker-3:8000",
+])
+
+@app.post("/v1/completions")
+async def complete(req: Request, api_key: str = Depends(verify_key)):
+    target = next(worker_pool)
+    async with httpx.AsyncClient(timeout=120) as client:
+        r = await client.post(
+            f"{target}/v1/completions",
+            content=await req.body(),
+            headers={"Content-Type": "application/json"}
+        )
+    return Response(content=r.content, media_type="application/json")</code></pre>
+
+    <h4 class="bp-h4">nginx: API Key Auth + Rate Limiting</h4>
+    <pre class="bp-pre"><code>upstream llm_upstream {
+    server llm-router:8080;
+}
+limit_req_zone $http_x_api_key zone=per_key:10m rate=30r/m;
+
+server {
+    location /v1/ {
+        auth_request     /auth;
+        proxy_pass       http://llm_upstream;
+        limit_req        zone=per_key burst=10 nodelay;
+        proxy_read_timeout 120s;
+        proxy_buffering  off;
+    }
+}</code></pre>
+
+    <h4 class="bp-h4">LXD Developer Containers</h4>
+    <p class="bp-p">The same bare-metal server also runs 8+ LXD containers for individual developers. LXD provides near-native performance (unlike Docker) with full filesystem isolation. We configured MASQUERADE NAT rules on the bond0 interface so containers have internet access, and VS Code Remote tunnel connectivity for all 5 engineers.</p>
+    <pre class="bp-pre"><code># NAT for LXD container internet access
+iptables -t nat -A POSTROUTING -s 10.x.x.0/24 -o bond0 -j MASQUERADE
+# Make persistent
+echo "iptables-save > /etc/iptables/rules.v4" >> /etc/rc.local</code></pre>
+
+    <div class="bp-result">
+      <strong>Results:</strong> 10,000+ daily completions served to a 5-engineer team · Cold start ~3.5 min · P95 token generation ~400ms for 256-token output · Monthly infra cost ~$180 vs ~$8,800 cloud equivalent · 99.8% uptime maintained
+    </div>
+
+    <h4 class="bp-h4">Key Takeaways</h4>
+    <ul class="bp-ul">
+      <li>K3s + NVIDIA device plugin works on single-node bare metal with zero special configuration beyond the device plugin DaemonSet</li>
+      <li><code>tensor_parallel_size</code> must match the number of physical GPUs exactly for V100 PCIe topology — NVLink isn't available on V100 PCIe cards</li>
+      <li>Always health-check poll workers before routing — model load takes 3–4 minutes and silently returns errors without explicit readiness checks</li>
+      <li>LXD containers for dev isolation + K3s for production on the same host works well; use CoreDNS to bridge the two networking domains</li>
+      <li>Set <code>gpu_memory_utilization ≤ 0.92</code> — the remaining headroom prevents OOM on burst KV cache allocations</li>
+    </ul>
+
+    <div class="bp-footer-nav">
+      <a href="/#blog">← All Articles</a>
+      <a href="stripe-carding.html">Next: Stopping a Stripe Carding Attack →</a>
+    </div>
+  </div>
+</main>
+<footer>
+  <div class="w">
+    <div class="ft">
+      <div class="ft-l"><em>talha.zafar</em> © 2026 · talhazafarjutt.github.io</div>
+      <div class="ft-r">
+        <a href="/#blog">All Articles</a>
+        <a href="/">Portfolio</a>
+        <a href="mailto:talha.zafar.j@gmail.com">Email</a>
+      </div>
+    </div>
+  </div>
+</footer>
+<script src="../js/blog.js" defer></script>
+</body>
+</html>

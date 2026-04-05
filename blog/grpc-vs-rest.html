@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Real numbers from migrating 6 microservices from REST to gRPC — 40% latency reduction, 76% smaller payloads, and a migration strategy that required zero downtime.">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<title>gRPC vs REST: 40% Overhead Reduction in Production — Talha Zafar</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%2300e5ff'/%3E%3Cstop offset='1' stop-color='%23a855f7'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='13' fill='%2305050f'/%3E%3Crect x='1.5' y='1.5' width='61' height='61' rx='12' fill='none' stroke='url(%23g)' stroke-width='2'/%3E%3Ctext x='7' y='42' font-family='monospace' font-weight='700' font-size='24' fill='%2300e5ff'%3E%3E_%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+<div id="prog"></div>
+<nav id="nav">
+  <div class="nav-bar">
+    <div class="nav-dots"><span class="nd-r"></span><span class="nd-y"></span><span class="nd-g"></span></div>
+    <a href="/" class="nav-logo">talha<em>.</em>zafar</a>
+    <div class="blog-nav-right">
+      <a href="/#blog" class="back-link">← All Articles</a>
+      <button class="theme-btn" id="themeBtn" aria-label="Toggle theme"><svg class="moon-ico" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg> <svg class="sun-ico" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button>
+    </div>
+  </div>
+</nav>
+<header class="bp-header">
+  <div class="w">
+    <div class="bp-tags ri"><span class="tag-c">gRPC</span><span class="tag-c">FastAPI</span><span class="tag-c">Microservices</span><span class="tag-c">Python</span></div>
+    <h1 class="bp-title ri">gRPC vs REST in Production — How We Cut Internal API Overhead by 40%</h1>
+    <div class="bp-meta ri"><span>Jan 2026</span><span class="bp-meta-dot">·</span><span>7 min read</span><span class="bp-meta-dot">·</span><span>Talha Zafar</span></div>
+  </div>
+</header>
+<main class="bp-body">
+  <div class="w">
+    <p class="bp-p ri">Six microservices. All REST over HTTP/1.1. A single agent task triggered 5 synchronous cross-service calls, each with JSON serialisation overhead and connection setup. Here's what we measured, how we migrated with zero downtime, and when gRPC is — and isn't — the right call.</p>
+
+    <h4 class="bp-h4 ri">The Setup</h4>
+    <p class="bp-p">The AI agent platform had 6 independent services: <strong>API Gateway</strong>, <strong>Agent Orchestrator</strong>, <strong>Task Queue</strong>, <strong>LLM Router</strong>, <strong>User Service</strong>, and <strong>Billing</strong>. All communication was REST over HTTP/1.1.</p>
+    <p class="bp-p">A single agent task execution path: Gateway → Orchestrator → LLM Router → Task Queue → back to Orchestrator. That's <strong>five synchronous round-trips</strong> per user request, each with:</p>
+    <ul class="bp-ul">
+      <li>JSON serialisation overhead (Python's <code>json.dumps</code> / <code>json.loads</code> on every hop)</li>
+      <li>HTTP/1.1 connection overhead (new connection per request without keep-alive tuning)</li>
+      <li>No native streaming (LLM token streaming required separate SSE endpoint)</li>
+      <li>No typed contracts (field naming inconsistencies caught only at runtime)</li>
+    </ul>
+
+    <h4 class="bp-h4">Why gRPC?</h4>
+    <ul class="bp-ul">
+      <li><strong>Protocol Buffers</strong>: binary serialisation — ~3–10× smaller payloads than JSON, faster to parse</li>
+      <li><strong>HTTP/2</strong>: connection multiplexing — one persistent connection per service pair, no per-request TCP handshake</li>
+      <li><strong>Server-side streaming</strong>: LLM token streaming over gRPC is natural with <code>stream</code> return types; over REST it required a separate SSE implementation</li>
+      <li><strong>Typed contracts</strong>: <code>.proto</code> files as the source of truth — schema mismatches caught at compile time, not production</li>
+    </ul>
+
+    <h4 class="bp-h4">The .proto Contract</h4>
+    <pre class="bp-pre"><code>syntax = "proto3";
+
+service AgentService {
+  rpc ExecuteTask(TaskRequest) returns (TaskResponse);
+  rpc StreamOutput(TaskRequest) returns (stream OutputChunk);
+  rpc GetStatus(StatusRequest) returns (StatusResponse);
+}
+
+message TaskRequest {
+  string task_id    = 1;
+  string agent_id   = 2;
+  string prompt     = 3;
+  int32  max_tokens = 4;
+  map&lt;string, string&gt; metadata = 5;
+}
+
+message OutputChunk {
+  string content  = 1;
+  bool   is_final = 2;
+  int32  token_count = 3;
+}</code></pre>
+    <p class="bp-p">The <code>.proto</code> file becomes the API contract. Any service that needs to call AgentService generates its client from this file — no documentation drift, no "what does this field actually mean?" Slack threads.</p>
+
+    <h4 class="bp-h4">Migration Strategy — No Big-Bang Rewrite</h4>
+    <p class="bp-p">We didn't rewrite everything simultaneously. The strategy: add gRPC as a second transport alongside REST, migrate service-to-service calls first, leave the public API as REST. Each service remained testable via REST throughout the transition.</p>
+    <p class="bp-p">Migration order mattered: we started with the highest-frequency call path (Orchestrator → LLM Router), measured the improvement, then proceeded. Total migration time: two weeks, zero downtime, no emergency rollbacks.</p>
+
+    <h4 class="bp-h4">Python gRPC with asyncio</h4>
+    <pre class="bp-pre"><code>import grpc
+from grpc.aio import insecure_channel, Channel
+from proto.agent_pb2_grpc import AgentServiceStub
+from proto.agent_pb2 import TaskRequest
+
+class AgentClient:
+    def __init__(self, address: str):
+        self._channel = insecure_channel(address)
+        self._stub = AgentServiceStub(self._channel)
+
+    async def execute(self, task_id: str, prompt: str) -&gt; TaskResponse:
+        req = TaskRequest(task_id=task_id, prompt=prompt, max_tokens=2048)
+        return await self._stub.ExecuteTask(req, timeout=30)
+
+    async def stream(self, task_id: str, prompt: str):
+        req = TaskRequest(task_id=task_id, prompt=prompt)
+        async for chunk in self._stub.StreamOutput(req):
+            yield chunk.content
+            if chunk.is_final:
+                break</code></pre>
+
+    <h4 class="bp-h4">Benchmarking: Before vs After</h4>
+    <p class="bp-p">We measured the Orchestrator → LLM Router call path (the most frequent) before and after migration using identical payloads.</p>
+    <pre class="bp-pre"><code># Before (REST/JSON): 5000 requests, avg payload 1.4KB
+avg_latency: 12.3ms | p95: 18.1ms | p99: 31.4ms
+payload_size: 1,420 bytes avg
+
+# After (gRPC/Protobuf): 5000 requests, avg payload 340B
+avg_latency: 7.1ms  | p95: 10.2ms | p99: 14.8ms
+payload_size: 342 bytes avg
+
+# Improvement
+latency_reduction: 42%
+payload_reduction: 76%
+p95_improvement:   44%</code></pre>
+
+    <div class="bp-result">
+      <strong>Numbers:</strong> Internal latency avg 12ms → 7ms (−42%) · Payload avg 1.4KB → 340 bytes (−76%) · P95 end-to-end agent task 180ms → 108ms · Connection overhead eliminated via HTTP/2 multiplexing
+    </div>
+
+    <h4 class="bp-h4">When NOT to Use gRPC</h4>
+    <ul class="bp-ul">
+      <li><strong>Public-facing APIs</strong>: browsers can't use gRPC natively without grpc-web, which adds a proxy layer and complexity</li>
+      <li><strong>Simple infrequent CRUD</strong>: the overhead of proto compilation and generated code isn't worth it for endpoints called 10 times/day</li>
+      <li><strong>Teams unfamiliar with proto tooling</strong>: debugging binary protocol traffic is significantly harder than JSON — invest in Postman/grpcurl tooling first</li>
+      <li><strong>External partner integrations</strong>: REST with OpenAPI documentation is more universally accessible to third-party developers</li>
+    </ul>
+
+    <h4 class="bp-h4">Takeaway</h4>
+    <p class="bp-p">For service-to-service calls within the same infrastructure, gRPC is almost always the right choice. The combination of smaller payloads, HTTP/2 multiplexing, and typed contracts pays dividends at any scale. Keep REST for your public API and external integrations where client diversity matters.</p>
+    <p class="bp-p">The migration path doesn't have to be all-or-nothing — running REST and gRPC transports in parallel during migration is clean and reversible.</p>
+
+    <div class="bp-footer-nav">
+      <a href="stripe-carding.html">← Stripe Carding Attack</a>
+      <a href="vault-gdpr.html">Next: Vault + GDPR →</a>
+    </div>
+  </div>
+</main>
+<footer>
+  <div class="w">
+    <div class="ft">
+      <div class="ft-l"><em>talha.zafar</em> © 2026 · talhazafarjutt.github.io</div>
+      <div class="ft-r">
+        <a href="/#blog">All Articles</a>
+        <a href="/">Portfolio</a>
+        <a href="mailto:talha.zafar.j@gmail.com">Email</a>
+      </div>
+    </div>
+  </div>
+</footer>
+<script src="../js/blog.js" defer></script>
+</body>
+</html>

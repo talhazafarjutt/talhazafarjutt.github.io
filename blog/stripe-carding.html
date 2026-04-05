@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="How we stopped a live Stripe carding attack — Radar rules, Redis BIN-prefix rate limiting, HMAC inter-service auth. Zero fraudulent transactions post-deployment.">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<title>Stopping a Live Stripe Carding Attack — Talha Zafar</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%2300e5ff'/%3E%3Cstop offset='1' stop-color='%23a855f7'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='13' fill='%2305050f'/%3E%3Crect x='1.5' y='1.5' width='61' height='61' rx='12' fill='none' stroke='url(%23g)' stroke-width='2'/%3E%3Ctext x='7' y='42' font-family='monospace' font-weight='700' font-size='24' fill='%2300e5ff'%3E%3E_%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+<div id="prog"></div>
+<nav id="nav">
+  <div class="nav-bar">
+    <div class="nav-dots"><span class="nd-r"></span><span class="nd-y"></span><span class="nd-g"></span></div>
+    <a href="/" class="nav-logo">talha<em>.</em>zafar</a>
+    <div class="blog-nav-right">
+      <a href="/#blog" class="back-link">← All Articles</a>
+      <button class="theme-btn" id="themeBtn" aria-label="Toggle theme"><svg class="moon-ico" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg> <svg class="sun-ico" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button>
+    </div>
+  </div>
+</nav>
+<header class="bp-header">
+  <div class="w">
+    <div class="bp-tags ri"><span class="tag-a">Security</span><span class="tag-a">Stripe</span><span class="tag-c">Redis</span><span class="tag-a">HMAC</span></div>
+    <h1 class="bp-title ri">Stopping a Live Stripe Carding Attack — Zero Fraud Post-Deployment</h1>
+    <div class="bp-meta ri"><span>Feb 2026</span><span class="bp-meta-dot">·</span><span>6 min read</span><span class="bp-meta-dot">·</span><span>Talha Zafar</span></div>
+  </div>
+</header>
+<main class="bp-body">
+  <div class="w">
+    <p class="bp-p ri">400+ failed charges in two hours, all $0.99, all from Eastern Europe. Our fraud rate hit 12%. We went to 0.02% in under 4 hours by layering three defences: Stripe Radar rules, Redis BIN-prefix rate limiting, and HMAC inter-service authentication.</p>
+
+    <h4 class="bp-h4 ri">What is a Carding Attack?</h4>
+    <p class="bp-p">Attackers buy lists of stolen card numbers and run automated scripts to test them in small amounts — usually $0.50–$1.00 — against real merchant endpoints. Cards that succeed are "live" and sold at a premium on dark web marketplaces. You only notice when Stripe sends a warning email about elevated dispute rates or your payment processor threatens account termination.</p>
+
+    <h4 class="bp-h4">How We Found Out</h4>
+    <p class="bp-p">Our Stripe dashboard showed <strong>400+ failed charges in a 2-hour window</strong>: all $0.99, multiple IPs from Eastern Europe, all hitting the same <code>/api/checkout</code> endpoint, all with different card numbers but similar BIN prefixes. Classic carding attack signature.</p>
+    <p class="bp-p">The pattern in logs: burst of POST requests, all with valid JSON payloads, all failing at the Stripe authorization step. Our API was being used as a card-testing proxy.</p>
+
+    <h4 class="bp-h4">Layer 1: Stripe Radar Rules</h4>
+    <p class="bp-p">Radar's rule DSL lets you block or review charges based on risk signals evaluated at Stripe's edge — before the charge attempt even reaches your server. We added three rules immediately:</p>
+    <pre class="bp-pre"><code># Block high-risk country + micro-amount combination
+block if: :ip_country: in ('RU', 'UA', 'RO', 'BG', 'BY', 'MD') and :amount_in_cents: &lt; 200
+
+# Block velocity per IP per hour
+block if: charge_count_per_ip_hourly &gt; 3
+
+# Review first-time international cards with micro-amounts
+review if: :is_new_card: = true and :card_country: != 'PK' and :amount_in_cents: &lt; 500</code></pre>
+    <p class="bp-p">This cut ~60% of attack volume at Stripe's edge. The remaining attacks were hitting our API server but getting blocked before reaching Stripe — still a problem because we were burning server resources processing them.</p>
+
+    <h4 class="bp-h4">Layer 2: Redis Rate Limiting Per IP + BIN Prefix</h4>
+    <p class="bp-p">We needed to stop the requests reaching our API at all. A token bucket per IP address is the obvious approach, but attackers can rotate IPs through proxies. The more effective signal: <strong>BIN prefix</strong> (first 6 digits of a card number, which identifies the issuing bank). Legitimate users rarely try more than one card from the same bank in an hour.</p>
+    <pre class="bp-pre"><code>async def check_rate_limit(ip: str, card_number: str) -&gt; None:
+    bin_prefix = card_number[:6]
+
+    # Per-IP limit
+    ip_key = f"rl:ip:{ip}"
+    ip_count = await redis.incr(ip_key)
+    if ip_count == 1:
+        await redis.expire(ip_key, 3600)
+    if ip_count &gt; 5:
+        raise HTTPException(status_code=429, detail="Rate limit exceeded")
+
+    # Per-IP + BIN limit (catches card cycling from same bank)
+    bin_key = f"rl:bin:{ip}:{bin_prefix}"
+    bin_count = await redis.incr(bin_key)
+    if bin_count == 1:
+        await redis.expire(bin_key, 3600)
+    if bin_count &gt; 2:
+        raise HTTPException(status_code=429, detail="Rate limit exceeded")</code></pre>
+    <p class="bp-p">The BIN-prefix limit was the key insight. Attackers who rotated cards from the same issuing bank (a common pattern — stolen card dumps often come from single bank breaches) got blocked even with different card numbers.</p>
+
+    <h4 class="bp-h4">Layer 3: HMAC Inter-Service Authentication</h4>
+    <p class="bp-p">Our payment service was only supposed to be called from our own backend API. But there was no enforcement — any client that knew the endpoint could call it directly. We added HMAC-SHA256 request signing between services so the payment service rejects anything that didn't come from a verified internal caller.</p>
+    <pre class="bp-pre"><code>import hmac, hashlib
+
+SHARED_SECRET = settings.INTER_SERVICE_SECRET  # from Vault
+
+def sign_request(payload: bytes) -&gt; str:
+    return hmac.new(
+        SHARED_SECRET.encode(), payload, hashlib.sha256
+    ).hexdigest()
+
+# Calling service adds signature header
+headers["X-Internal-Signature"] = sign_request(request_body)
+
+# Payment service verifies before processing
+async def verify_internal_sig(request: Request) -&gt; None:
+    sig = request.headers.get("X-Internal-Signature", "")
+    body = await request.body()
+    expected = sign_request(body)
+    if not hmac.compare_digest(sig, expected):
+        raise HTTPException(status_code=401, detail="Invalid signature")</code></pre>
+    <p class="bp-p">Using <code>hmac.compare_digest</code> instead of <code>==</code> prevents timing attacks — an attacker can't guess the signature one byte at a time by measuring response times.</p>
+
+    <div class="bp-result">
+      <strong>Result:</strong> Fraud rate 12% → 0.02% · Zero fraudulent transactions after deployment · No legitimate customer blocked · Full mitigation deployed in under 4 hours · Stripe fraud warning resolved
+    </div>
+
+    <h4 class="bp-h4">What We Learned</h4>
+    <ul class="bp-ul">
+      <li><strong>Configure Radar rules proactively</strong> — reactive setup during an active attack is stressful; add baseline velocity rules from day one</li>
+      <li><strong>Rate limit on BIN prefix</strong> (first 6 digits), not just full card — attackers cycle cards from the same issuing bank to evade per-card limits</li>
+      <li><strong>HMAC between your own services</strong> is cheap to add and eliminates an entire attack surface — don't leave internal APIs open</li>
+      <li><strong>Keep a Stripe webhook log</strong> — the audit trail (event timestamps, card fingerprints, IP addresses) is invaluable for post-incident analysis and Stripe dispute resolution</li>
+      <li><strong>Use <code>hmac.compare_digest</code></strong>, never <code>==</code> for signature comparison — prevents timing side-channel attacks</li>
+    </ul>
+
+    <div class="bp-footer-nav">
+      <a href="gpu-inference.html">← Bare-Metal GPU Inference</a>
+      <a href="grpc-vs-rest.html">Next: gRPC vs REST →</a>
+    </div>
+  </div>
+</main>
+<footer>
+  <div class="w">
+    <div class="ft">
+      <div class="ft-l"><em>talha.zafar</em> © 2026 · talhazafarjutt.github.io</div>
+      <div class="ft-r">
+        <a href="/#blog">All Articles</a>
+        <a href="/">Portfolio</a>
+        <a href="mailto:talha.zafar.j@gmail.com">Email</a>
+      </div>
+    </div>
+  </div>
+</footer>
+<script src="../js/blog.js" defer></script>
+</body>
+</html>
