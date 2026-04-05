@@ -1,3 +1,6 @@
+/* ── CURSOR FIX — style.css sets cursor:none globally ── */
+document.body.style.cursor='auto';
+
 /* ── THEME ── */
 const themeBtn=document.getElementById('themeBtn');
 (function(){document.documentElement.setAttribute('data-theme',localStorage.getItem('theme')||'dark')})();

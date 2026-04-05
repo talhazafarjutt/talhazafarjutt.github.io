@@ -6,7 +6,7 @@
 <meta name="description" content="Real numbers from migrating 6 microservices from REST to gRPC — 40% latency reduction, 76% smaller payloads, and a migration strategy that required zero downtime.">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <title>gRPC vs REST: 40% Overhead Reduction in Production — Talha Zafar</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%2300e5ff'/%3E%3Cstop offset='1' stop-color='%23a855f7'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='13' fill='%2305050f'/%3E%3Crect x='1.5' y='1.5' width='61' height='61' rx='12' fill='none' stroke='url(%23g)' stroke-width='2'/%3E%3Ctext x='7' y='42' font-family='monospace' font-weight='700' font-size='24' fill='%2300e5ff'%3E%3E_%3C/text%3E%3C/svg%3E">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2020/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%2300e5ff'/%3E%3Cstop offset='1' stop-color='%23a855f7'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='13' fill='%2305050f'/%3E%3Crect x='1.5' y='1.5' width='61' height='61' rx='12' fill='none' stroke='url(%23g)' stroke-width='2'/%3E%3Ctext x='7' y='42' font-family='monospace' font-weight='700' font-size='24' fill='%2300e5ff'%3E%3E_%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -33,27 +33,23 @@
 </header>
 <main class="bp-body">
   <div class="w">
-    <p class="bp-p ri">Six microservices. All REST over HTTP/1.1. A single agent task triggered 5 synchronous cross-service calls, each with JSON serialisation overhead and connection setup. Here's what we measured, how we migrated with zero downtime, and when gRPC is — and isn't — the right call.</p>
+    <p class="bp-p ri">About eight months into building our AI agent platform, I got annoyed enough at latency on the internal service calls that I pulled up a quick benchmark. The numbers were bad enough that we spent the next two weeks migrating everything to gRPC. Here's what we measured, how the migration went, and — equally important — what I'd still keep on REST.</p>
 
-    <h4 class="bp-h4 ri">The Setup</h4>
-    <p class="bp-p">The AI agent platform had 6 independent services: <strong>API Gateway</strong>, <strong>Agent Orchestrator</strong>, <strong>Task Queue</strong>, <strong>LLM Router</strong>, <strong>User Service</strong>, and <strong>Billing</strong>. All communication was REST over HTTP/1.1.</p>
-    <p class="bp-p">A single agent task execution path: Gateway → Orchestrator → LLM Router → Task Queue → back to Orchestrator. That's <strong>five synchronous round-trips</strong> per user request, each with:</p>
+    <h4 class="bp-h4 ri">The setup we were working with</h4>
+    <p class="bp-p">Six services: API Gateway, Agent Orchestrator, Task Queue, LLM Router, User Service, and Billing. All FastAPI. All communicating over REST/HTTP/1.1 with JSON. Standard stuff, and it was fine at low load.</p>
+    <p class="bp-p">The problem showed up when we started tracing individual agent task execution. A single user request would trigger five synchronous cross-service calls: Gateway → Orchestrator → LLM Router → Task Queue → back to Orchestrator. Each hop was adding JSON serialization, a new TCP connection (we hadn't tuned keep-alive), and the general overhead of an HTTP/1.1 request. Under load, the P95 end-to-end latency on agent tasks was creeping toward 200ms just in internal calls — before LLM inference was even included.</p>
+    <p class="bp-p">There was also a more annoying problem: field naming drift. With no schema enforcement between services, we'd had two separate incidents where one service changed a JSON field name and broke a downstream consumer that nobody caught until it was in production. Not a big deal individually, but a pattern I wanted to kill.</p>
+
+    <h4 class="bp-h4">Why gRPC addresses these specifically</h4>
+    <p class="bp-p">I've seen people recommend gRPC based on benchmarks from optimized benchmark environments that don't reflect real usage. The concrete advantages that applied to our situation:</p>
     <ul class="bp-ul">
-      <li>JSON serialisation overhead (Python's <code>json.dumps</code> / <code>json.loads</code> on every hop)</li>
-      <li>HTTP/1.1 connection overhead (new connection per request without keep-alive tuning)</li>
-      <li>No native streaming (LLM token streaming required separate SSE endpoint)</li>
-      <li>No typed contracts (field naming inconsistencies caught only at runtime)</li>
+      <li><strong>Protocol Buffers</strong> are binary and typed. No JSON parsing overhead, no field naming ambiguity — the <code>.proto</code> file is the contract and it's enforced at compile time</li>
+      <li><strong>HTTP/2 multiplexing</strong> means one persistent connection per service pair. Our five round-trips per request were each paying TCP handshake overhead because we hadn't tuned HTTP keep-alive. HTTP/2 makes this a non-issue by default</li>
+      <li><strong>Native server-side streaming</strong> — we had a separate SSE endpoint for LLM token streaming over REST. gRPC's <code>stream</code> return type made that the default, not a special case</li>
     </ul>
 
-    <h4 class="bp-h4">Why gRPC?</h4>
-    <ul class="bp-ul">
-      <li><strong>Protocol Buffers</strong>: binary serialisation — ~3–10× smaller payloads than JSON, faster to parse</li>
-      <li><strong>HTTP/2</strong>: connection multiplexing — one persistent connection per service pair, no per-request TCP handshake</li>
-      <li><strong>Server-side streaming</strong>: LLM token streaming over gRPC is natural with <code>stream</code> return types; over REST it required a separate SSE implementation</li>
-      <li><strong>Typed contracts</strong>: <code>.proto</code> files as the source of truth — schema mismatches caught at compile time, not production</li>
-    </ul>
-
-    <h4 class="bp-h4">The .proto Contract</h4>
+    <h4 class="bp-h4">The .proto file as the contract</h4>
+    <p class="bp-p">This is honestly one of the underrated parts. Once you write the <code>.proto</code>, every service that talks to this one generates its client from it. No more "wait what type is that field" conversations. No more discovering field renames at runtime.</p>
     <pre class="bp-pre"><code>syntax = "proto3";
 
 service AgentService {
@@ -71,19 +67,20 @@ message TaskRequest {
 }
 
 message OutputChunk {
-  string content  = 1;
-  bool   is_final = 2;
+  string content     = 1;
+  bool   is_final    = 2;
   int32  token_count = 3;
 }</code></pre>
-    <p class="bp-p">The <code>.proto</code> file becomes the API contract. Any service that needs to call AgentService generates its client from this file — no documentation drift, no "what does this field actually mean?" Slack threads.</p>
+    <p class="bp-p">The field numbers (1, 2, 3...) are how Protobuf maintains backward compatibility — you can add new fields without breaking old clients as long as you don't reuse field numbers. One thing that tripped us up early: renaming a field in the <code>.proto</code> is fine (Protobuf ignores field names in the wire format), but removing a field and reusing its number breaks everything. Add fields, never reuse numbers.</p>
 
-    <h4 class="bp-h4">Migration Strategy — No Big-Bang Rewrite</h4>
-    <p class="bp-p">We didn't rewrite everything simultaneously. The strategy: add gRPC as a second transport alongside REST, migrate service-to-service calls first, leave the public API as REST. Each service remained testable via REST throughout the transition.</p>
-    <p class="bp-p">Migration order mattered: we started with the highest-frequency call path (Orchestrator → LLM Router), measured the improvement, then proceeded. Total migration time: two weeks, zero downtime, no emergency rollbacks.</p>
+    <h4 class="bp-h4">Migration strategy — no big bang rewrite</h4>
+    <p class="bp-p">The worst thing you can do is try to migrate everything at once. We ran gRPC and REST in parallel for each service during the transition. Each service got a gRPC server added alongside its existing FastAPI REST server. Internal service-to-service calls migrated to gRPC first; the public API stayed REST throughout.</p>
+    <p class="bp-p">Migration order: highest-call-frequency path first. We started with Orchestrator → LLM Router because that was the hottest path. Measured the improvement, confirmed nothing broke, then moved to the next one. Total time: two weeks. Zero downtime. Zero emergency rollbacks.</p>
 
     <h4 class="bp-h4">Python gRPC with asyncio</h4>
+    <p class="bp-p">One thing worth knowing: the Python gRPC library (<code>grpcio</code>) has async support through <code>grpc.aio</code>, but it's a separate import path from the sync version. If you're mixing sync and async code you can end up with confusing behavior. Stick to <code>grpc.aio</code> throughout if you're on asyncio:</p>
     <pre class="bp-pre"><code>import grpc
-from grpc.aio import insecure_channel, Channel
+from grpc.aio import insecure_channel
 from proto.agent_pb2_grpc import AgentServiceStub
 from proto.agent_pb2 import TaskRequest
 
@@ -92,7 +89,7 @@ class AgentClient:
         self._channel = insecure_channel(address)
         self._stub = AgentServiceStub(self._channel)
 
-    async def execute(self, task_id: str, prompt: str) -&gt; TaskResponse:
+    async def execute(self, task_id: str, prompt: str) -> TaskResponse:
         req = TaskRequest(task_id=task_id, prompt=prompt, max_tokens=2048)
         return await self._stub.ExecuteTask(req, timeout=30)
 
@@ -102,9 +99,10 @@ class AgentClient:
             yield chunk.content
             if chunk.is_final:
                 break</code></pre>
+    <p class="bp-p">Reuse the channel. Creating a new gRPC channel per request completely defeats the HTTP/2 multiplexing benefit — you'd be doing TCP handshakes again on every call. Create one channel per service address at startup and share it.</p>
 
-    <h4 class="bp-h4">Benchmarking: Before vs After</h4>
-    <p class="bp-p">We measured the Orchestrator → LLM Router call path (the most frequent) before and after migration using identical payloads.</p>
+    <h4 class="bp-h4">The benchmark numbers</h4>
+    <p class="bp-p">We measured the Orchestrator → LLM Router path because it was both the highest frequency and the most payload-heavy. 5000 requests each way, identical payloads:</p>
     <pre class="bp-pre"><code># Before (REST/JSON): 5000 requests, avg payload 1.4KB
 avg_latency: 12.3ms | p95: 18.1ms | p99: 31.4ms
 payload_size: 1,420 bytes avg
@@ -113,26 +111,28 @@ payload_size: 1,420 bytes avg
 avg_latency: 7.1ms  | p95: 10.2ms | p99: 14.8ms
 payload_size: 342 bytes avg
 
-# Improvement
+# Delta
 latency_reduction: 42%
 payload_reduction: 76%
 p95_improvement:   44%</code></pre>
+    <p class="bp-p">The payload reduction was more dramatic than I expected. 1.4KB of JSON serializing to 342 bytes of Protobuf is a 76% reduction. At 10,000 agent tasks per day across five hops, that's meaningful bandwidth saved — but more importantly, it's serialization CPU time you're not burning on every request.</p>
 
     <div class="bp-result">
-      <strong>Numbers:</strong> Internal latency avg 12ms → 7ms (−42%) · Payload avg 1.4KB → 340 bytes (−76%) · P95 end-to-end agent task 180ms → 108ms · Connection overhead eliminated via HTTP/2 multiplexing
+      <strong>Numbers:</strong> Internal latency avg 12ms → 7ms (−42%) · Payload 1.4KB → 340 bytes (−76%) · P95 end-to-end agent task 180ms → 108ms · Connection overhead eliminated via HTTP/2 multiplexing
     </div>
 
-    <h4 class="bp-h4">When NOT to Use gRPC</h4>
+    <h4 class="bp-h4">When gRPC is the wrong choice</h4>
+    <p class="bp-p">I want to be clear about this because I've seen teams try to gRPC everything and create more problems than they solve:</p>
     <ul class="bp-ul">
-      <li><strong>Public-facing APIs</strong>: browsers can't use gRPC natively without grpc-web, which adds a proxy layer and complexity</li>
-      <li><strong>Simple infrequent CRUD</strong>: the overhead of proto compilation and generated code isn't worth it for endpoints called 10 times/day</li>
-      <li><strong>Teams unfamiliar with proto tooling</strong>: debugging binary protocol traffic is significantly harder than JSON — invest in Postman/grpcurl tooling first</li>
-      <li><strong>External partner integrations</strong>: REST with OpenAPI documentation is more universally accessible to third-party developers</li>
+      <li><strong>Public-facing APIs:</strong> browsers can't speak gRPC natively. grpc-web exists but adds a proxy layer and complexity. Keep your public API REST with OpenAPI docs</li>
+      <li><strong>Low-frequency CRUD:</strong> an endpoint called 20 times a day doesn't need the proto compilation overhead and generated client code. REST is fine</li>
+      <li><strong>External partner integrations:</strong> REST + OpenAPI is the universal language of third-party API consumers. Don't make their lives harder</li>
+      <li><strong>Debugging:</strong> binary protocol traffic is much harder to inspect than JSON. You need grpcurl or similar tooling. Make sure your team has it set up before you're debugging a production issue at midnight</li>
     </ul>
 
-    <h4 class="bp-h4">Takeaway</h4>
-    <p class="bp-p">For service-to-service calls within the same infrastructure, gRPC is almost always the right choice. The combination of smaller payloads, HTTP/2 multiplexing, and typed contracts pays dividends at any scale. Keep REST for your public API and external integrations where client diversity matters.</p>
-    <p class="bp-p">The migration path doesn't have to be all-or-nothing — running REST and gRPC transports in parallel during migration is clean and reversible.</p>
+    <h4 class="bp-h4">The short version</h4>
+    <p class="bp-p">For internal service-to-service calls in a microservices architecture: gRPC is almost always worth it. The combination of typed contracts, binary serialization, and HTTP/2 multiplexing adds up. For anything external-facing or low-frequency: REST is fine and requires less infrastructure overhead.</p>
+    <p class="bp-p">The migration doesn't have to be all-or-nothing. Running both transports in parallel during the switch is clean, testable, and reversible. Start with your hottest call path, measure, then proceed.</p>
 
     <div class="bp-footer-nav">
       <a href="stripe-carding.html">← Stripe Carding Attack</a>

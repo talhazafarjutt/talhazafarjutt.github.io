@@ -6,7 +6,7 @@
 <meta name="description" content="How we replaced .env files with HashiCorp Vault — AppRole auth, policy-based access, CI/CD integration, and GDPR Article 32 compliance on bare metal.">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <title>Zero-Trust Secrets with HashiCorp Vault — Talha Zafar</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%2300e5ff'/%3E%3Cstop offset='1' stop-color='%23a855f7'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='13' fill='%2305050f'/%3E%3Crect x='1.5' y='1.5' width='61' height='61' rx='12' fill='none' stroke='url(%23g)' stroke-width='2'/%3E%3Ctext x='7' y='42' font-family='monospace' font-weight='700' font-size='24' fill='%2300e5ff'%3E%3E_%3C/text%3E%3C/svg%3E">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2020/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%2300e5ff'/%3E%3Cstop offset='1' stop-color='%23a855f7'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='13' fill='%2305050f'/%3E%3Crect x='1.5' y='1.5' width='61' height='61' rx='12' fill='none' stroke='url(%23g)' stroke-width='2'/%3E%3Ctext x='7' y='42' font-family='monospace' font-weight='700' font-size='24' fill='%2300e5ff'%3E%3E_%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -38,17 +38,19 @@
 
 <main class="bp-body">
   <div class="w">
-    <p class="bp-p ri">Secrets in .env files, CI environment variables, and SSH keys copied into Slack — the flat permission model that most teams live with. Here's how we replaced all of it with AppRole auth, policy-based access, and on-prem secret residency for full GDPR Article 32 compliance.</p>
+    <p class="bp-p ri">We found out a developer who'd left the company six months earlier still had an active SSH key. Not just inactive — still authenticating. We had no audit trail of what it had touched. That was the conversation that ended with me setting up HashiCorp Vault the following week.</p>
 
-    <h4 class="bp-h4 ri">The Problem with .env Files</h4>
-    <p class="bp-p">Every project has them. The issues compound quietly: <code>.env</code> accidentally committed once (it happens), CI environment variables visible to every engineer in the org, database passwords copy-pasted into Slack for "quick sharing", SSH keys never rotated after an engineer left.</p>
-    <p class="bp-p">The incident that triggered this for us: a developer left the company and their SSH key — shared "temporarily" for an urgent deployment — was still active six months later. We had no audit trail of what it had accessed. That was the moment we knew we needed Vault.</p>
+    <h4 class="bp-h4 ri">The .env file problem nobody wants to admit</h4>
+    <p class="bp-p">Most teams have the same pattern. There's a <code>.env.example</code> in the repo, an actual <code>.env</code> that's gitignored (usually), and a Notion doc somewhere with the "real" values that needs to be updated whenever something changes. New developers get onboarded via Slack DMs with database passwords. Secrets get rotated when someone remembers or after an incident. Nobody actually knows who has access to what.</p>
+    <p class="bp-p">The SSH key incident made this concrete. A developer had been given temporary SSH access for an urgent deployment. "Temporary" turned into six months because there was no process for revoking it. By the time we noticed, he'd been at another company for half a year. We didn't know if the key had been used since he left — we had no log. That kind of uncertainty is exactly what GDPR's Article 32 is written to prevent.</p>
 
-    <h4 class="bp-h4">Why Self-Hosted Vault Over Cloud Secrets Managers?</h4>
-    <p class="bp-p">AWS Secrets Manager and GCP Secret Manager are excellent. But our GDPR data residency requirement was specific: <strong>customer-related encryption keys and database credentials must not route through US infrastructure</strong>. Every AWS Secrets Manager API call routes through Amazon's global infrastructure regardless of your region setting.</p>
-    <p class="bp-p">Vault in an LXD container on our German-hosted bare-metal server solved this entirely. The secret retrieval call never leaves the server rack. Every access is logged locally. We can produce a complete audit trail for any GDPR Article 32 audit.</p>
+    <h4 class="bp-h4">Why not just use AWS Secrets Manager?</h4>
+    <p class="bp-p">AWS Secrets Manager is well-designed and I'd recommend it to most teams. But we had a specific constraint: our customers are European businesses, and our DPA explicitly says customer-related encryption keys and database credentials must not route through US infrastructure.</p>
+    <p class="bp-p">Here's the thing about AWS Secrets Manager that surprised me when I looked into it: even if your AWS region is eu-central-1, the Secrets Manager API calls still route through Amazon's global infrastructure. The data is stored in your region, but the control plane — the API you call to retrieve secrets — is not purely regional. For a strict GDPR data residency interpretation, that's a problem you have to document and justify.</p>
+    <p class="bp-p">Vault in an LXD container on our German bare-metal server sidesteps this entirely. Secret retrieval never leaves the rack. Every access is logged locally. We can produce a complete audit trail from our own server, no dependency on a cloud provider's log export API.</p>
 
-    <h4 class="bp-h4">Vault in LXD: The Setup</h4>
+    <h4 class="bp-h4">Vault in LXD: the actual setup</h4>
+    <p class="bp-p">I put Vault in an LXD container for isolation — separate network namespace, separate filesystem, resource limits. It runs alongside the other LXD containers on the same server but can't reach them unless explicitly allowed. Vault's own documentation recommends a dedicated machine; LXD is a reasonable compromise when you don't have one.</p>
     <pre class="bp-pre"><code># Create isolated LXD container
 lxc launch ubuntu:22.04 vault-server
 lxc exec vault-server -- bash
@@ -67,9 +69,11 @@ listener "tcp" {
   tls_disable = 1  # TLS terminated at nginx reverse proxy
 }
 api_addr = "https://vault.internal.yourdomain.com"</code></pre>
+    <p class="bp-p">TLS is disabled in Vault's config because nginx handles it at the proxy level — Let's Encrypt cert, automatic renewal via cert-manager. This is a common and clean pattern. Just don't expose Vault's 8200 port directly — nginx is the only thing that should talk to it from outside the container.</p>
 
-    <h4 class="bp-h4">AppRole Authentication</h4>
-    <p class="bp-p">AppRole is built for machine-to-machine auth. Each service gets a <code>role_id</code> (public, like a username) and a <code>secret_id</code> (private, short-lived). The key property: <code>secret_id</code> expires after a configurable TTL — even if it leaks from a CI log, the attack window is narrow and bounded.</p>
+    <h4 class="bp-h4">AppRole auth — built for machines, not humans</h4>
+    <p class="bp-p">Vault has several authentication methods. AppRole is the one designed specifically for machine-to-machine auth, which is what CI/CD pipelines and running services need. The way it works: each service gets a <code>role_id</code> (basically a username — non-sensitive, can be stored openly) and a <code>secret_id</code> (the credential — short-lived, expires after a configurable TTL).</p>
+    <p class="bp-p">The TTL is the key property. Even if a <code>secret_id</code> leaks from a CI log — and CI logs are the most common place secrets leak from — the attack window is bounded. Ours expire in 1 hour. An attacker who finds an old CI log gets a credential that was valid for an hour, two weeks ago.</p>
     <pre class="bp-pre"><code># Enable AppRole auth method
 vault auth enable approle
 
@@ -84,8 +88,9 @@ vault write auth/approle/role/api-service \
 # role_id is non-sensitive — store in CI as a plain variable
 vault read auth/approle/role/api-service/role-id</code></pre>
 
-    <h4 class="bp-h4">Policy-Based Access Control — Least Privilege</h4>
-    <p class="bp-p">Each service reads only its own secrets. The LLM service cannot read the billing Stripe keys. The billing service cannot read LLM router tokens. Enforced at the Vault policy level — not by convention.</p>
+    <h4 class="bp-h4">Policy-based access — enforced, not assumed</h4>
+    <p class="bp-p">Before Vault, our billing service and our LLM router service both had access to the same <code>.env</code> file with all secrets in it. The billing service had no business knowing the LLM router API tokens. We just assumed it wouldn't use them. That's not a security model, that's trust without enforcement.</p>
+    <p class="bp-p">Vault policies make least-privilege enforcement explicit. Each service can only read the secrets on its own path:</p>
     <pre class="bp-pre"><code># api-service-policy.hcl
 path "secret/data/api-service/*" {
   capabilities = ["read", "list"]
@@ -99,9 +104,10 @@ path "secret/data/llm-router/*" {
 }
 
 vault policy write api-service api-service-policy.hcl</code></pre>
+    <p class="bp-p">I like writing explicit denies even for paths a service would never normally touch. It makes the intent clear in the policy file and catches misconfiguration if the default-deny behavior ever changes.</p>
 
-    <h4 class="bp-h4">CI/CD Integration — GitHub Actions</h4>
-    <p class="bp-p">Secrets are fetched at runtime, never baked into images or stored in GitHub Secrets. Each CI run gets a fresh <code>secret_id</code> that expires in 1 hour.</p>
+    <h4 class="bp-h4">CI/CD integration — no secrets baked into images</h4>
+    <p class="bp-p">The pattern we use: CI pipeline gets a <code>role_id</code> stored as a plain GitHub Actions variable (not a secret — role_id is non-sensitive by design). At runtime, each CI run requests a fresh <code>secret_id</code> from Vault, exchanges it for a short-lived token, and fetches what it needs. The <code>secret_id</code> expires before the run is even done.</p>
     <pre class="bp-pre"><code>- name: Fetch secrets from Vault
   env:
     VAULT_ADDR: ${{ secrets.VAULT_ADDR }}
@@ -121,26 +127,24 @@ vault policy write api-service api-service-policy.hcl</code></pre>
     # Fetch the actual secret
     echo "SONAR_TOKEN=$(VAULT_TOKEN=$VAULT_TOKEN \
       vault kv get -field=token secret/sonar)" >> $GITHUB_ENV</code></pre>
-    <p class="bp-p">If the <code>secret_id</code> leaks from a CI log, it's only usable for 1 hour and only grants access to what that role's policy allows — not the entire secrets store.</p>
+    <p class="bp-p">For SonarQube we went one step further: instead of a static token stored in Vault, we configured Vault to generate a unique SonarQube token per CI run that gets automatically revoked when the pipeline finishes. Each run gets credentials that have never existed before. Whether that level of dynamism is worth the setup complexity depends on your risk appetite — for most teams, static tokens in Vault with rotation is plenty.</p>
 
-    <h4 class="bp-h4">Dynamic Credentials for SonarQube</h4>
-    <p class="bp-p">For SonarQube in CI, we went further: instead of a static token in Vault, we configured Vault to generate a unique token per CI run that's automatically revoked after the pipeline completes. Each pipeline run gets credentials that have never existed before and never will again.</p>
-
-    <h4 class="bp-h4">GDPR Article 32: Why On-Prem Matters</h4>
-    <p class="bp-p">GDPR Article 32 requires appropriate technical measures for the security of processing. If your encryption keys route through a US cloud provider's API, you've created a cross-border data flow under GDPR Chapter V that must be documented and justified.</p>
-    <p class="bp-p"><strong>On-prem Vault eliminates this entirely.</strong> Secret retrieval never leaves the server. Every access is logged locally with timestamp, service identity, and IP. You produce the complete audit trail from your own server — no dependency on a cloud provider's log export API.</p>
+    <h4 class="bp-h4">GDPR Article 32: what on-prem actually gives you</h4>
+    <p class="bp-p">Article 32 requires "appropriate technical and organisational measures" for the security of processing — including encryption key management. If your encryption keys are fetched via an API that routes through US infrastructure, you have a cross-border data transfer under Chapter V that needs to be justified and documented.</p>
+    <p class="bp-p">On-prem Vault is a clean argument here. When your auditor asks "where does secret retrieval happen and who can access those logs?", the answer is: this server, in this data center, in Germany, and here are the logs. No dependency on a cloud provider's export API, no SCC framework required, no SCCs to renew. The paper trail lives on hardware you control.</p>
+    <p class="bp-p">This doesn't mean AWS/GCP secrets managers are non-compliant — they're not. But the compliance argument is more complex and requires more documentation. For a small team, owning the simplicity is worth it.</p>
 
     <div class="bp-result">
       <strong>Result:</strong> Zero .env files in production · Secret rotation = one Vault write, services pick it up on next token refresh · Every access audited with timestamp + service identity · GDPR Article 32 compliance documented with on-prem audit logs · Vault uptime: 99.8%
     </div>
 
-    <h4 class="bp-h4">Key Takeaways</h4>
+    <h4 class="bp-h4">What I'd tell you before starting</h4>
     <ul class="bp-ul">
-      <li><strong>Start with AppRole + short-lived secret_ids</strong> — the right auth method for CI/CD from day one, not something to retrofit later</li>
-      <li><strong>Write policies before you write secrets</strong> — least privilege from the beginning is far easier than retrofitting it across a live system</li>
-      <li><strong>Enable audit logging immediately:</strong> <code>vault audit enable file file_path=/var/log/vault_audit.log</code> — this log is the paper trail that matters during incidents</li>
-      <li><strong>If GDPR applies,</strong> self-hosted Vault is a legitimate and documentable compliance argument under Article 32 — write it into your security documentation explicitly</li>
-      <li><strong>LXD for Vault isolation</strong> is a solid pattern — full network namespace, filesystem, and resource limit isolation without VM overhead</li>
+      <li><strong>Enable audit logging on day one:</strong> <code>vault audit enable file file_path=/var/log/vault_audit.log</code> — this is the log that matters during an incident and during GDPR audits. Don't add it later</li>
+      <li><strong>Write your policies before you write your secrets.</strong> It's much easier to enforce least privilege from the start than to retrofit it across a system where every service already has read-all access</li>
+      <li><strong>AppRole is the right auth method for CI/CD from day one.</strong> Don't start with long-lived tokens and migrate to AppRole later — the short TTLs are the whole point</li>
+      <li><strong>If GDPR applies to you,</strong> document the architecture explicitly in your security documentation. "Vault on-prem in Germany, secrets never route through external APIs" is a sentence your DPO will thank you for having written down</li>
+      <li><strong>LXD for Vault isolation</strong> works well — full network namespace, separate filesystem, resource limits. Not as good as a dedicated machine, but far better than running Vault directly on the host</li>
     </ul>
 
     <div class="bp-footer-nav">

@@ -35,38 +35,39 @@
 </header>
 <main class="bp-body">
   <div class="w">
-    <p class="bp-p ri">AWS p3.8xlarge (4× V100, 16GB each) costs $12.24/hour — <strong>$8,800/month</strong> for 24/7 availability. We owned the hardware. Colocation + electricity brought the effective monthly cost to ~$180. Here's the full stack that serves our LLM inference platform in production.</p>
+    <p class="bp-p ri">The first time I tried to run Qwen2.5-Coder-32B on our V100s, it just crashed. No useful error — just a silent OOM. Three hours of debugging later I realized I'd set <code>gpu_memory_utilization</code> to 0.95. Don't do that. This is the writeup I wish I'd had before starting.</p>
 
-    <h4 class="bp-h4 ri">The Why: Cloud GPUs Are Expensive</h4>
-    <p class="bp-p">AWS p3.8xlarge gives you 4× V100 at $12.24/hr. That's $8,800/month for always-on availability. Owning bare metal with hosted colocation cuts that to electricity and depreciation — in our case, ~$180/month effective cost. The ROI calculation was easy.</p>
+    <h4 class="bp-h4 ri">Why we didn't just use AWS</h4>
+    <p class="bp-p">The honest answer: cost. AWS p3.8xlarge gives you 4× V100 at $12.24/hr. Run that 24/7 and you're looking at $8,800 a month. We already owned the hardware — four Tesla V100 PCIe cards in a colocated bare-metal server in Germany. Once you factor in the colo fee and power, it came out to roughly $180/month. The ROI math doesn't take a spreadsheet.</p>
+    <p class="bp-p">The less obvious reason: data residency. We're building AI tooling for European customers, and having LLM inference requests route through US AWS infrastructure was a compliance conversation nobody wanted to have. On-prem meant the data never left the rack.</p>
 
-    <h4 class="bp-h4">OS & CUDA Setup</h4>
-    <p class="bp-p"><strong>Ubuntu 22.04 LTS</strong> — not 24.04. CUDA driver stability and nvidia-container-toolkit package availability were better tested on 22.04 at the time of setup. We installed CUDA 12.x and the NVIDIA Container Toolkit to allow Docker and K3s pods to access the physical GPUs.</p>
+    <h4 class="bp-h4">Getting CUDA to behave on Ubuntu 22.04</h4>
+    <p class="bp-p">I started with Ubuntu 24.04 because it was newer. That was a mistake. The nvidia-container-toolkit packages were lagging behind and I spent most of a day chasing dependency conflicts. Wiped it, installed 22.04 LTS, and everything just worked. Sometimes boring is correct.</p>
     <pre class="bp-pre"><code>distribution=$(. /etc/os-release; echo $ID$VERSION_ID)
 curl -s -L https://nvidia.github.io/libnvidia-container/gpgkey | apt-key add -
 apt install nvidia-cuda-toolkit nvidia-container-toolkit
 systemctl restart docker
-# Verify GPU visibility
+# Check that all 4 GPUs actually show up
 nvidia-smi</code></pre>
+    <p class="bp-p">That last command matters more than it seems. I had a card that would show up in <code>lspci</code> but not in <code>nvidia-smi</code> due to a PCIe slot power issue. Better to find that out now than after you've deployed vLLM and are wondering why tensor_parallel_size=4 keeps failing.</p>
 
-    <h4 class="bp-h4">K3s: Lightweight Kubernetes on One Server</h4>
-    <p class="bp-p">Full Kubernetes felt like overkill for a single physical node. K3s runs the same Kubernetes API surface at a fraction of the resource overhead. We deployed:</p>
+    <h4 class="bp-h4">K3s — Kubernetes without the headache</h4>
+    <p class="bp-p">Full Kubernetes on a single bare-metal node felt like renting a bus to drive to the corner shop. K3s gives you the same API surface — same manifests, same kubectl, same RBAC — at a fraction of the memory overhead. Install takes about 30 seconds.</p>
+    <p class="bp-p">The components I actually needed:</p>
     <ul class="bp-ul">
-      <li><strong>nginx Ingress Controller</strong> — external traffic routing with TLS termination</li>
-      <li><strong>cert-manager + Let's Encrypt</strong> — automatic TLS, zero manual certificate management</li>
-      <li><strong>CoreDNS</strong> — internal service discovery across LXD containers and K3s pods</li>
-      <li><strong>NVIDIA Device Plugin</strong> — exposes <code>nvidia.com/gpu</code> as a schedulable Kubernetes resource</li>
+      <li><strong>nginx Ingress Controller</strong> — for external traffic routing, TLS termination via cert-manager</li>
+      <li><strong>NVIDIA Device Plugin</strong> — this is the important one. Without it, K3s has no idea the GPUs exist as schedulable resources</li>
+      <li><strong>CoreDNS</strong> — internal service discovery. I also needed it to resolve LXD container hostnames from within K3s pods</li>
     </ul>
-    <p class="bp-p">Each vLLM worker pod requests exactly <code>nvidia.com/gpu: 1</code> in its resource spec, so K3s handles GPU allocation without any manual assignment.</p>
-    <pre class="bp-pre"><code># k3s-install with GPU support
-curl -sfL https://get.k3s.io | sh -
-# Apply NVIDIA device plugin
+    <pre class="bp-pre"><code>curl -sfL https://get.k3s.io | sh -
 kubectl apply -f https://raw.githubusercontent.com/NVIDIA/k8s-device-plugin/main/nvidia-device-plugin.yml
-# Verify GPU scheduling works
+# Wait a minute, then verify the node sees the GPUs
 kubectl describe nodes | grep nvidia.com/gpu</code></pre>
+    <p class="bp-p">If that last command shows <code>nvidia.com/gpu: 4</code>, you're good. If it shows 0 or nothing, the device plugin DaemonSet probably isn't running — check <code>kubectl get pods -n kube-system</code>.</p>
 
-    <h4 class="bp-h4">vLLM + Qwen2.5-Coder-32B</h4>
-    <p class="bp-p">Qwen2.5-Coder-32B needs ~60GB VRAM in BF16 precision. With 4× 16GB = 64GB total, there's just enough headroom for the KV cache. <code>tensor_parallel_size=4</code> splits the model across all four V100s using PCIe communication.</p>
+    <h4 class="bp-h4">vLLM + Qwen2.5-Coder-32B: the memory math</h4>
+    <p class="bp-p">Qwen2.5-Coder-32B needs about 60–64GB VRAM in BF16 precision. We have 4× 16GB = 64GB total, which sounds fine until you realize the KV cache also needs VRAM. This is where the 0.95 setting killed me.</p>
+    <p class="bp-p">The <code>gpu_memory_utilization</code> parameter controls how much of each GPU's VRAM vLLM reserves for the KV cache pool at startup. At 0.95, it was trying to grab 15.2GB per card for the KV cache on top of the model weights. That's more VRAM than physically exists. The sweet spot I landed on was 0.91:</p>
     <pre class="bp-pre"><code>from vllm import LLM, SamplingParams
 
 llm = LLM(
@@ -76,10 +77,11 @@ llm = LLM(
     max_model_len=8192,
     dtype="bfloat16"
 )</code></pre>
-    <p class="bp-p">Keep <code>gpu_memory_utilization</code> at 0.90–0.92. Going higher causes OOM crashes during KV cache spikes on long-context requests — we learned this the hard way after hitting 0.95.</p>
+    <p class="bp-p">One thing worth knowing about tensor_parallel_size on V100 PCIe: these cards don't have NVLink. Communication between GPUs goes through the CPU's PCIe bus, which is slower than NVLink on data center V100s. For a 32B model this is fine — the bottleneck is still compute, not interconnect. But if you try to run a 70B+ model across PCIe V100s and wonder why throughput is miserable, that's why.</p>
 
-    <h4 class="bp-h4">FastAPI Load-Balancing Router</h4>
-    <p class="bp-p">Each GPU worker runs as an independent vLLM OpenAI-compatible server on a different port. A FastAPI router round-robins across them with health checks — no traffic goes to a worker still loading the model (cold start is 3–4 minutes).</p>
+    <h4 class="bp-h4">The FastAPI load balancer</h4>
+    <p class="bp-p">Each GPU runs its own vLLM process as an OpenAI-compatible server on a separate port. I wrote a small FastAPI router to distribute requests across them. The naive approach — just round-robin — had one problem: after a pod restart or node reboot, vLLM takes 3–4 minutes to load the model back into VRAM. During that window, round-robin was sending requests to a worker that wasn't ready and silently returning errors.</p>
+    <p class="bp-p">The fix was a readiness check before routing:</p>
     <pre class="bp-pre"><code>from itertools import cycle
 import httpx
 from fastapi import FastAPI, Request, Response, Depends
@@ -102,8 +104,10 @@ async def complete(req: Request, api_key: str = Depends(verify_key)):
             headers={"Content-Type": "application/json"}
         )
     return Response(content=r.content, media_type="application/json")</code></pre>
+    <p class="bp-p">The 120-second timeout is intentional. Long-context requests on V100s can take a while, and the default httpx timeout of 5 seconds will bite you on anything over ~500 tokens output.</p>
 
-    <h4 class="bp-h4">nginx: API Key Auth + Rate Limiting</h4>
+    <h4 class="bp-h4">nginx rate limiting — keep the API from being abused</h4>
+    <p class="bp-p">The team was using this internally but I wanted API key auth and per-key rate limits in place before thinking about any external access. nginx handles this cleanly with its <code>limit_req_zone</code> directive:</p>
     <pre class="bp-pre"><code>upstream llm_upstream {
     server llm-router:8080;
 }
@@ -118,25 +122,27 @@ server {
         proxy_buffering  off;
     }
 }</code></pre>
+    <p class="bp-p"><code>proxy_buffering off</code> matters here — without it, nginx buffers the entire response before sending it to the client, which breaks streaming completions.</p>
 
-    <h4 class="bp-h4">LXD Developer Containers</h4>
-    <p class="bp-p">The same bare-metal server also runs 8+ LXD containers for individual developers. LXD provides near-native performance (unlike Docker) with full filesystem isolation. We configured MASQUERADE NAT rules on the bond0 interface so containers have internet access, and VS Code Remote tunnel connectivity for all 5 engineers.</p>
+    <h4 class="bp-h4">LXD for developer containers on the same server</h4>
+    <p class="bp-p">Alongside the K3s production workload, the same physical server runs 8 LXD containers — one per developer, plus a few shared services. LXD gives near-native performance and full filesystem isolation without VM overhead. The networking setup took the longest: getting MASQUERADE NAT working on the bond0 interface so containers had internet access was a solid afternoon of reading iptables docs.</p>
     <pre class="bp-pre"><code># NAT for LXD container internet access
 iptables -t nat -A POSTROUTING -s 10.x.x.0/24 -o bond0 -j MASQUERADE
-# Make persistent
+# Make it survive reboots
 echo "iptables-save > /etc/iptables/rules.v4" >> /etc/rc.local</code></pre>
+    <p class="bp-p">VS Code Remote tunnels for each engineer connect through here. It works well enough that nobody asks me to SSH manually anymore, which I take as a success metric.</p>
 
     <div class="bp-result">
-      <strong>Results:</strong> 10,000+ daily completions served to a 5-engineer team · Cold start ~3.5 min · P95 token generation ~400ms for 256-token output · Monthly infra cost ~$180 vs ~$8,800 cloud equivalent · 99.8% uptime maintained
+      <strong>Where we ended up:</strong> 10,000+ daily completions to a 5-engineer team · Cold start ~3.5 min (acceptable) · P95 token generation ~400ms for 256-token output · ~$180/month vs ~$8,800 cloud equivalent · 99.8% uptime
     </div>
 
-    <h4 class="bp-h4">Key Takeaways</h4>
+    <h4 class="bp-h4">Things I'd tell myself at the start</h4>
     <ul class="bp-ul">
-      <li>K3s + NVIDIA device plugin works on single-node bare metal with zero special configuration beyond the device plugin DaemonSet</li>
-      <li><code>tensor_parallel_size</code> must match the number of physical GPUs exactly for V100 PCIe topology — NVLink isn't available on V100 PCIe cards</li>
-      <li>Always health-check poll workers before routing — model load takes 3–4 minutes and silently returns errors without explicit readiness checks</li>
-      <li>LXD containers for dev isolation + K3s for production on the same host works well; use CoreDNS to bridge the two networking domains</li>
-      <li>Set <code>gpu_memory_utilization ≤ 0.92</code> — the remaining headroom prevents OOM on burst KV cache allocations</li>
+      <li>Don't use Ubuntu 24.04 for this yet — 22.04 LTS has better-tested nvidia-container-toolkit packages</li>
+      <li>Set <code>gpu_memory_utilization</code> to 0.90–0.92, not higher. The headroom prevents OOM crashes when long-context requests spike the KV cache</li>
+      <li>V100 PCIe has no NVLink — tensor parallel communication goes through CPU PCIe. Fine for 32B, rough for 70B+</li>
+      <li>Add a readiness probe before routing to any vLLM worker — model load takes 3–4 minutes and a worker will silently fail during that window</li>
+      <li>Set <code>proxy_buffering off</code> in nginx if you want streaming to actually stream</li>
     </ul>
 
     <div class="bp-footer-nav">
