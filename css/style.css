@@ -80,9 +80,6 @@ body.cc #cd{transform:translate(-50%,-50%) scale(.4)}
   transition:background .3s,border-color .3s;
 }
 #nav.s .nav-bar{background:var(--nav-bg);backdrop-filter:blur(20px);border-bottom:1px solid var(--b)}
-.nav-dots{display:flex;gap:6px}
-.nav-dots span{width:10px;height:10px;border-radius:50%}
-.nav-dots .nd-r{background:#ff5f57}.nav-dots .nd-y{background:#febc2e}.nav-dots .nd-g{background:#28c840}
 .nav-logo{font-family:var(--mono);font-size:.95rem;font-weight:700;color:var(--t)}
 .nav-logo em{color:var(--c);font-style:normal}
 .nav-links{display:flex;align-items:center;gap:1.75rem;list-style:none}
