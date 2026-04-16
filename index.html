@@ -5,13 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="Talha Zafar — Senior Backend & DevOps Engineer. Python, FastAPI, Kubernetes, AI/MLOps.">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://assets.calendly.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://assets.calendly.com; font-src 'self' https://fonts.gstatic.com https://assets.calendly.com; img-src 'self' data: https:; frame-src https://calendly.com; connect-src 'self' https://calendly.com https://api.calendly.com https://assets.calendly.com;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://assets.calendly.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://assets.calendly.com; font-src 'self' https://fonts.gstatic.com https://assets.calendly.com; img-src 'self' data: https:; frame-src https://calendly.com; connect-src 'self' https://calendly.com https://api.calendly.com https://assets.calendly.com;">
 <title>Talha Zafar — Backend & DevOps Engineer</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%2300e5ff'/%3E%3Cstop offset='1' stop-color='%23a855f7'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='13' fill='%2305050f'/%3E%3Crect x='1.5' y='1.5' width='61' height='61' rx='12' fill='none' stroke='url(%23g)' stroke-width='2'/%3E%3Ctext x='7' y='42' font-family='monospace' font-weight='700' font-size='24' fill='%2300e5ff'%3E%3E_%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
+<script src="https://cdn.jsdelivr.net/npm/three@0.150.1/build/three.min.js"></script>
 </head>
 <body>
 <div id="prog"></div>
@@ -19,30 +20,39 @@
 <div id="cd"></div>
 <div id="cr"></div>
 
-<!-- NAV -->
+<!-- NAV — floating kinetic sidebar -->
 <nav id="nav">
-  <div class="nav-bar">
-    <a href="#hero" class="nav-logo">talha<em>.</em>zafar</a>
-    <ul class="nav-links" id="nl">
-      <li><a href="#about">About</a></li>
-      <li><a href="#skills">Skills</a></li>
-      <li><a href="#experience">Experience</a></li>
-      <li><a href="#projects">Projects</a></li>
-      <li><a href="#blog">Blog</a></li>
-      <li><a href="#contact" class="nav-cta">Schedule a Call →</a></li>
-    </ul>
-    <button class="theme-btn" id="themeBtn" aria-label="Toggle theme">
-      <svg class="moon-ico" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-      <svg class="sun-ico" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-    </button>
-    <button class="ham" id="ham" aria-label="Toggle menu"><span></span><span></span><span></span></button>
-  </div>
+  <a href="#hero" class="sn-logo" aria-label="Home">TZ</a>
+  <ul class="sn-list">
+    <li><a href="#about" class="sn-link" data-tip="About">
+      <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M6 20v-1a6 6 0 0 1 12 0v1"/></svg>
+    </a></li>
+    <li><a href="#skills" class="sn-link" data-tip="Skills">
+      <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+    </a></li>
+    <li><a href="#experience" class="sn-link" data-tip="Experience">
+      <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3H8a2 2 0 0 0-2 2v2h12V5a2 2 0 0 0-2-2z"/></svg>
+    </a></li>
+    <li><a href="#projects" class="sn-link" data-tip="Projects">
+      <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="6" cy="6" r="2"/><circle cx="18" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/><circle cx="12" cy="12" r="2"/><line x1="8" y1="6" x2="10" y2="12"/><line x1="16" y1="6" x2="14" y2="12"/><line x1="8" y1="18" x2="10" y2="12"/><line x1="16" y1="18" x2="14" y2="12"/></svg>
+    </a></li>
+    <li><a href="#blog" class="sn-link" data-tip="Blog">
+      <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>
+    </a></li>
+    <li><a href="#contact" class="sn-link" data-tip="Schedule a Call">
+      <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    </a></li>
+  </ul>
+  <button class="sn-theme" id="themeBtn" aria-label="Toggle theme">
+    <svg class="moon-ico" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    <svg class="sun-ico" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+  </button>
 </nav>
 
 <!-- HERO -->
 <section id="hero">
   <div class="grid3d"></div>
-  <canvas id="cvs"></canvas>
+  <canvas id="neuro"></canvas>
   <div class="w" style="width:100%">
     <div class="hero-inner">
       <div class="hero-left">
@@ -292,26 +302,19 @@
   </div>
 </section>
 
-<!-- PROJECTS — terminal cards -->
+<!-- PROJECTS — 3D neural graph -->
 <section id="projects">
   <div class="w">
     <div class="projects-header ri">
       <div class="sec-tag">selected work</div>
       <h2>Key <span>Projects</span></h2>
+      <p class="graph-hint ri" style="transition-delay:.12s">Hover the neural nodes to explore</p>
     </div>
-    <div class="proj-grid">
-      <div class="proj-card rz">
-        <div class="proj-term"><div class="pt-dots"><span class="tbd-r"></span><span class="tbd-y"></span><span class="tbd-g"></span></div><span class="pt-cmd">docker run codsy/llm</span><div class="pt-status"><span class="sd"></span>running</div></div>
-        <div class="proj-body"><div class="proj-name">LLM Inference Platform (Codsy)</div><p class="proj-desc">Production-grade multi-GPU LLM inference cluster on 4× Tesla V100. FastAPI load-balancing router, nginx API gateway with key auth, vLLM engine management, and drop-in Python SDK. Serving active developer team.</p><div class="proj-tech"><span class="pt-badge">vLLM</span><span class="pt-badge">FastAPI</span><span class="pt-badge">nginx</span><span class="pt-badge">K3s</span><span class="pt-badge">V100</span><span class="pt-badge">Python SDK</span></div></div>
-      </div>
-      <div class="proj-card rz" style="transition-delay:.1s">
-        <div class="proj-term"><div class="pt-dots"><span class="tbd-r"></span><span class="tbd-y"></span><span class="tbd-g"></span></div><span class="pt-cmd">vault status --policy</span><div class="pt-status"><span class="sd"></span>sealed</div></div>
-        <div class="proj-body"><div class="proj-name">Zero-Trust Secrets Pipeline</div><p class="proj-desc">HashiCorp Vault in LXD with AppRole auth, dynamic credential rotation for SSH and SonarQube CI/CD. Policy-based secret access with GDPR data residency compliance.</p><div class="proj-tech"><span class="pt-badge">HashiCorp Vault</span><span class="pt-badge">LXD</span><span class="pt-badge">AppRole</span><span class="pt-badge">GitHub Actions</span><span class="pt-badge">GDPR</span></div></div>
-      </div>
-      <div class="proj-card rz" style="transition-delay:.2s">
-        <div class="proj-term"><div class="pt-dots"><span class="tbd-r"></span><span class="tbd-y"></span><span class="tbd-g"></span></div><span class="pt-cmd">kubectl get pods -n ai</span><div class="pt-status"><span class="sd"></span>6/6 running</div></div>
-        <div class="proj-body"><div class="proj-name">AI Agent Microservices Platform</div><p class="proj-desc">6 independent gRPC-connected services with Redis job queuing, ECDH + ABE multi-tenant isolation. Sub-100ms P95 latency serving 10k+ daily API requests.</p><div class="proj-tech"><span class="pt-badge">FastAPI</span><span class="pt-badge">gRPC</span><span class="pt-badge">Redis</span><span class="pt-badge">ECDH</span><span class="pt-badge">ABE</span><span class="pt-badge">PostgreSQL</span></div></div>
-      </div>
+    <div class="proj-graph-wrap">
+      <canvas id="proj-graph"></canvas>
+      <div id="node-labels" class="node-labels"></div>
+      <div id="node-panel" class="node-panel" aria-live="polite"></div>
+      <div class="graph-bg-morph" id="graphBgMorph"></div>
     </div>
   </div>
 </section>
@@ -439,5 +442,7 @@
 <link href="https://assets.calendly.com/assets/external/widget.css" rel="stylesheet">
 <script src="https://assets.calendly.com/assets/external/widget.js" async></script>
 <script src="js/main.js" defer></script>
+<script src="js/threebg.js" defer></script>
+<script src="js/graph.js" defer></script>
 </body>
 </html>
