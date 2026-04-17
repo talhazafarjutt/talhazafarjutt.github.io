@@ -5,444 +5,203 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="Talha Zafar — Senior Backend & DevOps Engineer. Python, FastAPI, Kubernetes, AI/MLOps.">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://assets.calendly.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://assets.calendly.com; font-src 'self' https://fonts.gstatic.com https://assets.calendly.com; img-src 'self' data: https:; frame-src https://calendly.com; connect-src 'self' https://calendly.com https://api.calendly.com https://assets.calendly.com;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://assets.calendly.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://assets.calendly.com; font-src 'self' https://fonts.gstatic.com https://assets.calendly.com; img-src 'self' data: https:; frame-src https://calendly.com; connect-src 'self' https://calendly.com https://api.calendly.com https://assets.calendly.com;">
 <title>Talha Zafar — Backend & DevOps Engineer</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%2300e5ff'/%3E%3Cstop offset='1' stop-color='%23a855f7'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='13' fill='%2305050f'/%3E%3Crect x='1.5' y='1.5' width='61' height='61' rx='12' fill='none' stroke='url(%23g)' stroke-width='2'/%3E%3Ctext x='7' y='42' font-family='monospace' font-weight='700' font-size='24' fill='%2300e5ff'%3E%3E_%3C/text%3E%3C/svg%3E">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23080808'/%3E%3Crect x='12' y='12' width='18' height='18' fill='%23C8102E'/%3E%3Crect x='34' y='34' width='18' height='18' fill='%23F5C519'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
-<script src="https://cdn.jsdelivr.net/npm/three@0.150.1/build/three.min.js"></script>
 </head>
 <body>
-<div id="prog"></div>
-<div id="sl"></div>
-<div id="cd"></div>
-<div id="cr"></div>
 
-<!-- NAV — floating kinetic sidebar -->
-<nav id="nav">
-  <a href="#hero" class="sn-logo" aria-label="Home">TZ</a>
-  <ul class="sn-list">
-    <li><a href="#about" class="sn-link" data-tip="About">
-      <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M6 20v-1a6 6 0 0 1 12 0v1"/></svg>
-    </a></li>
-    <li><a href="#skills" class="sn-link" data-tip="Skills">
-      <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-    </a></li>
-    <li><a href="#experience" class="sn-link" data-tip="Experience">
-      <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3H8a2 2 0 0 0-2 2v2h12V5a2 2 0 0 0-2-2z"/></svg>
-    </a></li>
-    <li><a href="#projects" class="sn-link" data-tip="Projects">
-      <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="6" cy="6" r="2"/><circle cx="18" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/><circle cx="12" cy="12" r="2"/><line x1="8" y1="6" x2="10" y2="12"/><line x1="16" y1="6" x2="14" y2="12"/><line x1="8" y1="18" x2="10" y2="12"/><line x1="16" y1="18" x2="14" y2="12"/></svg>
-    </a></li>
-    <li><a href="#blog" class="sn-link" data-tip="Blog">
-      <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>
-    </a></li>
-    <li><a href="#contact" class="sn-link" data-tip="Schedule a Call">
-      <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-    </a></li>
-  </ul>
-  <button class="sn-theme" id="themeBtn" aria-label="Toggle theme">
-    <svg class="moon-ico" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-    <svg class="sun-ico" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-  </button>
-</nav>
+<!-- LENS CURSOR -->
+<div id="lens"></div>
 
-<!-- HERO -->
-<section id="hero">
-  <div class="grid3d"></div>
-  <canvas id="neuro"></canvas>
-  <div class="w" style="width:100%">
-    <div class="hero-inner">
-      <div class="hero-left">
-        <div class="h-badge-row">
-          <div class="h-badge"><span class="dot"></span>Available for new opportunities</div>
-          <div class="h-badge-de">✈️ Open to relocation worldwide</div>
-        </div>
-        <h1 class="h-name">
-          <span class="line"><span class="word"><span class="glitch" data-text="Talha">Talha</span></span></span>
-          <span class="line"><span class="word"><span class="glitch" data-text="Zafar">Zafar</span></span></span>
-        </h1>
-        <div class="h-role"><span class="pre">~/role $&nbsp;</span><span id="tw"></span></div>
-        <p class="h-desc">Backend &amp; DevOps engineer with <strong>4+ years</strong> building <strong>AI inference infrastructure</strong>, distributed microservices, and <strong>zero-trust security pipelines</strong>. Lahore, Pakistan — open to remote &amp; on-site.</p>
-        <div class="h-btns">
-          <div class="mag"><a href="#experience" class="btn btn-fill">View Work ↓</a></div>
-          <div class="mag"><a href="#contact" class="btn btn-out">Schedule a Call →</a></div>
-          <div class="mag"><a href="talha_zafar_resume.pdf" download class="btn btn-out">↓ Resume</a></div>
-        </div>
-      </div>
-      <div class="metrics-panel">
-        <div class="mp-title"><span class="dot-g"></span>LIVE SYSTEM METRICS<em>● ONLINE</em></div>
-        <div class="mp-body">
-          <div class="mp-row"><span class="mp-label">Infrastructure Uptime</span><span class="mp-val gc">99.8%</span></div>
-          <div class="mp-row"><span class="mp-label">API Requests / Day</span><span class="mp-val cc">10,000+</span></div>
-          <div class="mp-row"><span class="mp-label">P95 Latency</span><span class="mp-val cc">&lt; 100ms</span></div>
-          <div class="mp-row"><span class="mp-label">GPU Cluster</span><span class="mp-val pc">4× Tesla V100</span></div>
-          <div class="mp-row"><span class="mp-label">Years Experience</span><span class="mp-val gc">4+</span></div>
-          <div class="mp-bar-wrap">
-            <div class="mp-bar-label"><span>Backend</span><span>95%</span></div>
-            <div class="mp-bar"><div class="mp-bar-fill" style="width:95%;background:linear-gradient(90deg,var(--c),var(--p))"></div></div>
-            <div class="mp-bar-label"><span>DevOps / Infra</span><span>90%</span></div>
-            <div class="mp-bar"><div class="mp-bar-fill" style="width:90%;background:linear-gradient(90deg,var(--p),var(--a))"></div></div>
-            <div class="mp-bar-label"><span>Security / MLOps</span><span>85%</span></div>
-            <div class="mp-bar"><div class="mp-bar-fill" style="width:85%;background:linear-gradient(90deg,var(--a),var(--g))"></div></div>
-          </div>
-          <div class="spark-wrap">
-            <div class="spark-label">Request activity (simulated)</div>
-            <canvas id="spark"></canvas>
-          </div>
-        </div>
-      </div>
+<!-- SUPREMATIST WORLD CANVAS -->
+<div id="world">
+
+  <!-- Oversized name -->
+  <div id="name-block">
+    <span id="name-a">TALHA</span>
+    <span id="name-b">ZAFAR</span>
+  </div>
+
+  <!-- Role line -->
+  <div id="role-line">Backend&nbsp;&nbsp;·&nbsp;&nbsp;DevOps&nbsp;&nbsp;·&nbsp;&nbsp;AI&nbsp;Infrastructure</div>
+
+  <!-- Hint -->
+  <div id="hint">— move cursor to reveal · click shape to explore —</div>
+
+  <!-- GEOMETRIC SHAPES (projects) -->
+  <!-- Shape 0: Red circle — LLM Inference -->
+  <div class="shape" id="s0" data-pid="0">
+    <span class="s-num">01</span>
+  </div>
+
+  <!-- Shape 1: White bar — Zero-Trust -->
+  <div class="shape" id="s1" data-pid="1">
+    <span class="s-num">02</span>
+  </div>
+
+  <!-- Shape 2: Yellow triangle — AI Agents -->
+  <div class="shape" id="s2" data-pid="2">
+    <span class="s-num">03</span>
+  </div>
+
+  <!-- Hidden labels — revealed by lens (mix-blend-mode trick) -->
+  <span class="rl" style="--rx:18%;--ry:42%">GPU · vLLM · K3s</span>
+  <span class="rl" style="--rx:76%;--ry:50%">HashiCorp · GDPR</span>
+  <span class="rl" style="--rx:50%;--ry:78%">gRPC · Redis · ECDH</span>
+  <span class="rl" style="--rx:35%;--ry:16%">OPEN TO WORK</span>
+  <span class="rl" style="--rx:68%;--ry:20%">4+ YEARS PRODUCTION</span>
+  <span class="rl" style="--rx:82%;--ry:82%">LAHORE, PAKISTAN</span>
+
+  <!-- 3D Rotating Menu Cube -->
+  <div id="cube-wrap">
+    <div id="cube-label">MENU</div>
+    <div id="cube">
+      <div class="face face-f" data-nav="work">WORK</div>
+      <div class="face face-r" data-nav="about">ABOUT</div>
+      <div class="face face-b" data-nav="blog">BLOG</div>
+      <div class="face face-l" data-nav="contact">HIRE</div>
+      <div class="face face-t" data-nav="skills">STACK</div>
+      <div class="face face-bt">·</div>
     </div>
   </div>
-  <div class="scroll-hint"><div class="sl-line"></div><span>Scroll</span></div>
-</section>
 
-<!-- IMPACT STRIP -->
-<section id="impact">
-  <div class="w">
-    <div class="impact-grid">
-      <div class="impact-item ri"><div class="impact-num" data-count="4" data-suf="+">0</div><div class="impact-label">Years Experience</div><div class="impact-sub">Sep 2022 → Present</div></div>
-      <div class="impact-item ri" style="transition-delay:.08s"><div class="impact-num" data-count="10" data-suf="k+">0</div><div class="impact-label">Daily API Requests</div><div class="impact-sub">sub-100ms P95 latency</div></div>
-      <div class="impact-item ri" style="transition-delay:.16s"><div class="impact-num">99.8%</div><div class="impact-label">Infrastructure Uptime</div><div class="impact-sub">bare-metal K3s cluster</div></div>
-      <div class="impact-item ri" style="transition-delay:.24s"><div class="impact-num">4×</div><div class="impact-label">Tesla V100 GPUs</div><div class="impact-sub">LLM inference at scale</div></div>
+</div>
+
+<!-- PROJECT DETAIL (z-zoom overlay) -->
+<div id="detail">
+  <button id="d-close" aria-label="Close">✕</button>
+  <div id="d-body"></div>
+</div>
+
+<!-- PANEL: WORK -->
+<div class="panel" id="p-work" role="dialog" aria-label="Projects">
+  <button class="p-close" aria-label="Close">✕</button>
+  <div class="p-body">
+    <p class="p-tag">// selected work</p>
+    <h2>Projects</h2>
+    <button class="p-item" data-pid="0">
+      <span class="pi-n">01</span>
+      <span class="pi-info"><span class="pi-t">LLM Inference Platform</span><span class="pi-sub">vLLM · FastAPI · K3s · V100</span></span>
+      <span class="pi-arr">→</span>
+    </button>
+    <button class="p-item" data-pid="1">
+      <span class="pi-n">02</span>
+      <span class="pi-info"><span class="pi-t">Zero-Trust Secrets Pipeline</span><span class="pi-sub">HashiCorp Vault · LXD · GDPR</span></span>
+      <span class="pi-arr">→</span>
+    </button>
+    <button class="p-item" data-pid="2">
+      <span class="pi-n">03</span>
+      <span class="pi-info"><span class="pi-t">AI Agent Microservices</span><span class="pi-sub">gRPC · Redis · ECDH · FastAPI</span></span>
+      <span class="pi-arr">→</span>
+    </button>
+  </div>
+</div>
+
+<!-- PANEL: ABOUT -->
+<div class="panel" id="p-about" role="dialog" aria-label="About">
+  <button class="p-close" aria-label="Close">✕</button>
+  <div class="p-body">
+    <p class="p-tag">// profile</p>
+    <h2>Talha Zafar</h2>
+    <p class="p-desc">Backend &amp; DevOps engineer with <strong>4+ years</strong> building AI inference infrastructure, distributed microservices, and zero-trust security pipelines. Lahore, Pakistan — open to remote &amp; on-site.</p>
+    <div class="stat-row">
+      <div class="stat"><b>4+</b><span>Years</span></div>
+      <div class="stat"><b>99.8%</b><span>Uptime</span></div>
+      <div class="stat"><b>10k+</b><span>Daily&nbsp;Reqs</span></div>
+      <div class="stat"><b>4×</b><span>V100 GPUs</span></div>
+    </div>
+    <div class="exp-list">
+      <div class="exp-item">
+        <div class="exp-co active-co">Augai</div>
+        <div class="exp-d">Jan 2026 – Present · DevOps &amp; Infrastructure Engineer</div>
+        <p class="exp-p">Bare-metal K3s cluster (4× V100), HashiCorp Vault, GitHub Actions CI/CD with Trivy, Zabbix monitoring — 99.8% uptime.</p>
+      </div>
+      <div class="exp-item">
+        <div class="exp-co">BoolMind</div>
+        <div class="exp-d">Jan 2024 – Dec 2025 · Backend Engineer</div>
+        <p class="exp-p">10k+ daily reqs, sub-100ms P95. gRPC microservices, vLLM LLM inference on 4× V100, ECDH encryption, Stripe fraud prevention.</p>
+      </div>
+      <div class="exp-item">
+        <div class="exp-co">Techleadz</div>
+        <div class="exp-d">Sep 2022 – Dec 2023 · Junior Backend Engineer</div>
+        <p class="exp-p">REST APIs for 50k+ user SaaS products. PostgreSQL multi-tenant, MongoDB, Stripe, Firebase, OAuth2.</p>
+      </div>
+    </div>
+    <div class="contact-row">
+      <a href="mailto:talha.zafar.j@gmail.com">Email</a>
+      <a href="https://linkedin.com/in/talhazafarj" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+      <a href="https://github.com/talhazafarj" target="_blank" rel="noopener noreferrer">GitHub</a>
+      <a href="talha_zafar_resume.pdf" download>Resume</a>
     </div>
   </div>
-</section>
+</div>
 
-<!-- ABOUT -->
-<section id="about">
-  <div class="w">
-    <div class="about-grid">
-      <div class="rl">
-        <div class="sec-tag">about me</div>
-        <h2>Building systems that <span>don't break</span></h2>
-        <p>Expert in <strong>Python microservices</strong> (FastAPI, Django, Flask) and <strong>Node.js/NestJS</strong>. I architect backends that serve 10k+ daily requests with sub-100ms P95 latency — then lock them down with OWASP practices, ECDH encryption, and zero-trust infrastructure.</p>
-        <p>On the infra side I own a <strong>bare-metal GPU cluster</strong> (4× Tesla V100), K3s Kubernetes, LXD containers, and HashiCorp Vault. Currently building <strong>AI agent platforms</strong> and LLM deployment pipelines at production scale.</p>
-        <div class="about-links">
-          <a href="mailto:talha.zafar.j@gmail.com" class="about-link"><div class="al-ico">✉️</div>talha.zafar.j@gmail.com</a>
-          <a href="https://linkedin.com/in/talhazafarj" target="_blank" rel="noopener noreferrer" class="about-link"><div class="al-ico">💼</div>linkedin.com/in/talhazafarj</a>
-          <a href="https://github.com/talhazafarj" target="_blank" rel="noopener noreferrer" class="about-link"><div class="al-ico">🐙</div>github.com/talhazafarj</a>
-          <a href="tel:+923073576146" class="about-link"><div class="al-ico">📞</div>+92 307 357 6146 &nbsp;·&nbsp; Lahore, Pakistan</a>
-        </div>
-      </div>
-      <div class="rr">
-        <div class="terminal-box">
-          <div class="tb-bar"><div class="tb-dots"><span class="tbd-r"></span><span class="tbd-y"></span><span class="tbd-g"></span></div><span class="tb-title">talha@system ~ $ whoami</span></div>
-          <div class="tb-body">
-            <div class="tb-line"><span class="cmt"># system profile</span></div>
-            <div class="tb-line"><span class="key">name</span>: <span class="str">"Talha Zafar"</span></div>
-            <div class="tb-line"><span class="key">role</span>: <span class="str">"Backend &amp; DevOps Engineer"</span></div>
-            <div class="tb-line"><span class="key">location</span>: <span class="str">"Lahore, Pakistan"</span></div>
-            <div class="tb-line"><span class="key">experience</span>: <span class="val">4+ years production</span></div>
-            <div class="tb-line">&nbsp;</div>
-            <div class="tb-line"><span class="cmt"># current stack</span></div>
-            <div class="tb-line"><span class="key">languages</span>: [<span class="val">Python, TypeScript, Go, Bash</span>]</div>
-            <div class="tb-line"><span class="key">frameworks</span>: [<span class="val">FastAPI, Django, NestJS</span>]</div>
-            <div class="tb-line"><span class="key">infra</span>: [<span class="val">K3s, LXD, Docker, Vault</span>]</div>
-            <div class="tb-line"><span class="key">cloud</span>: [<span class="val">AWS, GCP</span>]</div>
-            <div class="tb-line"><span class="key">ai_mlops</span>: [<span class="val">vLLM, V100 GPU cluster</span>]</div>
-            <div class="tb-line">&nbsp;</div>
-            <div class="tb-line"><span class="cmt"># status</span></div>
-            <div class="tb-line"><span class="key">available</span>: <span class="val">true</span></div>
-            <div class="tb-line"><span class="key">remote_ok</span>: <span class="val">true</span></div>
-            <div class="tb-line"><span class="key">notice_period</span>: <span class="str">"1 month"</span></div>
-            <div class="tb-line">&nbsp;</div>
-            <div class="tb-line"><span class="cmd">$</span> <span class="tb-cursor"></span></div>
-          </div>
-        </div>
-      </div>
+<!-- PANEL: SKILLS -->
+<div class="panel" id="p-skills" role="dialog" aria-label="Skills">
+  <button class="p-close" aria-label="Close">✕</button>
+  <div class="p-body">
+    <p class="p-tag">// tech stack</p>
+    <h2>Skills</h2>
+    <div class="sk-grid">
+      <div class="sk-g"><div class="sk-t">BACKEND</div>Python · FastAPI · Django · TypeScript · Node.js · NestJS · gRPC · asyncio · Go</div>
+      <div class="sk-g"><div class="sk-t">DEVOPS</div>K3s · Docker · LXD · GitHub Actions · nginx · cert-manager · Helm · Linux · iptables · fail2ban</div>
+      <div class="sk-g"><div class="sk-t">DATA / CLOUD</div>PostgreSQL · MongoDB · Redis · AWS · GCP · vLLM · GPU Cluster · 4× Tesla V100</div>
+      <div class="sk-g"><div class="sk-t">SECURITY</div>HCP Vault · OWASP · ECDH · ABE · Zabbix · Grafana · Trivy · SonarQube · Gitleaks</div>
     </div>
   </div>
-</section>
+</div>
 
-<!-- SKILLS HONEYCOMB -->
-<section id="skills">
-  <div class="w">
-    <div class="skills-header ri">
-      <div class="sec-tag">tech stack</div>
-      <h2>Skills &amp; <span>Technologies</span></h2>
-    </div>
-    <div class="honeycomb" id="hc">
-      <div class="hc-row">
-        <div class="hex c"><div class="hex-icon">🐍</div>Python</div>
-        <div class="hex c"><div class="hex-icon">⚡</div>FastAPI</div>
-        <div class="hex c"><div class="hex-icon">🎸</div>Django</div>
-        <div class="hex c"><div class="hex-icon">🟦</div>TypeScript</div>
-        <div class="hex c"><div class="hex-icon">🟩</div>Node.js</div>
-        <div class="hex c"><div class="hex-icon">🏗️</div>NestJS</div>
-      </div>
-      <div class="hc-row">
-        <div class="hex c"><div class="hex-icon">🔗</div>gRPC</div>
-        <div class="hex c"><div class="hex-icon">🌐</div>REST</div>
-        <div class="hex c"><div class="hex-icon">🔄</div>GraphQL</div>
-        <div class="hex c"><div class="hex-icon">🔀</div>asyncio</div>
-        <div class="hex c"><div class="hex-icon">🦫</div>Go</div>
-      </div>
-      <div class="hc-row">
-        <div class="hex p"><div class="hex-icon">☸️</div>Kubernetes</div>
-        <div class="hex p"><div class="hex-icon">🐳</div>Docker</div>
-        <div class="hex p"><div class="hex-icon">📦</div>K3s</div>
-        <div class="hex p"><div class="hex-icon">🔲</div>LXD</div>
-        <div class="hex p"><div class="hex-icon">⚙️</div>GitHub Actions</div>
-        <div class="hex p"><div class="hex-icon">🌊</div>nginx</div>
-      </div>
-      <div class="hc-row">
-        <div class="hex p"><div class="hex-icon">🔐</div>cert-manager</div>
-        <div class="hex p"><div class="hex-icon">🐧</div>Linux</div>
-        <div class="hex p"><div class="hex-icon">🔥</div>iptables</div>
-        <div class="hex p"><div class="hex-icon">🛡️</div>fail2ban</div>
-        <div class="hex p"><div class="hex-icon">📜</div>Helm</div>
-      </div>
-      <div class="hc-row">
-        <div class="hex g"><div class="hex-icon">🐘</div>PostgreSQL</div>
-        <div class="hex g"><div class="hex-icon">🍃</div>MongoDB</div>
-        <div class="hex g"><div class="hex-icon">⚡</div>Redis</div>
-        <div class="hex g"><div class="hex-icon">☁️</div>AWS</div>
-        <div class="hex g"><div class="hex-icon">🌤️</div>GCP</div>
-        <div class="hex g"><div class="hex-icon">🤖</div>vLLM</div>
-      </div>
-      <div class="hc-row">
-        <div class="hex a"><div class="hex-icon">🏰</div>HCP Vault</div>
-        <div class="hex a"><div class="hex-icon">🔒</div>OWASP</div>
-        <div class="hex a"><div class="hex-icon">🔑</div>ECDH</div>
-        <div class="hex a"><div class="hex-icon">📊</div>Zabbix</div>
-        <div class="hex a"><div class="hex-icon">📈</div>Grafana</div>
-        <div class="hex a"><div class="hex-icon">🔍</div>Trivy</div>
-      </div>
-    </div>
-    <div class="skills-legend ri">
-      <div class="legend-item"><div class="legend-dot" style="background:var(--c)"></div>Backend &amp; APIs</div>
-      <div class="legend-item"><div class="legend-dot" style="background:var(--p)"></div>DevOps &amp; Infra</div>
-      <div class="legend-item"><div class="legend-dot" style="background:var(--g)"></div>Data &amp; Cloud</div>
-      <div class="legend-item"><div class="legend-dot" style="background:var(--a)"></div>Security &amp; Monitoring</div>
-    </div>
+<!-- PANEL: BLOG -->
+<div class="panel" id="p-blog" role="dialog" aria-label="Blog">
+  <button class="p-close" aria-label="Close">✕</button>
+  <div class="p-body">
+    <p class="p-tag">// writing</p>
+    <h2>Technical Blog</h2>
+    <a href="blog/gpu-inference.html" class="bl">
+      <span class="bl-n">01</span>
+      <span class="bl-info"><span class="bl-t">Running LLM Inference on 4× Tesla V100 — Bare Metal to Production</span><span class="bl-m">Mar 2026 · 10 min read</span></span>
+    </a>
+    <a href="blog/stripe-carding.html" class="bl">
+      <span class="bl-n">02</span>
+      <span class="bl-info"><span class="bl-t">Stopping a Live Stripe Carding Attack — Zero Fraud Post-Deployment</span><span class="bl-m">Feb 2026 · 6 min read</span></span>
+    </a>
+    <a href="blog/grpc-vs-rest.html" class="bl">
+      <span class="bl-n">03</span>
+      <span class="bl-info"><span class="bl-t">gRPC vs REST in Production — 40% Less Internal API Overhead</span><span class="bl-m">Jan 2026 · 7 min read</span></span>
+    </a>
+    <a href="blog/vault-gdpr.html" class="bl">
+      <span class="bl-n">04</span>
+      <span class="bl-info"><span class="bl-t">Zero-Trust Secrets with HashiCorp Vault — GDPR on Bare Metal</span><span class="bl-m">Dec 2025 · 8 min read</span></span>
+    </a>
   </div>
-</section>
+</div>
 
-<!-- EXPERIENCE — pipeline -->
-<section id="experience">
-  <div class="w">
-    <div class="exp-header-sec ri">
-      <div class="sec-tag">work history</div>
-      <h2>Professional <span>Experience</span></h2>
+<!-- PANEL: CONTACT -->
+<div class="panel" id="p-contact" role="dialog" aria-label="Contact">
+  <button class="p-close" aria-label="Close">✕</button>
+  <div class="p-body">
+    <p class="p-tag">// hire me</p>
+    <h2>Connect</h2>
+    <p class="p-desc">Open to new roles, freelance projects, and interesting conversations.</p>
+    <div class="ci-list">
+      <a href="mailto:talha.zafar.j@gmail.com" class="ci"><b>Email</b><span>talha.zafar.j@gmail.com</span></a>
+      <a href="https://linkedin.com/in/talhazafarj" target="_blank" rel="noopener noreferrer" class="ci"><b>LinkedIn</b><span>linkedin.com/in/talhazafarj</span></a>
+      <a href="https://github.com/talhazafarj" target="_blank" rel="noopener noreferrer" class="ci"><b>GitHub</b><span>github.com/talhazafarj</span></a>
+      <a href="tel:+923073576146" class="ci"><b>Phone</b><span>+92 307 357 6146</span></a>
+      <a href="talha_zafar_resume.pdf" download class="ci"><b>Resume</b><span>Download PDF →</span></a>
     </div>
-    <div class="pipeline">
-
-      <div class="pipe-item ri">
-        <div class="pipe-meta">
-          <div class="pipe-company" style="color:var(--g)">Augai</div>
-          <div class="pipe-dates now">Jan 2026 – Present</div>
-          <div class="pipe-badge online"><div class="bd" style="background:var(--g)"></div>RUNNING</div>
-        </div>
-        <div class="pipe-card">
-          <div class="pc-header"><div class="pc-dots"><span class="tbd-r"></span><span class="tbd-y"></span><span class="tbd-g"></span></div><span class="pc-title">devops_infra.sh</span><span class="pc-status">● active</span></div>
-          <div class="pc-body">
-            <div class="pc-role">DevOps &amp; Infrastructure Engineer</div>
-            <div class="pc-co">Augai · Infrastructure &amp; Security Consulting · Remote</div>
-            <ul class="pc-ul">
-              <li>Sole infrastructure owner for bare-metal Ubuntu 22.04 server: 4× NVIDIA Tesla V100 GPUs, K3s Kubernetes, 8+ LXD developer containers — 99.8% uptime.</li>
-              <li>Designed K3s cluster from scratch: nginx ingress, cert-manager TLS automation, CoreDNS, GPU passthrough.</li>
-              <li>Deployed HashiCorp Vault (AppRole auth, dynamic secrets) in isolated LXD container — GDPR data residency compliant.</li>
-              <li>Full security hardening: forensic audit (server clean), iptables firewall, fail2ban, kernel lockdown, rsyslog across all containers.</li>
-              <li>GitHub Actions CI/CD with SAST (SonarQube), container scanning (Trivy), secret detection (Gitleaks).</li>
-              <li>Configured Zabbix monitoring with K8s pod dashboards and Gmail SMTP alerting for 15+ components.</li>
-            </ul>
-            <div class="pc-tags"><span class="tag-g">K3s</span><span class="tag-g">HashiCorp Vault</span><span class="tag-g">LXD</span><span class="tag-g">iptables</span><span class="tag-g">Zabbix</span><span class="tag-g">GitHub Actions</span><span class="tag-g">Trivy</span><span class="tag-g">vLLM</span></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="pipe-item ri" style="transition-delay:.1s">
-        <div class="pipe-meta">
-          <div class="pipe-company" style="color:var(--c)">BoolMind</div>
-          <div class="pipe-dates">Jan 2024 – Dec 2025</div>
-          <div class="pipe-badge done">COMPLETED</div>
-        </div>
-        <div class="pipe-card">
-          <div class="pc-header"><div class="pc-dots"><span class="tbd-r"></span><span class="tbd-y"></span><span class="tbd-g"></span></div><span class="pc-title">backend_api.py</span><span class="pc-status">✓ deployed</span></div>
-          <div class="pc-body">
-            <div class="pc-role">Backend Engineer</div>
-            <div class="pc-co">BoolMind · AI &amp; Automation Platform · Remote</div>
-            <ul class="pc-ul">
-              <li>Architected production microservices — 10k+ daily requests, sub-100ms P95 latency, FastAPI + asyncio.</li>
-              <li>gRPC inter-service communication across 6 services — 40% less overhead vs REST; Redis caching cut DB load 60%.</li>
-              <li>Deployed LLM inference on 4× V100: vLLM serving Qwen2.5-Coder-32B, FastAPI load-balancer, nginx API gateway.</li>
-              <li>OWASP Top 10 mitigations, ECDH key exchange, and ABE encryption for multi-tenant data isolation.</li>
-              <li>Stripe security hardening post-carding attack: Radar rules, Redis rate-limiting, HMAC auth — zero fraud post-deployment.</li>
-            </ul>
-            <div class="pc-tags"><span class="tag-c">FastAPI</span><span class="tag-c">gRPC</span><span class="tag-c">Redis</span><span class="tag-c">PostgreSQL</span><span class="tag-c">OWASP</span><span class="tag-c">ECDH</span><span class="tag-c">ABE</span><span class="tag-c">vLLM</span></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="pipe-item ri" style="transition-delay:.2s">
-        <div class="pipe-meta">
-          <div class="pipe-company" style="color:var(--p)">Techleadz</div>
-          <div class="pipe-dates">Sep 2022 – Dec 2023</div>
-          <div class="pipe-badge done">COMPLETED</div>
-        </div>
-        <div class="pipe-card">
-          <div class="pc-header"><div class="pc-dots"><span class="tbd-r"></span><span class="tbd-y"></span><span class="tbd-g"></span></div><span class="pc-title">api_service.py</span><span class="pc-status">✓ deployed</span></div>
-          <div class="pc-body">
-            <div class="pc-role">Junior Backend Engineer</div>
-            <div class="pc-co">Techleadz · Software Development Agency · Lahore</div>
-            <ul class="pc-ul">
-              <li>RESTful APIs (Django REST, NestJS) for SaaS products with 50k+ registered users.</li>
-              <li>PostgreSQL multi-tenant schemas with row-level security — 35% query time reduction; MongoDB Beanie ODM for 500k+ daily events.</li>
-              <li>Integrated Stripe, Firebase, and OAuth2 for payments, notifications, and authentication end-to-end.</li>
-            </ul>
-            <div class="pc-tags"><span class="tag-p">Django</span><span class="tag-p">NestJS</span><span class="tag-p">PostgreSQL</span><span class="tag-p">MongoDB</span><span class="tag-p">Redis</span><span class="tag-p">Stripe</span><span class="tag-p">OAuth2</span></div>
-          </div>
-        </div>
-      </div>
-
-    </div>
+    <button id="calBtn">Book a 30-Minute Call →</button>
+    <p class="cal-note">Powered by Calendly · No spam, just a real conversation</p>
   </div>
-</section>
-
-<!-- PROJECTS — 3D neural graph -->
-<section id="projects">
-  <div class="w">
-    <div class="projects-header ri">
-      <div class="sec-tag">selected work</div>
-      <h2>Key <span>Projects</span></h2>
-      <p class="graph-hint ri" style="transition-delay:.12s">Hover the neural nodes to explore</p>
-    </div>
-    <div class="proj-graph-wrap">
-      <canvas id="proj-graph"></canvas>
-      <div id="node-labels" class="node-labels"></div>
-      <div id="node-panel" class="node-panel" aria-live="polite"></div>
-      <div class="graph-bg-morph" id="graphBgMorph"></div>
-    </div>
-  </div>
-</section>
-
-<!-- BLOG -->
-<section id="blog">
-  <div class="w">
-    <div class="blog-header ri">
-      <div class="sec-tag">writing</div>
-      <h2>Technical <span>Blog</span></h2>
-      <p>Real war stories from production systems — GPU clusters, security incidents, and architecture decisions.</p>
-    </div>
-    <div class="blog-grid">
-
-      <!-- BLOG 1 — GPU / AI Infra -->
-      <article class="blog-card ri">
-        <div class="bc-top">
-          <div class="bc-meta">
-            <div class="bc-tags"><span class="tag-p">GPU</span><span class="tag-p">vLLM</span><span class="tag-p">K3s</span><span class="tag-g">Infrastructure</span></div>
-            <div class="bc-info"><span class="bc-date">Mar 2026</span><span class="bc-dot">·</span><span class="bc-read">10 min read</span></div>
-          </div>
-          <h3 class="bc-title">Running LLM Inference on 4× Tesla V100 — Bare Metal to Production</h3>
-          <p class="bc-excerpt">AWS p3.8xlarge (4× V100) costs ~$8,800/month. We own the hardware. Here's the full stack: K3s, vLLM, FastAPI load-balancer, nginx API key auth — serving 10,000+ daily requests at sub-400ms P95.</p>
-        </div>
-<div class="bc-bottom"><a href="blog/gpu-inference.html" class="bc-link">Read Article →</a></div>
-      </article>
-
-      <!-- BLOG 2 — Stripe Carding Attack -->
-      <article class="blog-card ri" style="transition-delay:.1s">
-        <div class="bc-top">
-          <div class="bc-meta">
-            <div class="bc-tags"><span class="tag-a">Security</span><span class="tag-a">Stripe</span><span class="tag-c">Redis</span></div>
-            <div class="bc-info"><span class="bc-date">Feb 2026</span><span class="bc-dot">·</span><span class="bc-read">6 min read</span></div>
-          </div>
-          <h3 class="bc-title">Stopping a Live Stripe Carding Attack — Zero Fraud Post-Deployment</h3>
-          <p class="bc-excerpt">400+ failed charges in two hours, all $0.99, all from Eastern Europe. We went from 12% fraud rate to 0.02% with three layers: Stripe Radar rules, Redis rate limiting per IP/BIN, and HMAC inter-service authentication.</p>
-        </div>
-<div class="bc-bottom"><a href="blog/stripe-carding.html" class="bc-link">Read Article →</a></div>
-      </article>
-
-      <!-- BLOG 3 — gRPC vs REST -->
-      <article class="blog-card ri" style="transition-delay:.15s">
-        <div class="bc-top">
-          <div class="bc-meta">
-            <div class="bc-tags"><span class="tag-c">gRPC</span><span class="tag-c">FastAPI</span><span class="tag-c">Microservices</span></div>
-            <div class="bc-info"><span class="bc-date">Jan 2026</span><span class="bc-dot">·</span><span class="bc-read">7 min read</span></div>
-          </div>
-          <h3 class="bc-title">gRPC vs REST in Production — How We Cut Internal API Overhead by 40%</h3>
-          <p class="bc-excerpt">Six microservices, all talking REST over HTTP/1.1. A single agent task triggered 5 synchronous cross-service calls. Here's what we measured, how we migrated, and when gRPC is — and isn't — the right call.</p>
-        </div>
-<div class="bc-bottom"><a href="blog/grpc-vs-rest.html" class="bc-link">Read Article →</a></div>
-      </article>
-
-      <!-- BLOG 4 — Vault + GDPR -->
-      <article class="blog-card ri" style="transition-delay:.2s">
-        <div class="bc-top">
-          <div class="bc-meta">
-            <div class="bc-tags"><span class="tag-a">Vault</span><span class="tag-a">Security</span><span class="tag-g">GDPR</span></div>
-            <div class="bc-info"><span class="bc-date">Dec 2025</span><span class="bc-dot">·</span><span class="bc-read">8 min read</span></div>
-          </div>
-          <h3 class="bc-title">Zero-Trust Secrets with HashiCorp Vault — GDPR-Compliant on Bare Metal</h3>
-          <p class="bc-excerpt">Secrets in .env files, CI environment variables, and SSH keys in repos — the flat permission model that most teams live with. Here's how we replaced all of it with AppRole auth, policy-based access, and on-prem secret residency for GDPR compliance.</p>
-        </div>
-<div class="bc-bottom"><a href="blog/vault-gdpr.html" class="bc-link">Read Article →</a></div>
-      </article>
-
-    </div>
-  </div>
-</section>
-
-<!-- CONTACT -->
-<section id="contact">
-  <div class="w">
-    <div class="contact-header ri">
-      <div class="sec-tag" style="justify-content:center">get in touch</div>
-      <h2>Let's <span>Connect</span></h2>
-      <p>Open to new roles, freelance projects, and interesting conversations.</p>
-    </div>
-    <div class="contact-grid">
-      <div class="contact-links rl">
-        <a href="mailto:talha.zafar.j@gmail.com" class="c-link"><div class="c-ico">✉️</div><div><div class="c-lbl">Email</div><div class="c-val">talha.zafar.j@gmail.com</div></div></a>
-        <a href="https://linkedin.com/in/talhazafarj" target="_blank" rel="noopener noreferrer" class="c-link"><div class="c-ico">💼</div><div><div class="c-lbl">LinkedIn</div><div class="c-val">linkedin.com/in/talhazafarj</div></div></a>
-        <a href="https://github.com/talhazafarj" target="_blank" rel="noopener noreferrer" class="c-link"><div class="c-ico">🐙</div><div><div class="c-lbl">GitHub</div><div class="c-val">github.com/talhazafarj</div></div></a>
-        <a href="tel:+923073576146" class="c-link"><div class="c-ico">📞</div><div><div class="c-lbl">Phone / WhatsApp</div><div class="c-val">+92 307 357 6146</div></div></a>
-        <a href="talha_zafar_resume.pdf" download class="c-link" style="border-color:rgba(0,229,255,.2);background:var(--cd)"><div class="c-ico">📄</div><div><div class="c-lbl">Resume</div><div class="c-val">Download PDF</div></div></a>
-      </div>
-      <div class="cal-box rr">
-        <div class="cal-top"><div><h3>Schedule a Meeting</h3><p>Pick a time that works for you</p></div><span class="cal-badge">AVAILABLE</span></div>
-        <div class="cal-body">
-          <div class="cal-info">
-            <div class="cal-stat"><div class="cs-label">Duration</div><div class="cs-val"><span>30</span> min</div></div>
-            <div class="cal-stat"><div class="cs-label">Format</div><div class="cs-val"><span>Video</span> call</div></div>
-            <div class="cal-stat"><div class="cs-label">Timezone</div><div class="cs-val"><span>PKT</span> +5</div></div>
-            <div class="cal-stat"><div class="cs-label">Response</div><div class="cs-val">&lt;<span>2</span>h</div></div>
-          </div>
-          <div class="cal-avail">
-            <div class="cal-avail-dot"></div>
-            <div class="cal-avail-text"><strong>Currently accepting meetings</strong> — Mon–Sat, flexible hours</div>
-          </div>
-          <button class="cal-cta-btn" id="calBtn">
-            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-            Book a 30-Minute Call
-            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-          </button>
-          <div class="cal-note">Powered by Calendly · No spam, just a real conversation</div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<footer>
-  <div class="w">
-    <div class="ft">
-      <div class="ft-l"><em>talha.zafar</em> © 2026 · Pure HTML/CSS/JS — no frameworks</div>
-      <div class="ft-r">
-        <a href="https://github.com/talhazafarj" target="_blank" rel="noopener noreferrer">GitHub</a>
-        <a href="https://linkedin.com/in/talhazafarj" target="_blank" rel="noopener noreferrer">LinkedIn</a>
-        <a href="mailto:talha.zafar.j@gmail.com">Email</a>
-      </div>
-    </div>
-  </div>
-</footer>
+</div>
 
 <link href="https://assets.calendly.com/assets/external/widget.css" rel="stylesheet">
 <script src="https://assets.calendly.com/assets/external/widget.js" async></script>
 <script src="js/main.js" defer></script>
-<script src="js/threebg.js" defer></script>
-<script src="js/graph.js" defer></script>
 </body>
 </html>

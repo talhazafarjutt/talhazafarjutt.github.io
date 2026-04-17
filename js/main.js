@@ -1,177 +1,307 @@
-/* ── PROGRESS ── */
-const prog=document.getElementById('prog');
-window.addEventListener('scroll',()=>{prog.style.width=(scrollY/(document.documentElement.scrollHeight-innerHeight)*100)+'%'},{passive:true});
+/* ── SUPREMATIST PORTFOLIO — main.js ── */
 
-/* ── THEME TOGGLE ── */
-const themeBtn=document.getElementById('themeBtn');
-(function(){document.documentElement.setAttribute('data-theme',localStorage.getItem('theme')||'dark')})();
-themeBtn.addEventListener('click',()=>{const t=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',t);localStorage.setItem('theme',t)});
-function tc(){return document.documentElement.getAttribute('data-theme')==='light'?'3,105,161':'0,229,255'}
+/* ── PROJECT DATA ── */
+const PROJECTS = [
+  {
+    id: 0, name: 'LLM Inference Platform', sub: 'Codsy',
+    cmd: 'docker run codsy/llm', status: '● running',
+    color: '#C8102E',
+    desc: 'Production-grade multi-GPU LLM cluster: 4× Tesla V100, FastAPI load-balancing router, nginx API gateway with key auth, vLLM engine management. Serving active developer teams at scale.',
+    tech: ['vLLM', 'FastAPI', 'nginx', 'K3s', 'V100', 'Python SDK']
+  },
+  {
+    id: 1, name: 'Zero-Trust Secrets Pipeline', sub: 'Vault',
+    cmd: 'vault status --policy', status: '● sealed',
+    color: '#e2e8f0',
+    desc: 'HashiCorp Vault in isolated LXD container: AppRole auth, dynamic credential rotation for SSH & CI/CD. Policy-based access, GDPR data residency compliant on bare metal.',
+    tech: ['HashiCorp Vault', 'LXD', 'AppRole', 'GitHub Actions', 'GDPR']
+  },
+  {
+    id: 2, name: 'AI Agent Microservices', sub: 'Platform',
+    cmd: 'kubectl get pods -n ai', status: '6/6 running',
+    color: '#F5C519',
+    desc: '6 gRPC-connected services with Redis job queuing, ECDH + ABE multi-tenant isolation. Sub-100ms P95 latency serving 10k+ daily API requests.',
+    tech: ['FastAPI', 'gRPC', 'Redis', 'ECDH', 'ABE', 'PostgreSQL']
+  }
+];
 
-/* ── SPOTLIGHT ── */
-const sl=document.getElementById('sl');
-document.addEventListener('mousemove',e=>{sl.style.background=`radial-gradient(500px at ${e.clientX}px ${e.clientY}px,rgba(${tc()},.04),transparent 50%)`},{passive:true});
+/* ── LENS CURSOR ── */
+const lens = document.getElementById('lens');
+let lx = 0, ly = 0, lrx = -200, lry = -200;
 
-/* ── CURSOR ── */
-const cd=document.getElementById('cd'),cr=document.getElementById('cr');
-let mx=0,my=0,rx=0,ry=0;
-document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cd.style.left=mx+'px';cd.style.top=my+'px'},{passive:true});
-(function loop(){rx+=(mx-rx)*.1;ry+=(my-ry)*.1;cr.style.left=rx+'px';cr.style.top=ry+'px';requestAnimationFrame(loop)})();
-document.querySelectorAll('a,button,.hex,.proj-card,.c-link,.about-link,.btn,.sn-link').forEach(el=>{
-  el.addEventListener('mouseenter',()=>document.body.classList.add('ch'));
-  el.addEventListener('mouseleave',()=>document.body.classList.remove('ch'));
-});
-document.addEventListener('mousedown',()=>document.body.classList.add('cc'));
-document.addEventListener('mouseup',()=>document.body.classList.remove('cc'));
+document.addEventListener('mousemove', e => { lx = e.clientX; ly = e.clientY; }, { passive: true });
 
-/* ── BURST ── */
-document.addEventListener('click',e=>{
-  ['#00e5ff','#a855f7','#22c55e','#f59e0b'].forEach((col,i)=>{
-    for(let k=0;k<3;k++){
-      const p=document.createElement('div');p.className='bp';
-      const ang=(i*3+k)/12*Math.PI*2,d=35+Math.random()*55;
-      p.style.cssText=`left:${e.clientX}px;top:${e.clientY}px;background:${col};box-shadow:0 0 6px ${col};--tx:${Math.cos(ang)*d}px;--ty:${Math.sin(ang)*d}px`;
-      document.body.appendChild(p);setTimeout(()=>p.remove(),650);
+(function lloop() {
+  lrx += (lx - lrx) * 0.13;
+  lry += (ly - lry) * 0.13;
+  if (lens) { lens.style.left = lrx + 'px'; lens.style.top = lry + 'px'; }
+  requestAnimationFrame(lloop);
+})();
+
+/* ── PHYSICS SHAPES ── */
+const shapeEls = [
+  document.getElementById('s0'),
+  document.getElementById('s1'),
+  document.getElementById('s2')
+];
+
+const phys = shapeEls.map(el => ({ el, rx: 0, ry: 0, vx: 0, vy: 0 }));
+let mouseX = 0, mouseY = 0;
+
+document.addEventListener('mousemove', e => { mouseX = e.clientX; mouseY = e.clientY; }, { passive: true });
+
+(function physLoop() {
+  phys.forEach(s => {
+    if (!s.el) return;
+    const r = s.el.getBoundingClientRect();
+    const cx = r.left + r.width * 0.5;
+    const cy = r.top + r.height * 0.5;
+    const dx = mouseX - cx, dy = mouseY - cy;
+    const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+    const RAD = 220;
+
+    // spring toward rest
+    s.vx += (0 - s.rx) * 0.05;
+    s.vy += (0 - s.ry) * 0.05;
+
+    // cursor repulsion
+    if (dist < RAD) {
+      const f = ((RAD - dist) / RAD) * 2.6;
+      s.vx -= (dx / dist) * f;
+      s.vy -= (dy / dist) * f;
     }
+
+    s.vx *= 0.80;
+    s.vy *= 0.80;
+    s.rx += s.vx;
+    s.ry += s.vy;
+    s.el.style.translate = s.rx + 'px ' + s.ry + 'px';
+  });
+  requestAnimationFrame(physLoop);
+})();
+
+/* shape hover — lens grow */
+shapeEls.forEach((el, i) => {
+  if (!el) return;
+  el.addEventListener('mouseenter', () => document.body.classList.add('on-shape'));
+  el.addEventListener('mouseleave', () => document.body.classList.remove('on-shape'));
+  el.addEventListener('click', () => openDetail(i));
+});
+
+/* ── 3D MENU CUBE ── */
+const cubeEl = document.getElementById('cube');
+const FACE_SEQ = ['f', 'r', 'b', 'l', 't'];
+const ROTS = { f: [0, 0], r: [0, -90], b: [0, -180], l: [0, 90], t: [-90, 0] };
+let cubeRX = 0, cubeRY = 0, cubeIdx = 0;
+let dragging = false, dragX0 = 0, dragY0 = 0, dragRX0 = 0, dragRY0 = 0;
+let dragMoved = false;
+
+function applyRot(rx, ry) {
+  if (cubeEl) cubeEl.style.transform = 'rotateX(' + rx + 'deg) rotateY(' + ry + 'deg)';
+}
+
+const cubeWrap = document.getElementById('cube-wrap');
+if (cubeWrap) {
+  cubeWrap.addEventListener('mousedown', e => {
+    dragging = true; dragMoved = false;
+    dragX0 = e.clientX; dragY0 = e.clientY;
+    dragRX0 = cubeRX; dragRY0 = cubeRY;
+    e.preventDefault();
+  });
+}
+
+document.addEventListener('mousemove', e => {
+  if (!dragging) return;
+  const dx = e.clientX - dragX0, dy = e.clientY - dragY0;
+  if (Math.abs(dx) > 4 || Math.abs(dy) > 4) dragMoved = true;
+  applyRot(dragRX0 - dy * 0.65, dragRY0 + dx * 0.65);
+});
+
+document.addEventListener('mouseup', e => {
+  if (!dragging) return;
+  dragging = false;
+  if (dragMoved) return; // drag = rotate, not click
+  // click on face → open panel
+  const face = e.target.dataset && e.target.dataset.nav;
+  if (face) { openPanel(face); return; }
+  // click on wrap → cycle face
+  cubeIdx = (cubeIdx + 1) % FACE_SEQ.length;
+  const [rx, ry] = ROTS[FACE_SEQ[cubeIdx]];
+  cubeRX = rx; cubeRY = ry;
+  applyRot(rx, ry);
+});
+
+/* face hover — lens shrink */
+document.querySelectorAll('.face').forEach(f => {
+  f.addEventListener('mouseenter', () => document.body.classList.add('on-face'));
+  f.addEventListener('mouseleave', () => document.body.classList.remove('on-face'));
+});
+
+/* ── PANELS ── */
+const PANELS = {
+  work:    document.getElementById('p-work'),
+  about:   document.getElementById('p-about'),
+  skills:  document.getElementById('p-skills'),
+  blog:    document.getElementById('p-blog'),
+  contact: document.getElementById('p-contact')
+};
+let activePanel = null;
+
+function openPanel(id) {
+  if (!PANELS[id]) return;
+  closeAll();
+  PANELS[id].classList.add('open');
+  activePanel = id;
+}
+function closePanel() {
+  if (activePanel && PANELS[activePanel]) PANELS[activePanel].classList.remove('open');
+  activePanel = null;
+}
+function closeAll() { closePanel(); closeDetail(); }
+
+document.querySelectorAll('.p-close').forEach(btn => {
+  btn.addEventListener('click', closePanel);
+});
+
+/* work panel → project list → detail */
+document.querySelectorAll('.p-item').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const pid = parseInt(btn.dataset.pid);
+    closePanel();
+    openDetail(pid);
   });
 });
 
-/* ── SPARKLINE ── */
-(function(){
-  const c=document.getElementById('spark');if(!c)return;
-  c.width=c.offsetWidth||320;c.height=48;
-  const ctx=c.getContext('2d'),pts=[];
-  for(let i=0;i<40;i++)pts.push(20+Math.random()*28);
-  function draw(){
-    c.width=c.offsetWidth;
-    const W=c.width,H=48;ctx.clearRect(0,0,W,H);
-    pts.push(20+Math.random()*28);if(pts.length>50)pts.shift();
-    const max=Math.max(...pts),min=Math.min(...pts);
-    ctx.beginPath();
-    pts.forEach((v,i)=>{const x=i/(pts.length-1)*W,y=H-(v-min)/(max-min+1)*(H-6)-3;i===0?ctx.moveTo(x,y):ctx.lineTo(x,y)});
-    ctx.strokeStyle=`rgba(${tc()},.7)`;ctx.lineWidth=1.5;ctx.stroke();
-    const grad=ctx.createLinearGradient(0,0,0,H);
-    grad.addColorStop(0,`rgba(${tc()},.15)`);grad.addColorStop(1,`rgba(${tc()},0)`);
-    ctx.lineTo(W,H);ctx.lineTo(0,H);ctx.closePath();ctx.fillStyle=grad;ctx.fill();
-    setTimeout(()=>requestAnimationFrame(draw),120);
-  }
-  draw();
-})();
+/* ── DETAIL OVERLAY (z-zoom) ── */
+const detail = document.getElementById('detail');
+const dBody  = document.getElementById('d-body');
 
-/* ── TYPEWRITER ── */
-(function(){
-  const roles=['Senior Backend Engineer','DevOps & Infrastructure Engineer','AI/MLOps Platform Builder','Microservices Architect'];
-  const el=document.getElementById('tw');let ri=0,ci=0,del=false;
-  function tick(){
-    const cur=roles[ri];
-    if(del){el.textContent=cur.slice(0,--ci);if(ci===0){del=false;ri=(ri+1)%roles.length;setTimeout(tick,350);return}setTimeout(tick,38)}
-    else{el.textContent=cur.slice(0,++ci);if(ci===cur.length){del=true;setTimeout(tick,2200);return}setTimeout(tick,75)}
-  }
-  setTimeout(tick,1800);
-})();
-
-/* ── METRICS LIVE REQUEST COUNTER ── */
-setInterval(()=>{
-  const el=document.querySelector('.mp-val.cc');
-  if(el&&el.textContent.includes(',')){const v=Math.floor(9800+Math.random()*400);el.textContent=v.toLocaleString()+'+'}
-},2000);
-
-/* ── INTERSECTION OBSERVER ── */
-const CHARS='!<>-_\\/[]{}=+*^?#01ABCDabcd';
-function scramble(el){
-  const orig=el.innerHTML,plain=el.innerText;let f=0,tot=22;
-  function run(){
-    if(f>=tot){el.innerHTML=orig;return}
-    el.innerText=plain.split('').map((ch,i)=>{if(ch===' ')return ' ';if(i<f/tot*plain.length)return ch;return CHARS[Math.floor(Math.random()*CHARS.length)]}).join('');
-    f++;requestAnimationFrame(run);
-  }
-  run();
+function openDetail(pid) {
+  const p = PROJECTS[pid];
+  if (!dBody || !detail) return;
+  dBody.innerHTML =
+    '<div class="d-accent" style="background:' + p.color + '"></div>' +
+    '<div class="d-cmd">' + p.cmd + '&nbsp;&nbsp;—&nbsp;&nbsp;' + p.status + '</div>' +
+    '<div class="d-title">' + p.name + '</div>' +
+    '<p class="d-desc">' + p.desc + '</p>' +
+    '<div class="d-tech">' +
+      p.tech.map(t => '<span class="d-badge">' + t + '</span>').join('') +
+    '</div>';
+  detail.classList.add('open');
 }
-function counter(el){
-  const to=parseInt(el.dataset.count),suf=el.dataset.suf||'+',dur=1300,s=performance.now();
-  function step(n){const p=Math.min((n-s)/dur,1),e=1-Math.pow(1-p,3);el.textContent=Math.round(e*to)+(p>=1?suf:'');if(p<1)requestAnimationFrame(step)}
-  requestAnimationFrame(step);
+function closeDetail() {
+  if (detail) detail.classList.remove('open');
 }
 
-const obs=new IntersectionObserver(entries=>{
-  entries.forEach(e=>{
-    if(!e.isIntersecting)return;
-    const el=e.target;el.classList.add('on');
-    if(el.dataset.count)counter(el);
-    if(el.classList.contains('sc'))scramble(el);
-    obs.unobserve(el);
-  });
-},{threshold:.1,rootMargin:'0px 0px -30px 0px'});
-document.querySelectorAll('.ri,.rl,.rr,.rz,[data-count]').forEach(el=>obs.observe(el));
+const dClose = document.getElementById('d-close');
+if (dClose) dClose.addEventListener('click', closeDetail);
 
-/* hexagon staggered reveal */
-const hexObs=new IntersectionObserver(entries=>{
-  entries.forEach(e=>{
-    if(!e.isIntersecting)return;
-    e.target.querySelectorAll('.hex').forEach((h,i)=>setTimeout(()=>h.classList.add('on'),i*40));
-    hexObs.unobserve(e.target);
-  });
-},{threshold:.1});
-const hc=document.getElementById('hc');if(hc)hexObs.observe(hc);
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeAll();
+});
 
-/* ── MAGNETIC BUTTONS ── */
-document.querySelectorAll('.mag').forEach(w=>{
-  w.addEventListener('mousemove',e=>{const r=w.getBoundingClientRect(),x=(e.clientX-r.left-r.width/2)*.28,y=(e.clientY-r.top-r.height/2)*.28;w.style.transform=`translate(${x}px,${y}px)`});
-  w.addEventListener('mouseleave',()=>w.style.transform='');
+/* click outside panel → close */
+document.addEventListener('click', e => {
+  if (!activePanel) return;
+  const panelEl = PANELS[activePanel];
+  if (panelEl && !panelEl.contains(e.target) && !cubeWrap.contains(e.target)) closePanel();
+});
+
+/* ── WEB AUDIO — generative ambient ── */
+let ac, osc1, osc2, lfoNode, gainNode, filterNode, audioReady = false;
+
+function startAudio() {
+  if (audioReady) return;
+  audioReady = true;
+  try {
+    ac = new (window.AudioContext || window.webkitAudioContext)();
+    if (ac.state === 'suspended') ac.resume();
+
+    gainNode   = ac.createGain();
+    filterNode = ac.createBiquadFilter();
+    filterNode.type      = 'bandpass';
+    filterNode.frequency.value = 280;
+    filterNode.Q.value   = 6;
+
+    osc1 = ac.createOscillator();
+    osc1.type = 'sine';
+    osc1.frequency.value = 55; // A1 drone
+
+    osc2 = ac.createOscillator();
+    osc2.type = 'triangle';
+    osc2.frequency.value = 82.4; // E2 fifth
+
+    // LFO for gentle tremolo
+    lfoNode = ac.createOscillator();
+    const lfoGain = ac.createGain();
+    lfoNode.frequency.value = 0.18;
+    lfoGain.gain.value = 0.006;
+    lfoNode.connect(lfoGain);
+    lfoGain.connect(gainNode.gain);
+
+    osc1.connect(filterNode);
+    osc2.connect(filterNode);
+    filterNode.connect(gainNode);
+    gainNode.connect(ac.destination);
+
+    gainNode.gain.setValueAtTime(0, ac.currentTime);
+    gainNode.gain.linearRampToValueAtTime(0.014, ac.currentTime + 2.5);
+
+    osc1.start(); osc2.start(); lfoNode.start();
+  } catch (e) {
+    audioReady = false;
+  }
+}
+
+document.addEventListener('mousemove', startAudio, { once: true });
+document.addEventListener('click',     startAudio, { once: true });
+
+/* mouse → filter sweep */
+document.addEventListener('mousemove', e => {
+  if (!filterNode || !ac) return;
+  const nx = e.clientX / innerWidth;
+  const ny = e.clientY / innerHeight;
+  filterNode.frequency.setTargetAtTime(160 + nx * 700, ac.currentTime, 0.14);
+  gainNode.gain.setTargetAtTime(0.008 + ny * 0.014, ac.currentTime, 0.18);
+}, { passive: true });
+
+/* shape hover → brief tonal blip */
+shapeEls.forEach((el, i) => {
+  if (!el) return;
+  el.addEventListener('mouseenter', () => {
+    if (!ac) return;
+    const b = ac.createOscillator();
+    const bg = ac.createGain();
+    bg.gain.setValueAtTime(0.05, ac.currentTime);
+    bg.gain.exponentialRampToValueAtTime(0.0001, ac.currentTime + 0.22);
+    b.frequency.value = [330, 440, 554][i];
+    b.type = 'sine';
+    b.connect(bg); bg.connect(ac.destination);
+    b.start(); b.stop(ac.currentTime + 0.22);
+  });
+});
+
+/* panel open → subtle click */
+function audioClick() {
+  if (!ac) return;
+  const b = ac.createOscillator();
+  const bg = ac.createGain();
+  bg.gain.setValueAtTime(0.03, ac.currentTime);
+  bg.gain.exponentialRampToValueAtTime(0.0001, ac.currentTime + 0.08);
+  b.frequency.value = 880;
+  b.connect(bg); bg.connect(ac.destination);
+  b.start(); b.stop(ac.currentTime + 0.08);
+}
+document.querySelectorAll('.face, .p-item').forEach(el => {
+  el.addEventListener('click', audioClick);
 });
 
 /* ── CALENDLY ── */
-const calBtn=document.getElementById('calBtn');
-if(calBtn)calBtn.addEventListener('click',()=>Calendly.initPopupWidget({url:'https://calendly.com/talha-zafar-j/30min'}));
-
-/* ── NAV ACTIVE STATE (sidebar highlight) ── */
-const snLinks=document.querySelectorAll('.sn-link');
-const sectionObs=new IntersectionObserver(entries=>{
-  entries.forEach(e=>{
-    if(e.isIntersecting){
-      snLinks.forEach(l=>l.classList.toggle('active',l.getAttribute('href')==='#'+e.target.id));
+const calBtn = document.getElementById('calBtn');
+if (calBtn) {
+  calBtn.addEventListener('click', () => {
+    if (typeof Calendly !== 'undefined') {
+      Calendly.initPopupWidget({ url: 'https://calendly.com/talha-zafar-j/30min' });
     }
   });
-},{threshold:.4});
-document.querySelectorAll('section[id]').forEach(s=>sectionObs.observe(s));
-
-window.addEventListener('scroll',()=>document.getElementById('nav').classList.toggle('s',scrollY>50),{passive:true});
-const ham=document.getElementById('ham'),nl=document.getElementById('nl');
-if(ham&&nl){
-  ham.addEventListener('click',()=>nl.classList.toggle('open'));
-  nl.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>nl.classList.remove('open')));
 }
-
-/* ── DEPTH SCROLL — subtle z-recede for off-screen sections ── */
-(function(){
-  if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion:reduce)').matches)return;
-  if(innerWidth<700)return;
-  const secs=Array.from(document.querySelectorAll('section[id]'));
-  function up(){
-    const cy=scrollY+innerHeight*.45;
-    secs.forEach(function(s){
-      const mid=s.offsetTop+s.offsetHeight*.5;
-      const raw=(cy-mid)/(innerHeight*1.35);
-      const a=Math.min(Math.abs(raw),1);
-      s.style.transform='scale('+(1-a*.016).toFixed(4)+')';
-      s.style.opacity=(1-a*.2).toFixed(3);
-    });
-  }
-  window.addEventListener('scroll',up,{passive:true});
-  up();
-})();
-
-/* ── SECTION REACTIVE ACCENT GLOW ── */
-(function(){
-  const COLS={hero:'0,229,255',about:'0,229,255',skills:'168,85,247',experience:'34,197,94',projects:'0,229,255',blog:'245,158,11',contact:'0,229,255'};
-  const sg=document.createElement('div');
-  sg.id='sg';
-  document.body.insertBefore(sg,document.body.firstChild);
-  const acObs=new IntersectionObserver(function(entries){
-    entries.forEach(function(e){
-      if(e.isIntersecting&&COLS[e.target.id])
-        sg.style.background='radial-gradient(ellipse 55% 45% at 50% 50%,rgba('+COLS[e.target.id]+',.028),transparent 70%)';
-    });
-  },{threshold:.35});
-  document.querySelectorAll('section[id]').forEach(function(s){acObs.observe(s)});
-})();
