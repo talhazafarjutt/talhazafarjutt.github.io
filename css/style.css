@@ -152,8 +152,8 @@ section{position:relative;padding:100px 0;overflow:hidden}
   left:50%;bottom:8vh;transform:translateX(-50%);
 }
 
-/* reveal labels (lens effect) */
-.rl{
+/* reveal labels (lens effect) — hero only */
+.hlabel{
   position:absolute;left:var(--rx);top:var(--ry);
   font-family:var(--mono);font-size:.6rem;letter-spacing:.18em;
   text-transform:uppercase;color:var(--bg);
@@ -427,23 +427,23 @@ section{position:relative;padding:100px 0;overflow:hidden}
 /* ── CONTACT ── */
 #contact{background:rgba(6,5,12,.92);padding-bottom:80px}
 .contact-grid{display:grid;grid-template-columns:1fr 1.5fr;gap:2.5rem;align-items:start}
-.contact-links{display:flex;flex-direction:column;gap:.5rem}
+.contact-links{display:flex;flex-direction:column;gap:.6rem}
 .c-link{
-  display:flex;align-items:center;gap:.8rem;
-  padding:.75rem .9rem;border:1px solid var(--b);
-  color:rgba(255,255,255,.6);transition:all .22s;
+  display:flex;align-items:center;gap:1rem;
+  padding:1rem 1.1rem;border:1px solid var(--b);
+  color:rgba(255,255,255,.7);transition:all .22s;
   position:relative;overflow:hidden;
 }
 .c-link::before{content:'';position:absolute;inset:0;background:rgba(200,16,46,.06);transform:translateX(-100%);transition:transform .28s}
 .c-link:hover::before{transform:translateX(0)}
 .c-link:hover{border-color:rgba(200,16,46,.3);color:#fff;transform:translateX(4px)}
 .c-mark{
-  width:32px;height:32px;background:rgba(200,16,46,.1);border:1px solid rgba(200,16,46,.2);
+  width:40px;height:40px;background:rgba(200,16,46,.1);border:1px solid rgba(200,16,46,.2);
   display:flex;align-items:center;justify-content:center;
-  font-size:.7rem;flex-shrink:0;position:relative;z-index:1;
+  font-size:.8rem;flex-shrink:0;position:relative;z-index:1;font-weight:700;
 }
-.c-lbl{font-family:var(--mono);font-size:.58rem;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.08em;position:relative;z-index:1}
-.c-val{font-size:.82rem;margin-top:.08rem;position:relative;z-index:1}
+.c-lbl{font-family:var(--mono);font-size:.65rem;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.08em;position:relative;z-index:1}
+.c-val{font-size:.92rem;margin-top:.1rem;position:relative;z-index:1;font-weight:500}
 
 .cal-box{
   background:rgba(12,10,20,.9);border:1px solid rgba(255,255,255,.07);
