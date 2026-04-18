@@ -47,7 +47,7 @@ body.on-cube  #lens{width:55px; height:55px}
 
 /* ── LAYOUT ── */
 .sec-wrap{max-width:1160px;margin:0 auto;padding:0 2.5rem;position:relative;z-index:2}
-section{position:relative;padding:100px 0;overflow:hidden}
+section{position:relative;padding:100px 0}
 
 /* reveal animations */
 .ri{opacity:0;transform:translateY(32px);transition:opacity .7s var(--ease),transform .7s var(--ease)}
@@ -75,14 +75,6 @@ section{position:relative;padding:100px 0;overflow:hidden}
 }
 .sec-sub{font-size:.9rem;color:rgba(255,255,255,.45);margin-top:-2rem;margin-bottom:3rem;max-width:600px;line-height:1.7}
 
-/* ── DECORATIVE SHAPES ── */
-.deco-square{position:absolute;pointer-events:none;z-index:0}
-.deco-bar   {position:absolute;pointer-events:none;z-index:0}
-.deco-tri   {
-  position:absolute;pointer-events:none;z-index:0;
-  width:70px;height:60px;background:var(--yel);
-  clip-path:polygon(50% 0%,100% 100%,0% 100%);
-}
 
 /* ── FIXED CUBE NAV ── */
 #cube-wrap{
@@ -254,8 +246,8 @@ section{position:relative;padding:100px 0;overflow:hidden}
   background:linear-gradient(135deg,var(--red),var(--yel));
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
 }
-.about-left p{font-size:.9rem;color:rgba(255,255,255,.5);line-height:1.85;margin-bottom:.9rem}
-.about-left p strong{color:var(--c);font-weight:500}
+.about-left p{font-size:.9rem;color:rgba(255,255,255,.62);line-height:1.85;margin-bottom:.9rem}
+.about-left p strong{color:#fff;font-weight:600}
 .about-links{display:flex;flex-direction:column;gap:.5rem;margin-top:1.4rem}
 .al{
   display:flex;align-items:center;gap:.8rem;
