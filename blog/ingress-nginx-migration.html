@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="ingress-nginx retired in March 2026 — archived, read-only, no more security patches. The exact production migration to Gateway API I ran, step by step, without dropping a request.">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<title>Replacing ingress-nginx in Production Without Breaking Anything — Talha Zafar</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%2300e5ff'/%3E%3Cstop offset='1' stop-color='%23a855f7'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='13' fill='%2305050f'/%3E%3Crect x='1.5' y='1.5' width='61' height='61' rx='12' fill='none' stroke='url(%23g)' stroke-width='2'/%3E%3Ctext x='7' y='42' font-family='monospace' font-weight='700' font-size='24' fill='%2300e5ff'%3E%3E_%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+<div id="prog"></div>
+<nav id="nav">
+  <div class="nav-bar">
+    <a href="/" class="nav-logo">talha<em>.</em>zafar</a>
+    <div class="blog-nav-right">
+      <a href="/#blog" class="back-link">← All Articles</a>
+      <button class="theme-btn" id="themeBtn" aria-label="Toggle theme"><svg class="moon-ico" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg> <svg class="sun-ico" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button>
+    </div>
+  </div>
+</nav>
+<header class="bp-header">
+  <div class="w">
+    <div class="bp-tags ri">
+      <span class="tag-p">Kubernetes</span><span class="tag-p">Gateway API</span><span class="tag-a">Migration</span><span class="tag-g">DevOps</span>
+    </div>
+    <h1 class="bp-title ri">Replacing ingress-nginx in Production Without Breaking Anything</h1>
+    <div class="bp-meta ri"><span>Jul 2026</span><span class="bp-meta-dot">·</span><span>12 min read</span><span class="bp-meta-dot">·</span><span>Talha Zafar</span></div>
+  </div>
+</header>
+<main class="bp-body">
+  <div class="w">
+    <p class="bp-p ri">ingress-nginx retired in March 2026. The repository is archived and read-only — no more releases, no bug fixes, no security patches. Every CVE discovered from here on stays open forever, and it sits at the one place in your cluster that faces the public internet. When the retirement landed, roughly half of all Kubernetes environments were running this controller. So if you're reading this with ingress-nginx still at your edge, you're not alone. You're also not safe. This is the migration I ran across our clusters, in the order I ran it — not a feature comparison, not a vendor pitch, just the actual sequence of work.</p>
+
+    <h4 class="bp-h4 ri">Step 1 — Find out what you're actually running</h4>
+    <p class="bp-p">Before touching anything, I built an honest inventory. You cannot plan a cutover around a controller you only half understand. Start with the controller pod itself:</p>
+    <pre class="bp-pre"><code>kubectl get pods --all-namespaces \
+  --selector app.kubernetes.io/name=ingress-nginx</code></pre>
+    <p class="bp-p">Then every Ingress resource that depends on it. Some of ours declared <code>ingressClassName</code>, plenty of older ones still used the legacy annotation, so I matched both:</p>
+    <pre class="bp-pre"><code>kubectl get ingress -A -o json | jq -r '.items[]
+  | select(.spec.ingressClassName=="nginx"
+      or (.metadata.annotations["kubernetes.io/ingress.class"]=="nginx"))
+  | "\(.metadata.namespace)/\(.metadata.name)"'</code></pre>
+    <p class="bp-p">Now the part that actually decides how long this project takes. The routing rules migrate in an afternoon. The annotations are the real work. Rank every nginx-specific annotation in the cluster by how often it shows up:</p>
+    <pre class="bp-pre"><code>kubectl get ingress -A -o json | jq -r '.items[].metadata.annotations // {}
+  | keys[]' | grep nginx.ingress.kubernetes.io | sort | uniq -c | sort -rn</code></pre>
+    <p class="bp-p">When I ran this the first time, the output was longer than I wanted it to be. Pay special attention to anything with <code>configuration-snippet</code> or <code>server-snippet</code>. Those inject raw nginx config, they have no equivalent anywhere else, and the security hole they opened is a big part of why the project died in the first place. Every one of those is a manual rewrite and a conversation.</p>
+    <p class="bp-p">One last check people forget — third-party Helm charts that vendor their own ingress-nginx as a dependency:</p>
+    <pre class="bp-pre"><code>find . -name "Chart.yaml" -exec grep -l "ingress-nginx" {} \;</code></pre>
+    <p class="bp-p">If a chart installs its own copy, you either override it in values or wait for upstream to fix it. I tracked those on a separate line in the migration doc, because they're not yours to cut over and they'll quietly reinstall the thing you just removed.</p>
+
+    <h4 class="bp-h4">Step 2 — Pick your destination before you pick your tool</h4>
+    <p class="bp-p">There are two honest paths, and I've walked both depending on the cluster.</p>
+    <p class="bp-p"><strong>Path one is Gateway API.</strong> This is where all Kubernetes networking development has moved, and it's where you end up eventually regardless. The implementations worth evaluating: Cilium if it's already your CNI, because then the gateway runs on infrastructure you already operate; Envoy Gateway for the cleanest, most spec-conformant standalone option; Istio if you already run the mesh; Traefik or Kong if you want one controller that speaks both Ingress and Gateway API at once; NGINX Gateway Fabric if your team wants to stay in the nginx world.</p>
+    <p class="bp-p"><strong>Path two is staying on the Ingress API with a maintained controller.</strong> The Ingress API isn't going anywhere — it's frozen, not deleted. Traefik, HAProxy, Contour, and F5's NGINX Ingress Controller (<code>nginxinc/kubernetes-ingress</code> — a completely different codebase from the retired project, despite the maddeningly similar name) all still support it. This is the pragmatic move if you have hundreds of Ingress resources and zero capacity for a rewrite this quarter.</p>
+    <p class="bp-p">The rule I use: if your annotation audit came back heavy, deploy a dual-support controller like Traefik or Cilium first, swap the controller with minimal YAML changes, then convert routes to Gateway API at your own pace. If the audit came back light, or you're already on Cilium, go straight to Gateway API and skip the intermediate state. Some vendors will also sell you extended support for the retired controller if you genuinely need to buy a year — but that's a payment plan, not a plan. The rest of this write-up assumes the Gateway API path, because that's the destination either way.</p>
+
+    <h4 class="bp-h4">Step 3 — Convert the routing</h4>
+    <p class="bp-p">Run the official conversion tool first. It's a kubernetes-sigs project and it handles the boring 80% — hosts, paths, backends, and TLS references all become Gateways and HTTPRoutes:</p>
+    <pre class="bp-pre"><code>ingress2gateway print --providers ingress-nginx</code></pre>
+    <p class="bp-p">Treat the output as a first draft, not a finished manifest. It doesn't touch snippets and it can't make judgment calls. Everything else I translated by hand. The common annotations map like this:</p>
+    <ul class="bp-ul">
+      <li><strong>canary + canary-weight</strong> → a single HTTPRoute rule with two <code>backendRefs</code> carrying <code>weight</code> fields (80 and 20) in plain YAML</li>
+      <li><strong>ssl-redirect</strong> → an HTTPRoute on the HTTP listener with a <code>RequestRedirect</code> filter setting scheme <code>https</code> and status <code>301</code></li>
+      <li><strong>rewrite-target</strong> → a <code>URLRewrite</code> filter with <code>ReplacePrefixMatch</code> — but nginx regex capture groups like <code>/$2</code> have no direct equivalent, so any rewrite that leaned on captures needs rethinking, not translating</li>
+      <li><strong>header manipulation snippets</strong> → <code>RequestHeaderModifier</code> and <code>ResponseHeaderModifier</code> filters</li>
+    </ul>
+    <p class="bp-p">Then there's the group that doesn't live in the core spec at all: body-size limits, timeouts, rate limiting, IP allowlists, session affinity. Gateway API deliberately punted these to implementations through policy attachment. In Envoy Gateway that's <code>BackendTrafficPolicy</code>, <code>ClientTrafficPolicy</code>, and <code>SecurityPolicy</code>. In Cilium some of it lands in <code>CiliumNetworkPolicy</code>. In Traefik it's <code>Middleware</code> CRDs. Budget real time here — this is exactly where migrations stall, because it's per-implementation and none of it converts automatically.</p>
+    <p class="bp-p">Certificates keep working, which is the part people worry about most and shouldn't. cert-manager supports Gateway API natively once you flip on the <code>gateway-api</code> feature gate — it'll watch Gateway listeners and issue certs the same way it watched Ingress resources. external-dns similarly supports <code>gateway-httproute</code> as a source. Update both <em>before</em> cutover, not after. I made that mistake on a staging cluster once and spent twenty minutes convinced DNS was broken when it was just external-dns still watching the wrong source.</p>
+
+    <h4 class="bp-h4">Step 4 — Run both edges in parallel</h4>
+    <p class="bp-p">Install the new controller <em>alongside</em> ingress-nginx. It gets its own LoadBalancer Service and its own external IP. Nothing about the old path changes yet — this is the whole point, and it's what makes the migration safe.</p>
+    <p class="bp-p">Deploy the converted Gateways and HTTPRoutes pointing at the same backend Services the old Ingresses already use. Then test against the new IP directly, without touching DNS at all:</p>
+    <pre class="bp-pre"><code>curl -H "Host: app.example.com" https://NEW_LB_IP/ -k -v</code></pre>
+    <p class="bp-p">Verify parity path by path. Certificates resolve. Websocket upgrades survive. gRPC works if you serve it. And check that the backend still sees real client IPs — that usually means <code>externalTrafficPolicy: Local</code> on the new LoadBalancer Service plus correct forwarded-header config on the gateway, because Envoy handles <code>X-Forwarded-For</code> differently than nginx did. The first time through I found two services whose access logs suddenly showed the LoadBalancer's IP for every request. Caught it here, before DNS, which is the entire reason you run both edges in parallel.</p>
+
+    <h4 class="bp-h4">Step 5 — Cut over one hostname at a time</h4>
+    <p class="bp-p">Drop DNS TTLs to 60 seconds a full day before you start — the change has to propagate before it's useful. Then move a single low-risk hostname to the new IP and watch it for a day: error rates, latency percentiles, certificate expiry, log volume. Then the next one. There is no prize for cutting over fast.</p>
+    <p class="bp-p">Keep ingress-nginx running the entire time. Your rollback is a DNS record pointing back at the old IP, which with a 60-second TTL means a rollback measured in minutes, not hours. Do not delete anything while a single hostname still resolves to the old edge.</p>
+    <p class="bp-p">Long-lived connections deserve their own plan. Websocket sessions established against the old controller stay pinned there until they close — DNS changes don't touch a live TCP connection. So schedule the final termination of the old controller during your lowest-traffic window, and expect a reconnect storm when you do it. We moved ours to a Sunday 03:00 slot and the reconnect spike was a non-event; on a weekday afternoon it would not have been.</p>
+
+    <h4 class="bp-h4">Step 6 — The things that bite</h4>
+    <p class="bp-p">These are the failures I actually watched for, because none of them show up in a test curl. They show up a week later, in production, disconnected from the change that caused them.</p>
+    <ul class="bp-ul">
+      <li><strong>Path matching semantics.</strong> nginx with <code>use-regex: true</code> matched paths like <code>/api(/|$)(.*)</code>. Gateway API core guarantees only <code>Exact</code> and <code>PathPrefix</code>. <code>RegularExpression</code> matching exists in the spec but support is implementation-specific — check your gateway's conformance report before assuming a regex route carries over.</li>
+      <li><strong>Silent monitoring loss.</strong> Every Prometheus series starting with <code>nginx_ingress_controller_</code> vanishes at cutover. Any Grafana panel or alert built on those metrics goes dark <em>without erroring</em>. Rebuild edge alerting on the new controller's metrics before you move production traffic, or you'll be flying blind at the exact moment you most need eyes on the edge.</li>
+      <li><strong>Default backend behavior.</strong> nginx served a configurable default backend for unmatched requests. Gateway implementations return their own 404s. If anything downstream depended on the old default-backend response shape, it will notice — and it won't tell you politely.</li>
+      <li><strong>Body-size and timeout regressions.</strong> nginx defaulted <code>proxy-body-size</code> to 1m and half the clusters I've seen raised it via annotation. The new gateway ships its own defaults. File uploads that worked for years start returning <code>413</code>, and nobody connects it to the migration for a week. Same story for long-running request timeouts.</li>
+    </ul>
+
+    <div class="bp-result">
+      <strong>The migration in numbers:</strong> both edges run in parallel from day one · rollback = one DNS record, ~60s TTL, minutes to revert · cut over one hostname at a time, watch a day each · zero dropped requests across the fleet · old controller scaled to zero only after 1–2 weeks of soak per host
+    </div>
+
+    <h4 class="bp-h4">Step 7 — Decommission properly</h4>
+    <p class="bp-p">After every hostname has lived on the new edge for one to two weeks of soak, scale the ingress-nginx deployment to zero and leave it there for another week. If nothing screams, delete the Helm release, delete the old Ingress manifests from Git so nobody reapplies them by accident, and remove the old LoadBalancer Service so you stop paying for the IP. That last one is easy to forget and shows up on the cloud bill instead of in the cluster.</p>
+    <p class="bp-p">Then — since you're now on Gateway API — split ownership the way the spec intends. Infrastructure owns the <code>GatewayClass</code>. The platform team owns the <code>Gateway</code>. Application teams own their own <code>HTTPRoute</code>s in their own namespaces, and any cross-namespace reference requires an explicit <code>ReferenceGrant</code>. That separation is the actual payoff of this whole thing. The retirement forced my hand, but the architecture I landed on is genuinely better than the one I left. That doesn't happen often with a forced migration, so I'll take it.</p>
+
+    <h4 class="bp-h4">What I'd tell myself before starting</h4>
+    <ul class="bp-ul">
+      <li>The routing is an afternoon. The annotations are the project. Audit them first and let that number set the timeline.</li>
+      <li><code>configuration-snippet</code> and <code>server-snippet</code> are pure manual work — no tool converts raw nginx config, so surface them on day one.</li>
+      <li>Run both edges in parallel and test against the new IP with a <code>Host</code> header before DNS ever changes.</li>
+      <li>Rebuild your edge dashboards and alerts on the new metrics <em>before</em> cutover — the old <code>nginx_ingress_controller_</code> series die silently.</li>
+      <li>Cut over one hostname at a time with a 60-second TTL. Slow is the feature, not the bug.</li>
+    </ul>
+
+    <div class="bp-footer-nav">
+      <a href="/#blog">← All Articles</a>
+      <a href="gpu-inference.html">Next: Bare-Metal GPU Inference →</a>
+    </div>
+  </div>
+</main>
+<footer>
+  <div class="w">
+    <div class="ft">
+      <div class="ft-l"><em>talha.zafar</em> © 2026 · talhazafarjutt.github.io</div>
+      <div class="ft-r">
+        <a href="/#blog">All Articles</a>
+        <a href="/">Portfolio</a>
+        <a href="mailto:talha.zafar.j@gmail.com">Email</a>
+      </div>
+    </div>
+  </div>
+</footer>
+<script src="../js/blog.js" defer></script>
+</body>
+</html>
