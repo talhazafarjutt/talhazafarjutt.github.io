@@ -51,8 +51,8 @@
 
   <div class="hero-content">
     <div class="h-badges">
-      <span class="badge badge-g"><span class="dot-g"></span>Available for new opportunities</span>
-      <span class="badge badge-a">✈️ Open to relocation worldwide</span>
+      <span class="badge badge-g"><span class="dot-g"></span>Available — freelance projects &amp; full-time roles</span>
+      <span class="badge badge-a">🌍 Remote worldwide · PKT (UTC+5) · open to relocation</span>
     </div>
     <div id="name-block">
       <span id="name-a">TALHA</span>
@@ -61,9 +61,9 @@
     <div id="role-line"><span class="pre">~/role $&nbsp;</span><span id="tw"></span></div>
     <p class="hero-desc">Backend &amp; DevOps engineer with <strong>4+ years</strong> building <strong>AI inference infrastructure</strong>, distributed microservices, and <strong>zero-trust security pipelines</strong>.</p>
     <div class="hero-btns">
-      <a href="#projects" class="btn btn-fill">View Work ↓</a>
-      <a href="#contact" class="btn btn-out">Schedule a Call →</a>
-      <a href="talha_zafar_resume.pdf" download class="btn btn-out">↓ Resume</a>
+      <a href="#contact" class="btn btn-fill">Hire me for a project →</a>
+      <a href="#projects" class="btn btn-out">View Work ↓</a>
+      <a href="talha_zafar_resume.pdf" download class="btn btn-out">Full-time roles · Resume ↓</a>
     </div>
   </div>
 
@@ -85,19 +85,54 @@
   </div>
 </div>
 
+<!-- ══════════ HOW I HELP ══════════ -->
+<section id="services">
+  <div class="sec-wrap">
+    <div class="sec-label ri"><span class="sec-num">01</span>how i help</div>
+    <h2 class="sec-title ri">What I can <span>do for you</span></h2>
+    <p class="sec-sub ri">Three things teams bring me in for — each backed by production work, not slides. Follow the link on any card to read exactly how it went.</p>
+
+    <div class="help-grid">
+      <div class="help-card ri">
+        <div class="sp-accent" style="background:var(--c)"></div>
+        <div class="help-out">Run your own LLM inference at a fraction of cloud cost</div>
+        <p class="help-desc">I stand up production GPU inference end to end — vLLM on bare-metal K3s, a FastAPI load-balancer, and an API gateway with key auth and rate limits. One cluster I run serves 10k+ requests a day at ~$180/month, against ~$8,800 for the equivalent on AWS.</p>
+        <div class="sp-tags"><span>vLLM</span><span>K3s</span><span>GPU</span><span>FastAPI</span></div>
+        <a href="blog/gpu-inference.html" class="bc-link">See how →</a>
+      </div>
+
+      <div class="help-card ri" style="transition-delay:.08s">
+        <div class="sp-accent" style="background:var(--p)"></div>
+        <div class="help-out">APIs that stay fast and calm under load</div>
+        <p class="help-desc">Python and Node microservices that hold sub-100ms P95 at 10k+ daily requests — gRPC where it actually earns its keep, Redis caching that cut database load 60%, and async design that doesn't fall over at the worst possible moment.</p>
+        <div class="sp-tags"><span>FastAPI</span><span>gRPC</span><span>Redis</span><span>PostgreSQL</span></div>
+        <a href="blog/grpc-vs-rest.html" class="bc-link">See how →</a>
+      </div>
+
+      <div class="help-card ri" style="transition-delay:.16s">
+        <div class="sp-accent" style="background:var(--a)"></div>
+        <div class="help-out">Lock down the edge before it costs you</div>
+        <p class="help-desc">Zero-trust secrets with HashiCorp Vault, CI/CD wired with SAST plus container and secret scanning, and calm incident response when it counts — including shutting down a live Stripe carding attack and taking fraud to zero.</p>
+        <div class="sp-tags"><span>Vault</span><span>OWASP</span><span>GitHub Actions</span><span>GDPR</span></div>
+        <a href="blog/stripe-carding.html" class="bc-link">See how →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ══════════ ABOUT ══════════ -->
 <section id="about">
   <div class="sec-wrap">
     <div class="about-grid">
       <div class="about-left ri">
-        <div class="sec-label"><span class="sec-num">01</span>about me</div>
+        <div class="sec-label"><span class="sec-num">02</span>about me</div>
         <h2 class="sec-title">Building systems that <span>don't break</span></h2>
         <p>Expert in <strong>Python microservices</strong> (FastAPI, Django, Flask) and <strong>Node.js/NestJS</strong>. I architect backends that serve 10k+ daily requests with sub-100ms P95 latency — then lock them down with OWASP practices, ECDH encryption, and zero-trust infrastructure.</p>
         <p>On the infra side I own a <strong>bare-metal GPU cluster</strong> (4× Tesla V100), K3s Kubernetes, LXD containers, and HashiCorp Vault. Currently building <strong>AI agent platforms</strong> and LLM deployment pipelines at production scale.</p>
         <div class="about-links">
           <a href="mailto:talha.zafar.j@gmail.com" class="al"><div class="al-mark">✉</div>talha.zafar.j@gmail.com</a>
           <a href="https://linkedin.com/in/talhazafarj" target="_blank" rel="noopener noreferrer" class="al"><div class="al-mark">in</div>linkedin.com/in/talhazafarj</a>
-          <a href="https://github.com/talhazafarj" target="_blank" rel="noopener noreferrer" class="al"><div class="al-mark">gh</div>github.com/talhazafarj</a>
+          <a href="https://github.com/talhazafarjutt" target="_blank" rel="noopener noreferrer" class="al"><div class="al-mark">gh</div>github.com/talhazafarjutt</a>
           <a href="tel:+923073576146" class="al"><div class="al-mark">☏</div>+92 307 357 6146 · Lahore, Pakistan</a>
         </div>
       </div>
@@ -132,7 +167,7 @@
 <!-- ══════════ SKILLS ══════════ -->
 <section id="skills">
   <div class="sec-wrap">
-    <div class="sec-label ri"><span class="sec-num">02</span>tech stack</div>
+    <div class="sec-label ri"><span class="sec-num">03</span>tech stack</div>
     <h2 class="sec-title ri">Skills &amp; <span>Technologies</span></h2>
 
     <div class="skills-grid">
@@ -179,7 +214,7 @@
 <!-- ══════════ EXPERIENCE ══════════ -->
 <section id="experience">
   <div class="sec-wrap">
-    <div class="sec-label ri"><span class="sec-num">03</span>work history</div>
+    <div class="sec-label ri"><span class="sec-num">04</span>work history</div>
     <h2 class="sec-title ri">Professional <span>Experience</span></h2>
 
     <div class="exp-pipeline">
@@ -259,7 +294,7 @@
 <!-- ══════════ PROJECTS ══════════ -->
 <section id="projects">
   <div class="sec-wrap">
-    <div class="sec-label ri"><span class="sec-num">04</span>selected work</div>
+    <div class="sec-label ri"><span class="sec-num">05</span>selected work</div>
     <h2 class="sec-title ri">Key <span>Projects</span></h2>
 
     <div class="proj-grid">
@@ -301,13 +336,23 @@
 <!-- ══════════ BLOG ══════════ -->
 <section id="blog">
   <div class="sec-wrap">
-    <div class="sec-label ri"><span class="sec-num">05</span>writing</div>
+    <div class="sec-label ri"><span class="sec-num">06</span>writing</div>
     <h2 class="sec-title ri">Technical <span>Blog</span></h2>
     <p class="sec-sub ri">Real war stories from production systems — GPU clusters, security incidents, and architecture decisions.</p>
 
     <div class="blog-grid">
       <article class="blog-card ri">
         <div class="bc-num">01</div>
+        <div class="bc-body">
+          <div class="bc-tags"><span class="tag-p">Kubernetes</span><span class="tag-p">Gateway API</span><span class="tag-a">Migration</span></div>
+          <h3 class="bc-title">Replacing ingress-nginx in Production Without Breaking Anything</h3>
+          <p class="bc-exc">ingress-nginx retired in March 2026 — archived, read-only, no more security patches, sitting at the public edge. The exact cutover to Gateway API I ran across our clusters: audit, dual edges, one hostname at a time, zero dropped requests.</p>
+          <div class="bc-foot"><span>Jul 2026 · 12 min read</span><a href="blog/ingress-nginx-migration.html" class="bc-link">Read →</a></div>
+        </div>
+      </article>
+
+      <article class="blog-card ri" style="transition-delay:.08s">
+        <div class="bc-num">02</div>
         <div class="bc-body">
           <div class="bc-tags"><span class="tag-p">GPU</span><span class="tag-p">vLLM</span><span class="tag-p">K3s</span></div>
           <h3 class="bc-title">Running LLM Inference on 4× Tesla V100 — Bare Metal to Production</h3>
@@ -316,8 +361,8 @@
         </div>
       </article>
 
-      <article class="blog-card ri" style="transition-delay:.08s">
-        <div class="bc-num">02</div>
+      <article class="blog-card ri" style="transition-delay:.16s">
+        <div class="bc-num">03</div>
         <div class="bc-body">
           <div class="bc-tags"><span class="tag-a">Security</span><span class="tag-a">Stripe</span><span class="tag-c">Redis</span></div>
           <h3 class="bc-title">Stopping a Live Stripe Carding Attack — Zero Fraud Post-Deployment</h3>
@@ -326,8 +371,8 @@
         </div>
       </article>
 
-      <article class="blog-card ri" style="transition-delay:.16s">
-        <div class="bc-num">03</div>
+      <article class="blog-card ri" style="transition-delay:.24s">
+        <div class="bc-num">04</div>
         <div class="bc-body">
           <div class="bc-tags"><span class="tag-c">gRPC</span><span class="tag-c">FastAPI</span><span class="tag-c">Microservices</span></div>
           <h3 class="bc-title">gRPC vs REST in Production — How We Cut Internal API Overhead by 40%</h3>
@@ -336,8 +381,8 @@
         </div>
       </article>
 
-      <article class="blog-card ri" style="transition-delay:.24s">
-        <div class="bc-num">04</div>
+      <article class="blog-card ri" style="transition-delay:.32s">
+        <div class="bc-num">05</div>
         <div class="bc-body">
           <div class="bc-tags"><span class="tag-a">Vault</span><span class="tag-a">Security</span><span class="tag-g">GDPR</span></div>
           <h3 class="bc-title">Zero-Trust Secrets with HashiCorp Vault — GDPR-Compliant on Bare Metal</h3>
@@ -352,15 +397,15 @@
 <!-- ══════════ CONTACT ══════════ -->
 <section id="contact">
   <div class="sec-wrap">
-    <div class="sec-label ri" style="justify-content:center"><span class="sec-num">06</span>get in touch</div>
+    <div class="sec-label ri" style="justify-content:center"><span class="sec-num">07</span>get in touch</div>
     <h2 class="sec-title ri" style="text-align:center">Let's <span>Connect</span></h2>
-    <p class="sec-sub ri" style="text-align:center">Open to new roles, freelance projects, and interesting conversations.</p>
+    <p class="sec-sub ri" style="text-align:center">Two ways to work together — <strong>book a call</strong> to scope a freelance project, or <strong>grab my resume</strong> for a full-time role. Either way, I reply within 2 hours.</p>
 
     <div class="contact-grid">
       <div class="contact-links rl">
         <a href="mailto:talha.zafar.j@gmail.com" class="c-link"><div class="c-mark">✉</div><div><div class="c-lbl">Email</div><div class="c-val">talha.zafar.j@gmail.com</div></div></a>
         <a href="https://linkedin.com/in/talhazafarj" target="_blank" rel="noopener noreferrer" class="c-link"><div class="c-mark">in</div><div><div class="c-lbl">LinkedIn</div><div class="c-val">linkedin.com/in/talhazafarj</div></div></a>
-        <a href="https://github.com/talhazafarj" target="_blank" rel="noopener noreferrer" class="c-link"><div class="c-mark">gh</div><div><div class="c-lbl">GitHub</div><div class="c-val">github.com/talhazafarj</div></div></a>
+        <a href="https://github.com/talhazafarjutt" target="_blank" rel="noopener noreferrer" class="c-link"><div class="c-mark">gh</div><div><div class="c-lbl">GitHub</div><div class="c-val">github.com/talhazafarjutt</div></div></a>
         <a href="tel:+923073576146" class="c-link"><div class="c-mark">☏</div><div><div class="c-lbl">Phone / WhatsApp</div><div class="c-val">+92 307 357 6146</div></div></a>
         <a href="talha_zafar_resume.pdf" download class="c-link"><div class="c-mark">↓</div><div><div class="c-lbl">Resume</div><div class="c-val">Download PDF</div></div></a>
       </div>
@@ -391,7 +436,7 @@
     <div class="ft">
       <div class="ft-l"><span class="ft-logo">TZ</span> talha.zafar © 2026 · Pure HTML/CSS/JS</div>
       <div class="ft-r">
-        <a href="https://github.com/talhazafarj" target="_blank" rel="noopener noreferrer">GitHub</a>
+        <a href="https://github.com/talhazafarjutt" target="_blank" rel="noopener noreferrer">GitHub</a>
         <a href="https://linkedin.com/in/talhazafarj" target="_blank" rel="noopener noreferrer">LinkedIn</a>
         <a href="mailto:talha.zafar.j@gmail.com">Email</a>
       </div>
