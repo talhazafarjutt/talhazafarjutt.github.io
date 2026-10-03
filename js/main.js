@@ -31,6 +31,10 @@ document.querySelectorAll('.shape').forEach(el => {
   el.addEventListener('mouseenter', () => document.body.classList.add('on-shape'));
   el.addEventListener('mouseleave', () => document.body.classList.remove('on-shape'));
 });
+document.querySelectorAll('.s0-photo').forEach(el => {
+  el.addEventListener('mouseenter', () => document.body.classList.add('on-photo'));
+  el.addEventListener('mouseleave', () => document.body.classList.remove('on-photo'));
+});
 
 /* ── PHYSICS SHAPES (hero only) ── */
 const shapeEls = [
