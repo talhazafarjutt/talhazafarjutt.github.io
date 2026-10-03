@@ -42,7 +42,9 @@ const shapeEls = [
   document.getElementById('s1'),
   document.getElementById('s2')
 ];
-const phys = shapeEls.map(el => ({ el, rx: 0, ry: 0, vx: 0, vy: 0 }));
+// the portrait circle stays put: a face that dodges the cursor reads as a gimmick
+const holdsPhoto = el => el && el.querySelector('.s0-photo');
+const phys = shapeEls.filter(el => !holdsPhoto(el)).map(el => ({ el, rx: 0, ry: 0, vx: 0, vy: 0 }));
 let mX = 0, mY = 0;
 document.addEventListener('mousemove', e => { mX = e.clientX; mY = e.clientY; }, { passive: true });
 
@@ -244,7 +246,7 @@ document.addEventListener('mousemove', e => {
 }, { passive: true });
 
 shapeEls.forEach((el, i) => {
-  if (!el) return;
+  if (!el || holdsPhoto(el)) return;
   el.addEventListener('mouseenter', () => {
     if (!ac) return;
     const b = ac.createOscillator(), bg = ac.createGain();

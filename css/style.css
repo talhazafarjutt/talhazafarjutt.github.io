@@ -143,6 +143,8 @@ section{position:relative;padding:100px 0}
 }
 .s0-photo img{width:100%;height:100%;object-fit:cover;display:block}
 #s0 .s-num{z-index:1}
+#s0:has(.s0-photo){cursor:default}
+#s0:has(.s0-photo):hover{filter:none}
 /* white bar */
 #s1{
   width:clamp(42px,4vw,68px);height:clamp(200px,32vh,360px);

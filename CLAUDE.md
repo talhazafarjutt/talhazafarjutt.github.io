@@ -26,6 +26,11 @@ Live URL: https://talhazafarjutt.github.io
 The repo name `talhazafarjutt.github.io` makes GitHub Pages serve from `main` root automatically.
 Just push `index.html` — no `gh-pages` branch or Actions workflow needed.
 
+**Cache busting:** GitHub Pages serves assets with `cache-control: max-age=600`, so a returning visitor can get
+new HTML with stale CSS/JS/images. Every local asset link carries `?v=YYYYMMDD` — bump it in all pages
+(`index.html`, `blog/*.html`) whenever you change a CSS, JS or image file:
+`sed -i 's/?v=[0-9]*"/?v=NEWDATE"/g' index.html blog/*.html`
+
 ## Calendly Setup
 1. Create account at https://calendly.com
 2. In `index.html`, find the `.calendly-inline-widget` div and update `data-url`:
