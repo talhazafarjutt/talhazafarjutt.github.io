@@ -11,8 +11,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../css/style.css?v=20261003">
-<link rel="stylesheet" href="../css/civitas.css?v=20261003">
+<link rel="stylesheet" href="../css/style.css?v=2026100302">
+<link rel="stylesheet" href="../css/scene3d.css?v=2026100302">
+<link rel="stylesheet" href="../css/civitas.css?v=2026100302">
 </head>
 <body>
 <div id="prog"></div>
@@ -35,26 +36,7 @@
 
 <!-- ══ FIG 1 — interactive pipeline ══ -->
 <div class="p3-wrap">
-  <figure class="p3" id="pipe3d">
-    <canvas role="img" aria-label="Interactive 3D model of the scoring pipeline: transactions enter the ingest API, are persisted to Postgres, queued on a Redis Stream, consumed by a worker and scored by the risk engine. Scores above the threshold raise alerts that flow to an analyst, a supervisor and the audit trail. In bug mode, the dashboard stays healthy while zero transactions are scored and the stream backlog grows."></canvas>
-    <div class="p3-hud">
-      <div class="p3-dash"><span class="p3-dot"></span>Dashboard: <b>Healthy</b></div>
-      <dl class="p3-stats">
-        <div><dt>Accepted · 202</dt><dd data-k="acc">0</dd></div>
-        <div><dt>Scored</dt><dd data-k="scored">0</dd></div>
-        <div><dt>Backlog</dt><dd data-k="backlog">0</dd></div>
-        <div><dt>Alerts</dt><dd data-k="alerts">0</dd></div>
-      </dl>
-    </div>
-    <p class="p3-note" data-k="note" aria-live="polite"></p>
-    <div class="p3-ctrl">
-      <button type="button" data-mode="bug" class="on">↺ The 0-of-61 bug</button>
-      <button type="button" data-mode="fixed">✓ Apply the fix</button>
-      <button type="button" data-act="pause">Pause</button>
-    </div>
-    <div class="p3-hint">Drag to orbit · hover a block</div>
-    <div class="p3-tip" hidden></div>
-  </figure>
+  <figure class="p3" id="scene3d" aria-label="Interactive 3D model of the scoring pipeline"></figure>
   <p class="fig-cap"><b>Fig. 1</b> — The platform's scoring path, in 3D. Hover or tap any block for what it does and why. This is an illustrative simulation of the architecture: synthetic, not live data, and the rates are not measurements.</p>
 </div>
 
@@ -326,7 +308,9 @@ WITHOUT it          Sort (full scan)  2.79 ms</code></pre>
     </div>
   </div>
 </footer>
-<script src="../js/blog.js?v=20261003" defer></script>
-<script src="../js/civitas3d.js?v=20261003" defer></script>
+<script src="../js/blog.js?v=2026100302" defer></script>
+<script src="../js/scene3d.js?v=2026100302" defer></script>
+<script src="../js/scenes/civitas.js?v=2026100302" defer></script>
+<script src="../js/civitas3d.js?v=2026100302" defer></script>
 </body>
 </html>

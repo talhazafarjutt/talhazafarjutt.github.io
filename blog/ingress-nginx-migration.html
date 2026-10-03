@@ -10,11 +10,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../css/style.css?v=20261003">
+<link rel="stylesheet" href="../css/style.css?v=2026100302">
+<link rel="stylesheet" href="../css/scene3d.css?v=2026100302">
 </head>
 <body>
 <div id="prog"></div>
-<nav id="nav">
+<nav id="nav" class="blog-page-nav">
   <div class="nav-bar">
     <a href="/" class="nav-logo">talha<em>.</em>zafar</a>
     <div class="blog-nav-right">
@@ -32,6 +33,12 @@
     <div class="bp-meta ri"><span>Jul 2026</span><span class="bp-meta-dot">·</span><span>12 min read</span><span class="bp-meta-dot">·</span><span>Talha Zafar</span></div>
   </div>
 </header>
+<!-- ══ FIG 1 — interactive 3D ══ -->
+<div class="p3-wrap">
+  <figure class="p3" id="scene3d" aria-label="Interactive 3D model of the ingress-nginx to Gateway API migration"></figure>
+  <p class="fig-cap"><b>Fig. 1</b> — The edge migration, one step at a time. Hover or tap any block. Illustrative simulation with four generic hostnames — not real traffic.</p>
+</div>
+
 <main class="bp-body">
   <div class="w">
     <p class="bp-p ri">ingress-nginx retired in March 2026. The repository is archived and read-only — no more releases, no bug fixes, no security patches. Every CVE discovered from here on stays open forever, and it sits at the one place in your cluster that faces the public internet. When the retirement landed, roughly half of all Kubernetes environments were running this controller. So if you're reading this with ingress-nginx still at your edge, you're not alone. You're also not safe. This is the migration I ran across our clusters, in the order I ran it — not a feature comparison, not a vendor pitch, just the actual sequence of work.</p>
@@ -127,6 +134,8 @@
     </div>
   </div>
 </footer>
-<script src="../js/blog.js?v=20261003" defer></script>
+<script src="../js/blog.js?v=2026100302" defer></script>
+<script src="../js/scene3d.js?v=2026100302" defer></script>
+<script src="../js/scenes/ingress.js?v=2026100302" defer></script>
 </body>
 </html>

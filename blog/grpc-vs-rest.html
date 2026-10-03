@@ -10,11 +10,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../css/style.css?v=20261003">
+<link rel="stylesheet" href="../css/style.css?v=2026100302">
+<link rel="stylesheet" href="../css/scene3d.css?v=2026100302">
 </head>
 <body>
 <div id="prog"></div>
-<nav id="nav">
+<nav id="nav" class="blog-page-nav">
   <div class="nav-bar">
     <a href="/" class="nav-logo">talha<em>.</em>zafar</a>
     <div class="blog-nav-right">
@@ -30,6 +31,12 @@
     <div class="bp-meta ri"><span>Jan 2026</span><span class="bp-meta-dot">·</span><span>7 min read</span><span class="bp-meta-dot">·</span><span>Talha Zafar</span></div>
   </div>
 </header>
+<!-- ══ FIG 1 — interactive 3D ══ -->
+<div class="p3-wrap">
+  <figure class="p3" id="scene3d" aria-label="Interactive 3D model of the agent-task hot path across six services"></figure>
+  <p class="fig-cap"><b>Fig. 1</b> — The agent-task hot path across six services. The HUD shows this article's measurements on Orchestrator → LLM Router; packet speed is proportional to the measured averages; connection counts are simulated.</p>
+</div>
+
 <main class="bp-body">
   <div class="w">
     <p class="bp-p ri">About eight months into building our AI agent platform, I got annoyed enough at latency on the internal service calls that I pulled up a quick benchmark. The numbers were bad enough that we spent the next two weeks migrating everything to gRPC. Here's what we measured, how the migration went, and — equally important — what I'd still keep on REST.</p>
@@ -151,6 +158,8 @@ p95_improvement:   44%</code></pre>
     </div>
   </div>
 </footer>
-<script src="../js/blog.js?v=20261003" defer></script>
+<script src="../js/blog.js?v=2026100302" defer></script>
+<script src="../js/scene3d.js?v=2026100302" defer></script>
+<script src="../js/scenes/grpc.js?v=2026100302" defer></script>
 </body>
 </html>
