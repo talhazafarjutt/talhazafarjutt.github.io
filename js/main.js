@@ -111,13 +111,12 @@ document.addEventListener('mouseup', e => {
     if (sec) sec.scrollIntoView({ behavior: 'smooth' });
     // spin cube to matching face
     const faceKey = { projects:'f', about:'r', blog:'b', contact:'l', skills:'t', experience:'bt' }[goto];
-    if (faceKey) { const [rx,ry] = ROTS[faceKey]; setCubeRot(rx, ry); }
+    if (faceKey) setCubeFace(faceKey);
     return;
   }
   // no face → cycle
   cubeIdx = (cubeIdx + 1) % FACE_SEQ.length;
-  const [rx, ry] = ROTS[FACE_SEQ[cubeIdx]];
-  setCubeRot(rx, ry);
+  setCubeFace(FACE_SEQ[cubeIdx]);
 });
 
 /* touch support for cube */
@@ -186,21 +185,40 @@ const revObs = new IntersectionObserver(entries => {
 
 document.querySelectorAll('.ri,.rl,.rr,[data-count]').forEach(el => revObs.observe(el));
 
-/* ── CUBE ACTIVE SECTION HIGHLIGHT ── */
-const secObs = new IntersectionObserver(entries => {
-  entries.forEach(e => {
-    if (!e.isIntersecting) return;
-    const id = e.target.id;
-    const faceMap = { projects:'f', about:'r', blog:'b', contact:'l', skills:'t', experience:'bt' };
-    document.querySelectorAll('.face').forEach(f => f.classList.remove('face-active'));
-    const key = faceMap[id];
-    if (key) {
-      const face = document.querySelector('.face-' + key);
-      if (face) face.classList.add('face-active');
-    }
-  });
-}, { threshold: 0.4 });
-document.querySelectorAll('section[id]').forEach(s => secObs.observe(s));
+/* ── CUBE FOLLOWS THE SECTION IN VIEW ── */
+// rotate the cube to the face of whichever section crosses the upper third of the viewport
+const SECTION_FACE = { projects:'f', about:'r', blog:'b', contact:'l', skills:'t', experience:'bt' };
+const navSections = [...document.querySelectorAll('section[id]')];
+let shownFace = null, cubeSyncTimer = 0;
+
+function setCubeFace(key) {
+  const [rx, ry] = ROTS[key];
+  // take the short way round instead of unwinding past 360°
+  setCubeRot(rx + 360 * Math.round((cubeRX - rx) / 360), ry + 360 * Math.round((cubeRY - ry) / 360));
+}
+function syncCube() {
+  if (dragging || !cubeEl) return;
+  const probe = innerHeight * 0.35;
+  let active = navSections[0];
+  for (const sec of navSections) if (sec.getBoundingClientRect().top <= probe) active = sec;
+  if (innerHeight + scrollY >= document.documentElement.scrollHeight - 4) active = navSections[navSections.length - 1];
+  const key = SECTION_FACE[active.id] || 'f';             // hero / services: rest on the front face
+  if (key === shownFace) return;
+  shownFace = key;
+  setCubeFace(key);
+  document.querySelectorAll('.face').forEach(f => f.classList.toggle('face-active', !!SECTION_FACE[active.id] && f.classList.contains('face-' + key)));
+}
+let cubeTick = false;
+window.addEventListener('scroll', () => {
+  if (cubeTick) return;
+  cubeTick = true;
+  requestAnimationFrame(() => { cubeTick = false; syncCube(); });
+}, { passive: true });
+window.addEventListener('resize', syncCube);
+// after a manual spin, settle back onto the current section's face
+document.addEventListener('mouseup', () => { clearTimeout(cubeSyncTimer); cubeSyncTimer = setTimeout(() => { shownFace = null; syncCube(); }, 1400); });
+if (cubeWrap) cubeWrap.addEventListener('touchend', () => { clearTimeout(cubeSyncTimer); cubeSyncTimer = setTimeout(() => { shownFace = null; syncCube(); }, 1400); });
+syncCube();
 
 /* ── WEB AUDIO — generative ambient ── */
 let ac, osc1, osc2, gainNode, filterNode, audioReady = false;
@@ -283,5 +301,5 @@ if (calBtn) {
 
 /* ── FACE-ACTIVE CSS INJECT (no extra class needed in HTML) ── */
 const faceActiveStyle = document.createElement('style');
-faceActiveStyle.textContent = '.face-active{background:var(--red)!important;color:#fff!important;border-color:var(--red)!important}';
+faceActiveStyle.textContent = '.face-active{background:var(--red)!important;color:#fff!important;border-color:var(--red)!important;opacity:1!important}';
 document.head.appendChild(faceActiveStyle);
