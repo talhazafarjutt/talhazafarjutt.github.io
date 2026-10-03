@@ -3,8 +3,8 @@
   const W = ['w0', 'w1', 'w2', 'w3'];
   const worker = i => ({ p: [2.0, -2.7 + i * 1.8], s: [1.2, 0.8, 1.1], c: '#a855f7', label: 'llm-worker-' + i, short: 'w' + i,
     info: 'vLLM process serving an OpenAI-compatible API on its own port. After a pod restart it needs 3–4 minutes to load the model back into VRAM.' });
-  const gpu = i => ({ p: [4.8, -2.7 + i * 1.8], s: [1.4, 0.4, 1.1], c: '#22c55e', label: 'V100 · 16 GB', short: 'V100',
-    info: 'Tesla V100 PCIe, no NVLink: GPU-to-GPU traffic goes over the CPU\'s PCIe bus. Four cards, 64 GB in total.' });
+  const gpu = i => ({ p: [4.8, -2.7 + i * 1.8], s: [1.4, 0.4, 1.1], c: '#22c55e', label: 'V100 · 32 GB', short: 'V100',
+    info: 'Tesla V100 PCIe, no NVLink: GPU-to-GPU traffic goes over the CPU\'s PCIe bus. Four 32 GB cards, 128 GB in total.' });
 
   Scene3D.mount('#scene3d', {
     aria: 'Interactive 3D model of the inference cluster: engineers call nginx, which checks the API key and per-key rate limit, then a FastAPI router that spreads requests across four vLLM workers, one per Tesla V100. Modes show plain round-robin failing on a worker that is still loading, the readiness-check fix, and nginx rate limiting a runaway client.',

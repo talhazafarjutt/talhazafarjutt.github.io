@@ -10,8 +10,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../css/style.css?v=2026100302">
-<link rel="stylesheet" href="../css/scene3d.css?v=2026100302">
+<link rel="stylesheet" href="../css/style.css?v=2026100303">
+<link rel="stylesheet" href="../css/scene3d.css?v=2026100303">
 </head>
 <body>
 <div id="prog"></div>
@@ -44,7 +44,7 @@
     <p class="bp-p ri">The first time I tried to run Qwen2.5-Coder-32B on our V100s, it just crashed. No useful error — just a silent OOM. Three hours of debugging later I realized I'd set <code>gpu_memory_utilization</code> to 0.95. Don't do that. This is the writeup I wish I'd had before starting.</p>
 
     <h4 class="bp-h4 ri">Why we didn't just use AWS</h4>
-    <p class="bp-p">The honest answer: cost. AWS p3.8xlarge gives you 4× V100 at $12.24/hr. Run that 24/7 and you're looking at $8,800 a month. We already owned the hardware — four Tesla V100 PCIe cards in a colocated bare-metal server in Germany. Once you factor in the colo fee and power, it came out to roughly $180/month. The ROI math doesn't take a spreadsheet.</p>
+    <p class="bp-p">The honest answer: cost. AWS p3.8xlarge gives you 4× V100 at $12.24/hr — and those are the 16 GB cards, half the memory of ours. Run that 24/7 and you're looking at $8,800 a month for the smaller box. We already owned the hardware — four Tesla V100 PCIe cards in a colocated bare-metal server in Germany. Once you factor in the colo fee and power, it came out to roughly $180/month. The ROI math doesn't take a spreadsheet.</p>
     <p class="bp-p">The less obvious reason: data residency. We're building AI tooling for European customers, and having LLM inference requests route through US AWS infrastructure was a compliance conversation nobody wanted to have. On-prem meant the data never left the rack.</p>
 
     <h4 class="bp-h4">Getting CUDA to behave on Ubuntu 22.04</h4>
@@ -72,8 +72,8 @@ kubectl describe nodes | grep nvidia.com/gpu</code></pre>
     <p class="bp-p">If that last command shows <code>nvidia.com/gpu: 4</code>, you're good. If it shows 0 or nothing, the device plugin DaemonSet probably isn't running — check <code>kubectl get pods -n kube-system</code>.</p>
 
     <h4 class="bp-h4">vLLM + Qwen2.5-Coder-32B: the memory math</h4>
-    <p class="bp-p">Qwen2.5-Coder-32B needs about 60–64GB VRAM in BF16 precision. We have 4× 16GB = 64GB total, which sounds fine until you realize the KV cache also needs VRAM. This is where the 0.95 setting killed me.</p>
-    <p class="bp-p">The <code>gpu_memory_utilization</code> parameter controls how much of each GPU's VRAM vLLM reserves for the KV cache pool at startup. At 0.95, it was trying to grab 15.2GB per card for the KV cache on top of the model weights. That's more VRAM than physically exists. The sweet spot I landed on was 0.91:</p>
+    <p class="bp-p">Qwen2.5-Coder-32B needs about 60–64GB VRAM in BF16 precision just for the weights. We have 4× 32GB = 128GB total, so with <code>tensor_parallel_size=4</code> each card holds roughly 16GB of weights. Plenty of room — which is exactly why I got careless with the 0.95 setting.</p>
+    <p class="bp-p">The <code>gpu_memory_utilization</code> parameter caps how much of each GPU's VRAM vLLM claims at startup — weights, activations and the KV cache pool together. At 0.95 that's 30.4GB of every 32GB card, leaving about 1.6GB for the CUDA context, NCCL buffers and anything else that needs memory outside vLLM's budget. Not enough. The sweet spot I landed on was 0.91, which leaves roughly 2.9GB of headroom per card:</p>
     <pre class="bp-pre"><code>from vllm import LLM, SamplingParams
 
 llm = LLM(
@@ -139,13 +139,13 @@ echo "iptables-save > /etc/iptables/rules.v4" >> /etc/rc.local</code></pre>
     <p class="bp-p">VS Code Remote tunnels for each engineer connect through here. It works well enough that nobody asks me to SSH manually anymore, which I take as a success metric.</p>
 
     <div class="bp-result">
-      <strong>Where we ended up:</strong> 10,000+ daily completions to a 5-engineer team · Cold start ~3.5 min (acceptable) · P95 token generation ~400ms for 256-token output · ~$180/month vs ~$8,800 cloud equivalent · 99.8% uptime
+      <strong>Where we ended up:</strong> 10,000+ daily completions to a 5-engineer team · Cold start ~3.5 min (acceptable) · P95 token generation ~400ms for 256-token output · ~$180/month vs ~$8,800 for AWS's smaller 4× V100 (16 GB) instance · 99.8% uptime
     </div>
 
     <h4 class="bp-h4">Things I'd tell myself at the start</h4>
     <ul class="bp-ul">
       <li>Don't use Ubuntu 24.04 for this yet — 22.04 LTS has better-tested nvidia-container-toolkit packages</li>
-      <li>Set <code>gpu_memory_utilization</code> to 0.90–0.92, not higher. The headroom prevents OOM crashes when long-context requests spike the KV cache</li>
+      <li>Set <code>gpu_memory_utilization</code> to 0.90–0.92, not higher. vLLM pre-allocates its whole share at startup; the few GB left outside it are what the CUDA context and NCCL need</li>
       <li>V100 PCIe has no NVLink — tensor parallel communication goes through CPU PCIe. Fine for 32B, rough for 70B+</li>
       <li>Add a readiness probe before routing to any vLLM worker — model load takes 3–4 minutes and a worker will silently fail during that window</li>
       <li>Set <code>proxy_buffering off</code> in nginx if you want streaming to actually stream</li>
@@ -169,8 +169,8 @@ echo "iptables-save > /etc/iptables/rules.v4" >> /etc/rc.local</code></pre>
     </div>
   </div>
 </footer>
-<script src="../js/blog.js?v=2026100302" defer></script>
-<script src="../js/scene3d.js?v=2026100302" defer></script>
-<script src="../js/scenes/gpu.js?v=2026100302" defer></script>
+<script src="../js/blog.js?v=2026100303" defer></script>
+<script src="../js/scene3d.js?v=2026100303" defer></script>
+<script src="../js/scenes/gpu.js?v=2026100303" defer></script>
 </body>
 </html>
