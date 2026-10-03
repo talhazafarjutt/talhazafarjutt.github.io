@@ -27,7 +27,7 @@ The repo name `talhazafarjutt.github.io` makes GitHub Pages serve from `main` ro
 Just push `index.html` — no `gh-pages` branch or Actions workflow needed.
 
 **Cache busting:** GitHub Pages serves assets with `cache-control: max-age=600`, so a returning visitor can get
-new HTML with stale CSS/JS/images. Every local asset link carries `?v=YYYYMMDD` — bump it in all pages
+new HTML with stale CSS/JS/images. Every local asset link carries `?v=YYYYMMDDnn` (date + sequence) — bump it in all pages
 (`index.html`, `blog/*.html`) whenever you change a CSS, JS or image file:
 `sed -i 's/?v=[0-9]*"/?v=NEWDATE"/g' index.html blog/*.html`
 
@@ -51,6 +51,8 @@ or send directly.
 | `index.html` | Entire site — edit here for any content/design changes |
 | `.gitignore` | Excludes docx, pdf, secrets, node_modules |
 | `CLAUDE.md` | This file |
+| `js/scene3d.js` + `css/scene3d.css` | Dependency-free 3D figure engine used by every blog post (canvas 2D, auto-fit camera) |
+| `js/scenes/*.js` | One scene per post: nodes, edges, modes, `tick()`. Facts in tooltips/notes must come from that post |
 
 ## Content Updates
 All content is in `index.html`. Sections in order:
