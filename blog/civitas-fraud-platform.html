@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="A practical case study on silent fraud-platform failures: missing transaction identity fields, fake confidence from green dashboards, and the operational safeguards that make detection systems trustworthy.">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self';">
+<title>How a Fraud Platform Can Look Healthy While Catching Nothing — Talha Zafar</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23080808'/%3E%3Crect x='10' y='10' width='20' height='20' fill='%23C8102E'/%3E%3Crect x='34' y='34' width='20' height='20' fill='%23F5C519'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../css/civitas.css">
+</head>
+<body>
+<div id="prog"></div>
+<nav id="nav" class="blog-page-nav">
+  <a href="/" class="nav-logo">talha<em>.</em>zafar</a>
+  <div class="blog-nav-right">
+    <a href="/#blog" class="back-link">← All Articles</a>
+  </div>
+</nav>
+
+<header class="bp-header">
+  <div class="w">
+    <div class="bp-tags">
+      <span class="tag-c">FastAPI</span><span class="tag-c">Postgres</span><span class="tag-p">Redis Streams</span><span class="tag-g">Security</span><span class="tag-a">Performance</span>
+    </div>
+    <h1 class="bp-title">How a Fraud Platform Can Look Healthy While Catching Nothing</h1>
+    <div class="bp-meta"><span>Sep 2026</span><span class="bp-meta-dot">·</span><span>16 min read</span><span class="bp-meta-dot">·</span><span>Talha Zafar</span></div>
+  </div>
+</header>
+
+<!-- ══ FIG 1 — interactive pipeline ══ -->
+<div class="p3-wrap">
+  <figure class="p3" id="pipe3d">
+    <canvas role="img" aria-label="Interactive 3D model of the scoring pipeline: transactions enter the ingest API, are persisted to Postgres, queued on a Redis Stream, consumed by a worker and scored by the risk engine. Scores above the threshold raise alerts that flow to an analyst, a supervisor and the audit trail. In bug mode, the dashboard stays healthy while zero transactions are scored and the stream backlog grows."></canvas>
+    <div class="p3-hud">
+      <div class="p3-dash"><span class="p3-dot"></span>Dashboard: <b>Healthy</b></div>
+      <dl class="p3-stats">
+        <div><dt>Accepted · 202</dt><dd data-k="acc">0</dd></div>
+        <div><dt>Scored</dt><dd data-k="scored">0</dd></div>
+        <div><dt>Backlog</dt><dd data-k="backlog">0</dd></div>
+        <div><dt>Alerts</dt><dd data-k="alerts">0</dd></div>
+      </dl>
+    </div>
+    <p class="p3-note" data-k="note" aria-live="polite"></p>
+    <div class="p3-ctrl">
+      <button type="button" data-mode="bug" class="on">↺ The 0-of-61 bug</button>
+      <button type="button" data-mode="fixed">✓ Apply the fix</button>
+      <button type="button" data-act="pause">Pause</button>
+    </div>
+    <div class="p3-hint">Drag to orbit · hover a block</div>
+    <div class="p3-tip" hidden></div>
+  </figure>
+  <p class="fig-cap"><b>Fig. 1</b> — The platform's scoring path, in 3D. Hover or tap any block for what it does and why. This is an illustrative simulation of the architecture: synthetic, not live data, and the rates are not measurements.</p>
+</div>
+
+<main class="bp-body">
+  <div class="w">
+
+    <div class="bp-lead">
+      <span class="lbl">Executive summary</span>
+      <p>This project was a financial-crime detection platform built to support public-sector fraud monitoring. The real problem was not model quality alone, but the fact that the system could appear healthy while silently dropping all of its incoming fraud signals. When the identity fields required by the risk engine were missing, the platform kept accepting transactions, the queue grew, and zero of 61 were ever scored. The lesson was operational: a fraud system must fail loudly at the boundaries, not just look healthy on the dashboard.</p>
+      <p>For teams operating in regulated or high-risk money movement environments, the risks are familiar: green dashboards, silent data drift, weak observability, and policies that are hard to audit. This project was a reminder that detection value comes from reliable signal flow, not from the presence of a model.</p>
+    </div>
+
+    <p class="bp-p">The dashboard was green. The API was returning <code>202 PENDING</code> on every transaction. The worker was consuming from the Redis Stream without errors. Nothing in the logs looked wrong.</p>
+    <p class="bp-p bp-big">Zero of 61 transactions had been scored.</p>
+    <p class="bp-p">The adapter between my platform and the risk engine was missing four identity fields — <code>transaction_id</code>, <code>sender_id</code>, <code>receiver_id</code>, <code>timestamp</code>. Nothing threw at the boundary. The engine received payloads it could not act on, the backlog grew without bound, and a fraud-detection system detected no fraud while every health indicator said it was fine.</p>
+    <p class="bp-p">That bug is the reason I write these notes the way I do. It was not found by reading the code. It was found by running the code and counting rows.</p>
+
+    <h2 class="bp-h2">What this was</h2>
+    <p class="bp-p">Civitas AI is an AI financial-crime intelligence platform aimed at public-sector fraud detection. I delivered a paid, fixed-price technical proof of concept for it, later extended toward a V1.</p>
+    <p class="bp-p">For clients, the practical value of this work was not just “we built an ML pipeline.” It was that we designed a system that could prove a decision path existed from transaction intake to alerting, authorization, and auditability. In fraud systems, the most expensive failure is not a single bad model — it is a pipeline that looks healthy while silently dropping the data the model needs to work.</p>
+    <p class="bp-p">Two engineers. A colleague owned the risk engine — model training, scoring logic, the four-signal design I describe below. That is their work and I describe it only to explain what my side had to support. I owned the entire platform: API, data model, database, security, performance, deployment, CI. Roughly 5,800 lines of platform Python, 18 HTTP endpoints, 259 automated tests, 3 migrations.</p>
+    <p class="bp-p"><strong>The data was synthetic and public throughout — a PaySim-derived transaction set. No real bank, government, or personal data at any point.</strong> In a fraud-detection context a reader should want that answered before anything else, so: it is answered. Every performance and detection number below was measured against synthetic data on non-production hardware, and I repeat that caveat wherever it matters.</p>
+    <p class="bp-p">It is a proof of concept deployed to staging. It is not in production and I do not claim it is.</p>
+
+    <h2 class="bp-h2">The shape of the system, and why</h2>
+    <p class="bp-p">Four stages, asynchronous — the same path Fig. 1 animates:</p>
+    <pre class="bp-pre"><code>Transaction → ingest (202 PENDING) → Redis Stream → worker → risk engine
+  → score persisted → alert raised above threshold → analyst → supervisor → audit</code></pre>
+    <p class="bp-p">Three decisions did most of the work.</p>
+    <p class="bp-p"><strong>Ingestion never blocks on scoring.</strong> A submitted transaction is persisted and acknowledged with <code>202 PENDING</code> <em>before</em> the model is consulted. Scoring happens on a Redis Stream consumer group. This is not a throughput optimization; it is a financial-systems requirement. The money-movement path cannot fail because an ML service is slow or unavailable. If scoring is degraded, transactions still land, and the backlog drains when the scorer recovers. The alternative — synchronous scoring — makes the model a hard dependency of accepting money, which is the wrong coupling for any system in that position.</p>
+    <p class="bp-p"><strong>Decision policy lives in the backend, not the model.</strong> The engine returns a risk score. A configurable threshold decides what happens to it. The engine's response carries a <code>decision</code> field that I deliberately never obey — it is stored for comparison only. Whether a transaction is blocked or routed to review is policy. It must be explainable to a regulator, auditable after the fact, and changeable without shipping a new model. Baking that into model weights makes it all three of unexplainable, unauditable, and unchangeable.</p>
+    <p class="bp-p"><strong>Scoring is append-only and version-stamped.</strong> Scores are never overwritten; each one carries the engine version that produced it. Any historical decision can be reconstructed from the row that produced it, rather than from a mutable "current score" that has since drifted.</p>
+
+    <h2 class="bp-h2">The ML boundary</h2>
+    <p class="bp-p"><code>FraudModelClient</code> is a typed Protocol with three interchangeable implementations:</p>
+    <ul class="bp-ul">
+      <li><code>StubClient</code> — deterministic fixtures</li>
+      <li><code>HttpClient</code> — remote scoring service</li>
+      <li><code>InProcessClient</code> — the engine loaded directly</li>
+    </ul>
+    <p class="bp-p">This is the single decision that let two engineers work in parallel without blocking each other. I built the entire backend — ingestion, persistence, alerting, authorization, the case workflow — against <code>StubClient</code>, before the model existed. When the engine was ready, the system moved to in-process scoring without touching one line of API or database code.</p>
+    <p class="bp-p">The risk engine itself (my colleague's work) combines four independent signals: a supervised XGBoost model weighted at 60%, deterministic rules at 25%, an Isolation Forest anomaly detector at 10%, and network/graph analysis at 5%. A HIGH-severity rule applies a floor — a minimum risk score of 70 regardless of what the model produces.</p>
+
+    <!-- ══ FIG 2 — signal stack ══ -->
+    <figure class="stk" id="stack3d">
+      <div class="stk-scene" aria-hidden="true">
+        <div class="iso stk-iso">
+          <div class="cub" data-k="xgb"   style="--c:#F5C519;--hh:84;--z:0"><i class="s1"></i><i class="s2"></i><i class="s3"></i><i class="s4"></i><i class="t">60</i></div>
+          <div class="cub" data-k="rules" style="--c:#00e5ff;--hh:35;--z:84"><i class="s1"></i><i class="s2"></i><i class="s3"></i><i class="s4"></i><i class="t">25</i></div>
+          <div class="cub" data-k="iso"   style="--c:#a855f7;--hh:14;--z:119"><i class="s1"></i><i class="s2"></i><i class="s3"></i><i class="s4"></i><i class="t">10</i></div>
+          <div class="cub" data-k="graph" style="--c:#22c55e;--hh:7;--z:133"><i class="s1"></i><i class="s2"></i><i class="s3"></i><i class="s4"></i><i class="t">5</i></div>
+          <div class="floor" style="--fz:98"><span>FLOOR 70</span></div>
+        </div>
+      </div>
+      <ul class="stk-leg">
+        <li data-k="xgb"   style="--c:#F5C519"><span class="sw"></span><span class="nm">XGBoost (supervised)</span><span class="wt">60%</span><span class="ds">The learned model. Its flags need an explanation attached before anyone acts on them.</span></li>
+        <li data-k="rules" style="--c:#00e5ff"><span class="sw"></span><span class="nm">Deterministic rules</span><span class="wt">25%</span><span class="ds">Defensible in a sentence — the first thing a supervisor wants to know about.</span></li>
+        <li data-k="iso"   style="--c:#a855f7"><span class="sw"></span><span class="nm">Isolation Forest</span><span class="wt">10%</span><span class="ds">Anomaly detection: unusual, not necessarily known-bad.</span></li>
+        <li data-k="graph" style="--c:#22c55e"><span class="sw"></span><span class="nm">Network / graph</span><span class="wt">5%</span><span class="ds">Who is connected to whom.</span></li>
+        <li class="fl"><span class="sw"></span><span class="nm">HIGH-severity rule floor</span><span class="wt">≥ 70</span><span class="ds">Lifts the score to at least 70 regardless of what the model says.</span></li>
+      </ul>
+    </figure>
+    <p class="fig-cap"><b>Fig. 2</b> — The four signals as a stack on the 0–100 score scale; slab height is the signal's weight. Engine design by my ML colleague. The platform stores every slab separately — that is the point of the next paragraph.</p>
+
+    <p class="bp-p">The platform decision that matters here is that I persist <strong>each signal separately</strong>, not just the blended score. The reason is operational. The first question a supervisor asks about a flagged transaction is <em>"did the model flag this, or did a hard rule?"</em> — because a rule-driven flag is deterministic and defensible in a sentence, while a model-driven one needs its explanation attached before anyone acts on it. A single blended probability cannot answer that question, and by the time someone asks, the inputs are gone.</p>
+    <p class="bp-p">Reported evaluation on the synthetic holdout was PR-AUC 0.993 with roughly 99.5% recall. That is a number from synthetic data. It is not evidence of production banking performance and should not be read as any.</p>
+
+    <h2 class="bp-h2">Security as something the build enforces</h2>
+    <p class="bp-p">I could list the controls. Lists of controls prove nothing, so here is what each one prevents.</p>
+    <p class="bp-p"><strong>Rotating refresh tokens with family reuse detection.</strong> If a stolen refresh token is replayed, the entire token family is revoked — not just the replayed token. The attacker and the legitimate user both get logged out, which is the correct outcome, because a replay means one of the two is compromised and you cannot tell which from the request.</p>
+    <p class="bp-p"><strong>Scopes, not roles.</strong> Permission is granted per action. An analyst and a supervisor are not different code paths with different <code>if</code> branches; they hold different scope sets against the same path. Role-branching is where authorization bugs live.</p>
+    <p class="bp-p"><strong>Object-level authorization returns 404, never 403.</strong> A 403 confirms the resource exists. A 404 leaks nothing. If you can distinguish "not yours" from "not there," you can enumerate the space of what exists by walking IDs.</p>
+    <p class="bp-p"><strong>Four-eyes on case closure.</strong> Closing a fraud case requires a separate <code>alerts:close</code> scope. No single actor confirms fraud alone.</p>
+    <p class="bp-p"><strong>Two-layer idempotency</strong> — a Redis fast path plus a database <code>UNIQUE</code> constraint as the source of truth. The database layer exists specifically because a cache miss must never permit a duplicate financial transaction. Redis is the optimization; the constraint is the guarantee.</p>
+    <p class="bp-p"><strong>Layered rate limiting.</strong> A tighter pre-authentication bucket keyed on source address absorbs unauthenticated floods and cannot be influenced by the caller, a per-principal bucket applies after authentication, and dedicated per-account login limits blunt credential stuffing against a single target.</p>
+    <p class="bp-p">Plus: OAuth2 with password and client-credentials grants, Argon2id hashing, RS256 JWTs for non-local environments, IBAN masking to the last four digits on every read path, RFC 9457 <code>problem+json</code> on every error so nothing leaks a stack trace, and a container that runs non-root from the first instruction with all Linux capabilities dropped, <code>no-new-privileges</code>, and a read-only root filesystem.</p>
+
+    <h4 class="bp-h4">The part I would build again first</h4>
+    <p class="bp-p"><code>validate_production_safety()</code> runs at startup and <strong>refuses to boot</strong> if the configuration is unsafe: a default secret still in place, a wildcard CORS origin, HS256 in production, a missing durable queue, leftover demo credentials.</p>
+    <p class="bp-p">And it is enforced by an automated hardening suite with test names like <code>production_refuses_the_default_secret</code> and <code>signing_refuses_to_fall_back_to_the_hmac_secret</code>.</p>
+    <p class="bp-p">The argument: <strong>a security control that lives in a document is a suggestion; one that fails the build is a guarantee.</strong> A misconfigured deploy cannot reach an environment by accident, because the process will not start and the pipeline goes red before it gets the chance.</p>
+
+    <h4 class="bp-h4">Where that check lied to me</h4>
+    <p class="bp-p">An early version of the startup check demanded RS256. The signing function, separately, quietly fell back to the HMAC secret when no key path was configured.</p>
+    <p class="bp-p">Boot passed. The check was satisfied. The <strong>first token mint</strong> then failed with <code>InvalidKeyError</code>.</p>
+    <p class="bp-p">The check was verifying the <em>setting</em>, not the <em>capability</em>. It confirmed that someone had written <code>RS256</code> in a config field; it never confirmed that a usable RS256 key existed. The fix was to verify at startup that the keys are present and parseable — to check the thing itself rather than the intention to do the thing.</p>
+    <p class="bp-p">The lesson is worse than "the check had a bug." A safety check that validates intent rather than reality is <strong>worse than no check</strong>, because it manufactures confidence. Without it I would have tested token minting by hand. With it, I trusted a green boot.</p>
+
+    <h2 class="bp-h2">Performance, measured</h2>
+    <p class="bp-p">Three rounds of optimization. One was reverted.</p>
+    <div class="bp-tablewrap">
+      <table class="bp-table">
+        <thead><tr><th>Round</th><th>Change</th><th>Slowest response under load</th><th>Verdict</th></tr></thead>
+        <tbody>
+          <tr><td>Baseline</td><td>Hard-coded worker count, default pool sizing</td><td>4,251 ms</td><td>Saturating early</td></tr>
+          <tr><td>1</td><td>Environment-driven concurrency, right-sized DB pool</td><td>163 ms</td><td>Kept — 26× better</td></tr>
+          <tr><td>2</td><td>Query-level fixes: N+1 elimination, index coverage</td><td>~27 ms avg</td><td>Kept</td></tr>
+          <tr class="rev"><td>3</td><td>Parallelized Redis calls with <code>asyncio.gather</code></td><td>31.6 ms avg</td><td>Reverted — measurably slower</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ══ FIG 3 — performance pairs ══ -->
+    <div class="prf" role="group" aria-label="Three before-and-after comparisons, each on a single metric">
+      <div class="prf-card">
+        <div class="prf-metric">Slowest response under load</div>
+        <div class="prf-scene" aria-hidden="true"><div class="iso prf-iso">
+          <div class="cub" style="--c:#C8102E;--v:125"><i class="s1"></i><i class="s2"></i><i class="s3"></i><i class="s4"></i><i class="t"></i></div>
+          <div class="cub" style="--c:#22c55e;--v:4.8"><i class="s1"></i><i class="s2"></i><i class="s3"></i><i class="s4"></i><i class="t"></i></div>
+        </div></div>
+        <div class="prf-rows">
+          <div style="--c:#C8102E"><div class="n">Baseline · <code>--workers 2</code> hard-coded</div><div class="v">4,251 ms</div></div>
+          <div style="--c:#22c55e"><div class="n">Round 1 · env-driven concurrency</div><div class="v">163 ms</div></div>
+        </div>
+        <div class="prf-verdict">26× better · kept</div>
+      </div>
+      <div class="prf-card">
+        <div class="prf-metric">Average response</div>
+        <div class="prf-scene" aria-hidden="true"><div class="iso prf-iso">
+          <div class="cub" style="--c:#22c55e;--v:106.8"><i class="s1"></i><i class="s2"></i><i class="s3"></i><i class="s4"></i><i class="t"></i></div>
+          <div class="cub rev" style="--c:#C8102E;--v:125"><i class="s1"></i><i class="s2"></i><i class="s3"></i><i class="s4"></i><i class="t"></i></div>
+        </div></div>
+        <div class="prf-rows">
+          <div style="--c:#22c55e"><div class="n">Round 2 · query fixes</div><div class="v">~27 ms</div></div>
+          <div style="--c:#C8102E"><div class="n">Round 3 · <code>asyncio.gather</code></div><div class="v">31.6 ms</div></div>
+        </div>
+        <div class="prf-verdict bad">Predicted win · measured slower · reverted</div>
+      </div>
+      <div class="prf-card">
+        <div class="prf-metric">EXPLAIN ANALYZE · list query</div>
+        <div class="prf-scene" aria-hidden="true"><div class="iso prf-iso">
+          <div class="cub" style="--c:#C8102E;--v:125"><i class="s1"></i><i class="s2"></i><i class="s3"></i><i class="s4"></i><i class="t"></i></div>
+          <div class="cub" style="--c:#00e5ff;--v:2.5"><i class="s1"></i><i class="s2"></i><i class="s3"></i><i class="s4"></i><i class="t"></i></div>
+        </div></div>
+        <div class="prf-rows">
+          <div style="--c:#C8102E"><div class="n">Without index · sort, full scan</div><div class="v">2.79 ms</div></div>
+          <div style="--c:#00e5ff"><div class="n">With <code>(team, booked_at, id)</code> · index-only</div><div class="v">0.05 ms</div></div>
+        </div>
+        <div class="prf-verdict">55× · seek vs sort</div>
+      </div>
+    </div>
+    <p class="fig-cap"><b>Fig. 3</b> — Each pair compares one metric only, scaled within the pair; the panels are not comparable with each other. Synthetic data, non-production hardware.</p>
+
+    <p class="bp-p">Round 3 is the one I want to keep in the table. I was confident it would help: several independent Redis calls, obviously parallelizable, <code>asyncio.gather</code> is right there. It came back about 4.6 ms slower on average and I reverted it the same day. Sub-millisecond operations do not parallelize profitably — the coordination cost exceeded the work being coordinated. There was nothing to hide behind; the operations were simply too fast to be worth scheduling.</p>
+
+    <h4 class="bp-h4">Round 1 was a one-line Docker bug</h4>
+    <p class="bp-p">The 26× did not come from clever code. The Docker image hard-coded <code>--workers 2</code> in its start command. uvicorn only consults the <code>WEB_CONCURRENCY</code> environment variable <strong>when the <code>--workers</code> flag is absent</strong>. So the variable was being silently ignored: a six-core host ran two workers with two-thirds of the machine idle, and every attempt to tune concurrency by environment did nothing at all.</p>
+    <p class="bp-p">The fix was deleting the flag. The same image is now correct on a laptop and on a large host, because the environment knob actually reaches the process.</p>
+    <p class="bp-p">I find this one instructive because the baseline number — 4,251 ms — looked like an architecture problem. It was a string in a Dockerfile.</p>
+
+    <h4 class="bp-h4">The read path, with the proof attached</h4>
+    <p class="bp-p">Keyset (cursor) pagination throughout, with <strong>no <code>OFFSET</code> anywhere</strong>. The cost of fetching a page does not grow with how deep the page is, which is the failure mode that turns a fine-looking list endpoint into a timeout at page 400.</p>
+    <p class="bp-p">A composite index leading with the tenant column, <code>(team, booked_at, id)</code>. I did not assume it worked; I ran <code>EXPLAIN ANALYZE</code>:</p>
+    <pre class="bp-pre"><code>WITH the index      Index Only Scan   0.05 ms   Heap Fetches: 0
+WITHOUT it          Sort (full scan)  2.79 ms</code></pre>
+    <p class="bp-p">55× on a small table. The multiple matters less than the shape: it is an index seek versus a sort, so the gap widens as the table grows rather than staying fixed.</p>
+    <p class="bp-p">Alongside that:</p>
+    <ul class="bp-ul">
+      <li>A <strong>partial index</strong> covering only non-<code>COMPLETE</code> scoring statuses — about 1% of rows. Indexing the remaining 99% would have been a second copy of the table maintained on every write, for queries that never ask for it.</li>
+      <li><strong>Whole-page joins</strong>, so a 50-row page costs 2 queries instead of 101.</li>
+      <li>All dashboard aggregates computed in <strong>a single SQL pass with conditional counts</strong>, rather than five separate queries assembled in Python.</li>
+      <li><strong>Anchored prefix matching</strong> (<code>external_ref%</code>) for search, because a leading wildcard forces a sequential scan and quietly discards the index you thought you were using.</li>
+    </ul>
+
+    <h4 class="bp-h4">A portability decision I would make again</h4>
+    <p class="bp-p">"Newest score per transaction" was first written with <code>LATERAL</code> — the natural Postgres tool for it, and the one I reached for without thinking.</p>
+    <p class="bp-p">The test suite runs on SQLite by design, where <code>LATERAL</code> is a syntax error. So the fastest query in the read path was the one query no test could execute.</p>
+    <p class="bp-p">I rewrote it as a portable, still index-backed <code>NOT EXISTS</code>. The principle: <strong>a query the tests cannot execute is a query nobody checks.</strong> Same reasoning applied to time-bucketing, where <code>date_trunc</code> became a form that also works with <code>strftime</code>.</p>
+
+    <h4 class="bp-h4">Methodology, because the numbers are worth exactly what the method is worth</h4>
+    <p class="bp-p"><strong>Load generation is open-loop.</strong> Requests are offered at a fixed rate regardless of how fast the server responds, because that is how real traffic arrives — users do not politely wait for your p99 before clicking again. A closed-loop generator that waits for each response before sending the next hides the precise saturation you are hunting for. That is coordinated omission, and it makes a struggling system look calm.</p>
+    <p class="bp-p"><strong>Five runs minimum before trusting any number.</strong> A single run swings ±20% on cold caches. I published figures of 96 ms, then 69.9 ms, then 56.9 ms during Round 2 and later retracted all three as cold-start contaminated. The honest figure was around 27 ms. Those retractions are the reason I trust the 27.</p>
+    <p class="bp-p"><strong>A benchmark that lied, caught before it shipped.</strong> An early micro-benchmark showed tuples were 4.5× faster than lists. The result was wrong: the benchmark used <em>constant</em> tuples, which CPython folds at compile time into a single <code>RETURN_CONST</code>. It was measuring the interpreter returning a pre-built object — that is, measuring nothing. Re-measured with variables: 26.6 ms vs 33.4 ms. A real difference, and a much smaller one. <strong>Verify the ruler before trusting the reading.</strong></p>
+    <p class="bp-p"><strong>Two more predicted wins that were not.</strong> <code>ORJSONResponse</code> turned out to be deprecated on the FastAPI version in use, and worse, it opted <em>out</em> of the faster Pydantic-direct serialization path — so the "optimization" was a regression. Reverted. Setting <code>n_jobs=-1</code> on the Isolation Forest: 12.42 ms versus 12.17 ms, which is noise. I recorded that one specifically so nobody on the project would spend an afternoon repeating it.</p>
+    <p class="bp-p"><strong>One number I refused to publish.</strong> I could not measure the system's true throughput ceiling, because the load generator competed with the server for the same cores. The evidence: three generators offering 75 rps together achieved only 32.3 rps, while the API sat at 146% of a possible 400% CPU and the client was 2.1% idle. The server was not the bottleneck; my measuring apparatus was. The correct conclusion is "this number is not knowable from this machine," and that is what went in the report instead of a flattering estimate.</p>
+    <p class="bp-p"><strong>The track record, stated plainly:</strong> three optimizations I predicted would help — parallelized Redis, ORJSON, <code>n_jobs=-1</code> — all failed when measured. The two changes that actually mattered were found by measuring, not by reasoning. That is the entire thesis of this section, and it is why the reverted row stays in the table.</p>
+
+    <h2 class="bp-h2">The container</h2>
+    <p class="bp-p">Multi-stage build, final image <strong>358 MB</strong>. The compiler and development headers never reach the runtime image, compiled libraries are stripped, and test directories and bytecode caches are excluded.</p>
+    <p class="bp-p">The larger win was deciding what does not belong at runtime at all. Training-only libraries — pandas, shap, kagglehub, matplotlib — are deliberately omitted from the runtime image. Roughly a gigabyte of code that never executes in production, and every line of it part of the attack surface if it ships.</p>
+    <p class="bp-p"><code>xgboost-cpu</code> rather than plain <code>xgboost</code>, because the standard wheel pulls in NVIDIA CUDA libraries — 288 MB — into a container with no GPU.</p>
+
+    <h2 class="bp-h2">What running it revealed</h2>
+    <p class="bp-p">Every bug in this section shares a property: reading the code did not find it, and executing the code did.</p>
+
+    <h4 class="bp-h4">The 0-of-61 adapter</h4>
+    <p class="bp-p">Already described above — and replayable in Fig. 1: four missing identity fields, no error at the boundary, zero transactions scored, unbounded backlog, and every health signal green. The failure mode was silence. I found it by asking the database how many scores existed, not by reading the integration.</p>
+
+    <h4 class="bp-h4">A score of 92.84 stored as 1.0</h4>
+    <p class="bp-p">The risk engine publishes <code>risk_score</code> on a <strong>0–100</strong> scale. My integration clamped it to 0–1.</p>
+    <p class="bp-p">So 92.84 was silently stored as 1.0. Not an error, not a crash — a completely plausible number. A confidence score of 1.0 looks like a maximally confident model. It was actually a clamp ceiling.</p>
+    <p class="bp-p">I caught it because 1.0 looked suspiciously clean sitting next to a <code>weighted_score</code> of 93.96. That is a bad detection mechanism. It relies on my noticing.</p>
+    <p class="bp-p">The fix documented the scale in <em>both</em> places and added regression tests that assert the scale explicitly — because this was the <strong>second</strong> unit-mismatch bug on the same boundary. The first: SHAP contributions bounded to [-1, 1], when SHAP values are unbounded log-odds and one real observed value was -8.84. Two bugs of the same species on the same seam meant the seam needed a test, not another careful read.</p>
+
+    <h4 class="bp-h4">A CI pipeline that had never run once</h4>
+    <p class="bp-p">I added a CI pipeline and reported it as done without ever executing it.</p>
+    <p class="bp-p">Its first real run failed at the install step:</p>
+    <pre class="bp-pre"><code>error: Multiple top-level packages discovered in a flat-layout: ['app', 'secrets', 'postman', 'alembic']</code></pre>
+    <p class="bp-p"><code>pyproject.toml</code> never told setuptools which directory was the package. Behind that sat a second bug: <code>email-validator</code> was listed in the Dockerfile's hand-maintained dependency list but missing from <code>pyproject.toml</code>.</p>
+    <p class="bp-p">The root cause of both was <strong>dependency-list drift</strong>. Docker installed from one list, CI from another. Docker builds worked. The live deployment worked. CI could never have passed, and I would not have known until someone ran it.</p>
+    <p class="bp-p"><em>A pipeline you have not run is not a pipeline.</em> That one is mine to own.</p>
+
+    <div class="bp-cta">
+      <p>If your fraud stack looks healthy on paper but never produces reliable alerts, the issue is rarely the model alone. It is often the signal pipeline, policy enforcement, or the audit trail around the decision. I help teams design and harden these systems so they fail loudly, prove the signal is reaching the right place, and remain explainable under operational pressure.</p>
+      <p>If you are building or reviewing a fraud-detection platform and want a second opinion on the architecture, data contracts, or risk workflow, I would be happy to talk.</p>
+      <a href="/#contact">Talk to me →</a>
+    </div>
+
+    <h4 class="bp-h4">A validator that was dead code</h4>
+    <p class="bp-p">A custom Pydantic validator existed to accept comma-separated CORS origins. It never ran. <code>pydantic-settings</code> JSON-decodes list-typed environment variables <em>before</em> any custom validator is reached, so a plain comma-separated value hard-crashed with a <code>JSONDecodeError</code> — from code written specifically to prevent that.</p>
+    <p class="bp-p">It looked correct in review. It had never once been exercised.</p>
+
+    <h4 class="bp-h4">Silent data loss behind a passing environment</h4>
+    <p class="bp-p">Tearing down the local stack with <code>docker compose down -v</code> wiped the volume. Migrations re-ran automatically on the next boot; seeding did not. The result was a valid schema with zero users, where every login returned 401 and nothing anywhere reported a problem.</p>
+    <p class="bp-p">It recurred four times before I stopped treating it as an environment quirk and root-caused it. Fixed permanently with an idempotent <code>--if-empty</code> seed step wired into the compose stack.</p>
+
+    <h4 class="bp-h4">Three shell bugs that produced confidently wrong output</h4>
+    <p class="bp-p">In the bash load-test harness:</p>
+    <ul class="bp-ul">
+      <li>A <code>$(...)</code> command substitution ran authentication in a subshell, so the token never reached the parent. Every request 401'd.</li>
+      <li><code>$BASHPID</code> inside a command substitution named the <em>substitution's</em> subshell, so curl wrote one file while jq read another. Every response appeared to be missing its scoring field.</li>
+      <li><code>mawk</code> rejects function definitions inside rule blocks, so every percentile printed blank.</li>
+    </ul>
+    <p class="bp-p">None of these errored loudly. All three produced output that looked like a finding. A measurement harness that is wrong is more dangerous than one that is broken, because a broken one tells you.</p>
+
+    <h2 class="bp-h2">Deploying it</h2>
+    <p class="bp-p">Containerized backend, managed Postgres, managed Redis, separately hosted frontend, on a managed platform.</p>
+    <p class="bp-p">Two failures worth writing down because both cost real time:</p>
+    <p class="bp-p">Async Postgres drivers reject <code>sslmode=require</code>. It is a psycopg-only parameter; the async drivers want <code>ssl=require</code>. Every managed database that mandates TLS hits this, and the error does not point at the parameter.</p>
+    <p class="bp-p">A non-root container cannot read a mounted secret file whose permissions are locked to a different host UID. Correct container hardening plus correct file permissions, combining into a failure. Both sides individually right.</p>
+
+    <h2 class="bp-h2">Delivering it</h2>
+    <p class="bp-p">Four things I did on the delivery side that I would do again.</p>
+    <p class="bp-p"><strong>The client-facing deliverable included a "what this does not prove" section.</strong> Synthetic data is not evidence of production performance. Recall cannot be reported, because reporting it requires knowing about the frauds that were never flagged. Precision is meaningless until analysts have closed real cases. Naming those limits made every other claim in the document more believable, which is the opposite of what it feels like while writing it.</p>
+    <p class="bp-p"><strong>The metrics endpoint refuses to report recall.</strong> It returns a note explaining why instead of a number. Declining to publish a flattering-but-unknowable metric is an engineering decision, and it is enforced in code rather than left to whoever writes the next slide.</p>
+    <p class="bp-p"><strong>Scope discipline.</strong> The client said explicitly: don't spend time on full production hardening yet. So the work was scoped to a staging-quality deployment, and the deferred hardening was listed explicitly — not silently skipped, and not silently gold-plated on their budget.</p>
+    <p class="bp-p"><strong>Every limitation was paired with its remediation path.</strong> No open wounds in client-facing material. A limitation with a plan is a roadmap item; a limitation without one is a liability.</p>
+
+    <h2 class="bp-h2">What this does not prove</h2>
+    <ul class="bp-ul">
+      <li><strong>Nothing here is evidence of production banking performance.</strong> Synthetic data, synthetic holdout, non-production hardware. PR-AUC 0.993 on PaySim-derived data says the pipeline works end to end. It says nothing about real adversaries, who adapt.</li>
+      <li><strong>Throughput ceiling: unmeasured.</strong> Not "high" — unmeasured, for the reason given above. Establishing it needs a load generator on separate hardware.</li>
+      <li><strong>Detection quality against adaptive fraud: unknown.</strong> Synthetic fraud does not change behavior when you start catching it. Real fraud does.</li>
+      <li><strong>It is a proof of concept on staging</strong>, not a production system. The deferred hardening is deferred, and it is written down.</li>
+    </ul>
+    <p class="bp-p">What would come next: load generation from isolated hardware to get a real ceiling, a shadow-mode period against live traffic before any decision is enforced, and analyst feedback loops closed so precision becomes measurable at all.</p>
+
+    <h2 class="bp-h2">What I would do differently</h2>
+    <p class="bp-p">The dependency-list duplication.</p>
+    <p class="bp-p">Docker installed from a hand-maintained list in the Dockerfile. CI installed from <code>pyproject.toml</code>. They drifted, and because Docker was the path that actually ran, the drift was invisible until CI ran for the first time and could not install the application.</p>
+    <p class="bp-p">I fixed the symptom — the missing package, the setuptools configuration — and CI went green. I did not fix the cause. There are still two lists, and nothing prevents them from diverging again the next time someone adds a dependency in a hurry. The correct fix is one source of truth with the Dockerfile installing from <code>pyproject.toml</code> directly, and I know that, and it is not done.</p>
+    <p class="bp-p">That is the honest answer to "what would you change," because it is the one thing on this list that is still a known open weakness rather than a solved problem. Everything else in this article either shipped or got reverted with a measurement attached.</p>
+
+    <div class="bp-footer-nav">
+      <a href="/#blog">← All articles</a>
+      <a href="/#contact">Work with me →</a>
+    </div>
+  </div>
+</main>
+<footer>
+  <div class="w">
+    <div class="ft">
+      <div class="ft-l"><em>talha.zafar</em> © 2026 · talhazafarjutt.github.io</div>
+      <div class="ft-r">
+        <a href="/#blog">All Articles</a>
+        <a href="/">Portfolio</a>
+        <a href="mailto:talha.zafar.j@gmail.com">Email</a>
+      </div>
+    </div>
+  </div>
+</footer>
+<script src="../js/blog.js" defer></script>
+<script src="../js/civitas3d.js" defer></script>
+</body>
+</html>
