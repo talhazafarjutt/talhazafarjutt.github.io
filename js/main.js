@@ -187,9 +187,12 @@ document.querySelectorAll('.ri,.rl,.rr,[data-count]').forEach(el => revObs.obser
 
 /* ── CUBE FOLLOWS THE SECTION IN VIEW ── */
 // rotate the cube to the face of whichever section crosses the upper third of the viewport
-const SECTION_FACE = { projects:'f', about:'r', blog:'b', contact:'l', skills:'t', experience:'bt' };
+const SECTION_FACE = { hero:'f', services:'f', projects:'f', about:'r', blog:'b', contact:'l', skills:'t', experience:'bt' };
+// the front face is shared by three sections that are never on screen together
+const FRONT_LABEL = { hero:'INTRO', services:'HELP', projects:'WORK' };
 const navSections = [...document.querySelectorAll('section[id]')];
-let shownFace = null, cubeSyncTimer = 0;
+const frontFace = document.querySelector('.face-f');
+let shownId = null, cubeSyncTimer = 0;
 
 function setCubeFace(key) {
   const [rx, ry] = ROTS[key];
@@ -202,11 +205,16 @@ function syncCube() {
   let active = navSections[0];
   for (const sec of navSections) if (sec.getBoundingClientRect().top <= probe) active = sec;
   if (innerHeight + scrollY >= document.documentElement.scrollHeight - 4) active = navSections[navSections.length - 1];
-  const key = SECTION_FACE[active.id] || 'f';             // hero / services: rest on the front face
-  if (key === shownFace) return;
-  shownFace = key;
+  if (active.id === shownId) return;
+  shownId = active.id;
+  const key = SECTION_FACE[active.id] || 'f';
+  if (frontFace) {
+    const front = FRONT_LABEL[active.id] ? active.id : 'projects';   // elsewhere the front face is WORK again
+    frontFace.textContent = FRONT_LABEL[front];
+    frontFace.dataset.goto = front;
+  }
   setCubeFace(key);
-  document.querySelectorAll('.face').forEach(f => f.classList.toggle('face-active', !!SECTION_FACE[active.id] && f.classList.contains('face-' + key)));
+  document.querySelectorAll('.face').forEach(f => f.classList.toggle('face-active', f.classList.contains('face-' + key)));
 }
 let cubeTick = false;
 window.addEventListener('scroll', () => {
@@ -216,78 +224,9 @@ window.addEventListener('scroll', () => {
 }, { passive: true });
 window.addEventListener('resize', syncCube);
 // after a manual spin, settle back onto the current section's face
-document.addEventListener('mouseup', () => { clearTimeout(cubeSyncTimer); cubeSyncTimer = setTimeout(() => { shownFace = null; syncCube(); }, 1400); });
-if (cubeWrap) cubeWrap.addEventListener('touchend', () => { clearTimeout(cubeSyncTimer); cubeSyncTimer = setTimeout(() => { shownFace = null; syncCube(); }, 1400); });
+document.addEventListener('mouseup', () => { clearTimeout(cubeSyncTimer); cubeSyncTimer = setTimeout(() => { shownId = null; syncCube(); }, 1400); });
+if (cubeWrap) cubeWrap.addEventListener('touchend', () => { clearTimeout(cubeSyncTimer); cubeSyncTimer = setTimeout(() => { shownId = null; syncCube(); }, 1400); });
 syncCube();
-
-/* ── WEB AUDIO — generative ambient ── */
-let ac, osc1, osc2, gainNode, filterNode, audioReady = false;
-
-function startAudio() {
-  if (audioReady) return;
-  audioReady = true;
-  try {
-    ac = new (window.AudioContext || window.webkitAudioContext)();
-    if (ac.state === 'suspended') ac.resume();
-
-    gainNode   = ac.createGain();
-    filterNode = ac.createBiquadFilter();
-    filterNode.type = 'bandpass';
-    filterNode.frequency.value = 280;
-    filterNode.Q.value = 5;
-
-    osc1 = ac.createOscillator(); osc1.type = 'sine';     osc1.frequency.value = 55;
-    osc2 = ac.createOscillator(); osc2.type = 'triangle'; osc2.frequency.value = 82.4;
-
-    const lfo = ac.createOscillator();
-    const lfoG = ac.createGain();
-    lfo.frequency.value = 0.18; lfoG.gain.value = 0.005;
-    lfo.connect(lfoG); lfoG.connect(gainNode.gain);
-
-    osc1.connect(filterNode); osc2.connect(filterNode);
-    filterNode.connect(gainNode); gainNode.connect(ac.destination);
-
-    gainNode.gain.setValueAtTime(0, ac.currentTime);
-    gainNode.gain.linearRampToValueAtTime(0.012, ac.currentTime + 2.5);
-    osc1.start(); osc2.start(); lfo.start();
-  } catch (_) { audioReady = false; }
-}
-
-document.addEventListener('mousemove', startAudio, { once: true });
-document.addEventListener('click',     startAudio, { once: true });
-document.addEventListener('scroll',    startAudio, { once: true, passive: true });
-
-document.addEventListener('mousemove', e => {
-  if (!filterNode || !ac) return;
-  filterNode.frequency.setTargetAtTime(150 + (e.clientX / innerWidth) * 650, ac.currentTime, 0.15);
-  gainNode.gain.setTargetAtTime(0.006 + (e.clientY / innerHeight) * 0.014, ac.currentTime, 0.2);
-}, { passive: true });
-
-shapeEls.forEach((el, i) => {
-  if (!el || holdsPhoto(el)) return;
-  el.addEventListener('mouseenter', () => {
-    if (!ac) return;
-    const b = ac.createOscillator(), bg = ac.createGain();
-    bg.gain.setValueAtTime(0.045, ac.currentTime);
-    bg.gain.exponentialRampToValueAtTime(0.0001, ac.currentTime + 0.2);
-    b.frequency.value = [330, 440, 554][i];
-    b.connect(bg); bg.connect(ac.destination);
-    b.start(); b.stop(ac.currentTime + 0.2);
-  });
-});
-
-function uiClick() {
-  if (!ac) return;
-  const b = ac.createOscillator(), bg = ac.createGain();
-  bg.gain.setValueAtTime(0.025, ac.currentTime);
-  bg.gain.exponentialRampToValueAtTime(0.0001, ac.currentTime + 0.07);
-  b.frequency.value = 880; b.type = 'sine';
-  b.connect(bg); bg.connect(ac.destination);
-  b.start(); b.stop(ac.currentTime + 0.07);
-}
-document.querySelectorAll('.face,.btn,.bc-link,.al,.c-link').forEach(el => {
-  el.addEventListener('click', uiClick);
-});
 
 /* ── CALENDLY ── */
 const calBtn = document.getElementById('calBtn');
