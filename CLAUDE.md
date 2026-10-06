@@ -52,6 +52,7 @@ or send directly.
 | `.gitignore` | Excludes docx, pdf, secrets, node_modules |
 | `CLAUDE.md` | This file |
 | `js/scene3d.js` + `css/scene3d.css` | Dependency-free 3D figure engine used by every blog post (canvas 2D, auto-fit camera) |
+| `js/visit.js` | Visit log: one `sendBeacon` per page view to the Cloudflare Worker `visits.talha-zafar-j.workers.dev` (D1 db `portfolio`, table `visits`, 30-day cron cleanup). Skips GPC/DNT; `?notrack` opts this browser out. Worker URL must stay in `connect-src` of every page with a CSP |
 | `js/scenes/*.js` | One scene per post: nodes, edges, modes, `tick()`. Facts in tooltips/notes must come from that post |
 
 ## Content Updates

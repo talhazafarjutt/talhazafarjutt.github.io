@@ -509,6 +509,7 @@ footer{background:rgba(4,3,8,.98);border-top:1px solid rgba(200,16,46,.15);paddi
 .ft-r{display:flex;gap:1.5rem}
 .ft-r a{font-family:var(--mono);font-size:.62rem;color:rgba(255,255,255,.25);text-transform:uppercase;letter-spacing:.1em;transition:color .2s}
 .ft-r a:hover{color:var(--red)}
+.ft-privacy{font-family:var(--mono);font-size:.58rem;line-height:1.6;color:rgba(255,255,255,.22);margin-top:.8rem}
 
 /* ─────────────────────────────
    BLOG ARTICLE PAGES
