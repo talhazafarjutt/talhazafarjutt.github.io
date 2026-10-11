@@ -43,3 +43,6 @@ build/
 *.pfx
 secrets.json
 credentials.json
+
+# Wrangler local state (Cloudflare Worker deploys)
+.wrangler/

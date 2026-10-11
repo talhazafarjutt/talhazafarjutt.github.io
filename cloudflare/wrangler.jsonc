@@ -1,0 +1,16 @@
+// Deploy config for the `visits` Worker — mirrors what was set up in the Cloudflare dashboard.
+// Deploy:  npx wrangler deploy --config cloudflare/wrangler.jsonc
+{
+  "name": "visits",
+  "main": "visits-worker.js",
+  "compatibility_date": "2026-10-06",
+  "workers_dev": true,
+  // keep variables added in the dashboard (deploys would otherwise drop plain-text vars; secrets always survive)
+  "keep_vars": true,
+  "observability": { "enabled": true },
+  "d1_databases": [
+    { "binding": "DB", "database_name": "portfolio", "database_id": "e23bf4bf-8583-4f76-8fd3-0f3bb6dafeb1" }
+  ],
+  // daily 03:00 UTC: delete visits older than 30 days
+  "triggers": { "crons": ["0 3 * * *"] }
+}
