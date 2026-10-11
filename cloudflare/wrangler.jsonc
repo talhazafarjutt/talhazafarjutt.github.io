@@ -7,6 +7,8 @@
   "workers_dev": true,
   // keep variables added in the dashboard (deploys would otherwise drop plain-text vars; secrets always survive)
   "keep_vars": true,
+  // don't inject __name() helpers: the dashboard script is shipped from a function's source
+  "keep_names": false,
   "observability": { "enabled": true },
   "d1_databases": [
     { "binding": "DB", "database_name": "portfolio", "database_id": "e23bf4bf-8583-4f76-8fd3-0f3bb6dafeb1" }

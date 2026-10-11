@@ -377,4 +377,6 @@ function dashboard() {
   load();
   setInterval(load, 60000);
 }
-const DASH_JS = '(' + dashboard.toString() + ')();';
+// Wrangler bundles with esbuild keep_names, which inserts __name(fn, 'name') calls into function
+// bodies — so dashboard.toString() references a helper the browser doesn't have. Define it.
+const DASH_JS = 'var __name = function (f) { return f; };\n(' + dashboard.toString() + ')();';
