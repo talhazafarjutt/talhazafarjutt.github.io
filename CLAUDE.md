@@ -31,6 +31,16 @@ new HTML with stale CSS/JS/images. Every local asset link carries `?v=YYYYMMDDnn
 (`index.html`, `blog/*.html`) whenever you change a CSS, JS or image file:
 `sed -i 's/?v=[0-9]*"/?v=NEWDATE"/g' index.html blog/*.html`
 
+## SEO
+- Page titles, descriptions, publish dates and share-card text live in **`tools/seo/seo_pages.py`** (single source of truth).
+- `python3 tools/seo/inject.py` rewrites the `<!-- SEO:start … SEO:end -->` block in every page (canonical, Open Graph, Twitter,
+  JSON-LD: ProfilePage/Person/WebSite on home, BlogPosting + BreadcrumbList on articles) and regenerates `sitemap.xml`. Idempotent.
+- `python3 tools/seo/cards.py` renders the 1200×630 share cards in `img/og/` + favicon PNGs (headless Chrome).
+- **New article:** add it to `seo_pages.py` → run `cards.py` and `inject.py` → add its card to the homepage blog grid → bump `?v=`.
+- Keep titles ≤ ~65 chars and descriptions ≤ ~155; only state facts the page itself contains.
+- `robots.txt` blocks `/cloudflare/`, `/tools/`, `blog/*.md`, `resume_source.html`. `404.html` is served by GitHub Pages for unknown URLs.
+- Calendly's widget is loaded on demand (`loadCalendly()` in `js/main.js`), not on every page view.
+
 ## Calendly Setup
 1. Create account at https://calendly.com
 2. In `index.html`, find the `.calendly-inline-widget` div and update `data-url`:

@@ -1,0 +1,10 @@
+# talhazafarjutt.github.io
+User-agent: *
+Allow: /
+# source files and tooling, not pages
+Disallow: /cloudflare/
+Disallow: /tools/
+Disallow: /blog/*.md$
+Disallow: /resume_source.html
+
+Sitemap: https://talhazafarjutt.github.io/sitemap.xml

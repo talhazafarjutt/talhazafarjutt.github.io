@@ -228,13 +228,29 @@ document.addEventListener('mouseup', () => { clearTimeout(cubeSyncTimer); cubeSy
 if (cubeWrap) cubeWrap.addEventListener('touchend', () => { clearTimeout(cubeSyncTimer); cubeSyncTimer = setTimeout(() => { shownId = null; syncCube(); }, 1400); });
 syncCube();
 
-/* ── CALENDLY ── */
+/* ── CALENDLY — loaded on demand (≈ a third-party script per page view saved) ── */
 const calBtn = document.getElementById('calBtn');
+let calendlyReady = null;
+function loadCalendly() {
+  calendlyReady ??= new Promise((resolve, reject) => {
+    const css = document.createElement('link');
+    css.rel = 'stylesheet'; css.href = 'https://assets.calendly.com/assets/external/widget.css';
+    const js = document.createElement('script');
+    js.src = 'https://assets.calendly.com/assets/external/widget.js'; js.async = true;
+    js.onload = resolve; js.onerror = () => { calendlyReady = null; reject(); };
+    document.head.append(css, js);
+  });
+  return calendlyReady;
+}
 if (calBtn) {
+  // warm it up once the contact section is close, so the click opens instantly
+  new IntersectionObserver((es, o) => {
+    if (es[0].isIntersecting) { loadCalendly().catch(() => {}); o.disconnect(); }
+  }, { rootMargin: '600px 0px' }).observe(calBtn);
   calBtn.addEventListener('click', () => {
-    if (typeof Calendly !== 'undefined') {
-      Calendly.initPopupWidget({ url: 'https://calendly.com/talha-zafar-j/30min' });
-    }
+    loadCalendly()
+      .then(() => Calendly.initPopupWidget({ url: 'https://calendly.com/talha-zafar-j/30min' }))
+      .catch(() => window.open('https://calendly.com/talha-zafar-j/30min', '_blank', 'noopener'));
   });
 }
 

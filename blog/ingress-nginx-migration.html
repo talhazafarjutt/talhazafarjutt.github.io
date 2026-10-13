@@ -3,15 +3,98 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="ingress-nginx retired in March 2026 — archived, read-only, no more security patches. The exact production migration to Gateway API I ran, step by step, without dropping a request.">
+<meta name="description" content="ingress-nginx was retired in March 2026. The exact cutover to Gateway API I ran: audit, parallel edges, one hostname at a time, zero dropped requests.">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
-<title>Replacing ingress-nginx in Production Without Breaking Anything — Talha Zafar</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%2300e5ff'/%3E%3Cstop offset='1' stop-color='%23a855f7'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='13' fill='%2305050f'/%3E%3Crect x='1.5' y='1.5' width='61' height='61' rx='12' fill='none' stroke='url(%23g)' stroke-width='2'/%3E%3Ctext x='7' y='42' font-family='monospace' font-weight='700' font-size='24' fill='%2300e5ff'%3E%3E_%3C/text%3E%3C/svg%3E">
+<title>Replacing ingress-nginx with Gateway API in Production — Talha Zafar</title>
+<!-- SEO:start (generated from seo_pages.py) -->
+<link rel="canonical" href="https://talhazafarjutt.github.io/blog/ingress-nginx-migration.html">
+<meta name="author" content="Talha Zafar">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta name="theme-color" content="#080808">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon-96.png" type="image/png" sizes="96x96">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta property="og:site_name" content="Talha Zafar">
+<meta property="og:locale" content="en_US">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Replacing ingress-nginx in Production Without Breaking Anything">
+<meta property="og:description" content="ingress-nginx was retired in March 2026. The exact cutover to Gateway API I ran: audit, parallel edges, one hostname at a time, zero dropped requests.">
+<meta property="og:url" content="https://talhazafarjutt.github.io/blog/ingress-nginx-migration.html">
+<meta property="og:image" content="https://talhazafarjutt.github.io/img/og/ingress-nginx-migration.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Replacing ingress-nginx in Production Without Breaking Anything">
+<meta property="article:published_time" content="2026-07">
+<meta property="article:modified_time" content="2026-10-13">
+<meta property="article:author" content="https://talhazafarjutt.github.io/">
+<meta property="article:tag" content="Kubernetes">
+<meta property="article:tag" content="Gateway API">
+<meta property="article:tag" content="ingress-nginx">
+<meta property="article:tag" content="Migration">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Replacing ingress-nginx in Production Without Breaking Anything">
+<meta name="twitter:description" content="ingress-nginx was retired in March 2026. The exact cutover to Gateway API I ran: audit, parallel edges, one hostname at a time, zero dropped requests.">
+<meta name="twitter:image" content="https://talhazafarjutt.github.io/img/og/ingress-nginx-migration.jpg">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@graph": [
+  {
+   "@type": "BlogPosting",
+   "@id": "https://talhazafarjutt.github.io/blog/ingress-nginx-migration.html#article",
+   "headline": "Replacing ingress-nginx in Production Without Breaking Anything",
+   "description": "ingress-nginx was retired in March 2026. The exact cutover to Gateway API I ran: audit, parallel edges, one hostname at a time, zero dropped requests.",
+   "image": "https://talhazafarjutt.github.io/img/og/ingress-nginx-migration.jpg",
+   "url": "https://talhazafarjutt.github.io/blog/ingress-nginx-migration.html",
+   "mainEntityOfPage": "https://talhazafarjutt.github.io/blog/ingress-nginx-migration.html",
+   "datePublished": "2026-07",
+   "dateModified": "2026-10-13",
+   "inLanguage": "en",
+   "keywords": [
+    "Kubernetes",
+    "Gateway API",
+    "ingress-nginx",
+    "Migration"
+   ],
+   "author": {
+    "@type": "Person",
+    "@id": "https://talhazafarjutt.github.io/#person",
+    "name": "Talha Zafar",
+    "url": "https://talhazafarjutt.github.io/"
+   },
+   "publisher": {
+    "@type": "Person",
+    "@id": "https://talhazafarjutt.github.io/#person",
+    "name": "Talha Zafar",
+    "url": "https://talhazafarjutt.github.io/"
+   }
+  },
+  {
+   "@type": "BreadcrumbList",
+   "itemListElement": [
+    {
+     "@type": "ListItem",
+     "position": 1,
+     "name": "Talha Zafar",
+     "item": "https://talhazafarjutt.github.io/"
+    },
+    {
+     "@type": "ListItem",
+     "position": 2,
+     "name": "Replacing ingress-nginx in Production Without Breaking Anything",
+     "item": "https://talhazafarjutt.github.io/blog/ingress-nginx-migration.html"
+    }
+   ]
+  }
+ ]
+}
+</script>
+<!-- SEO:end -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../css/style.css?v=2026100601">
-<link rel="stylesheet" href="../css/scene3d.css?v=2026100601">
+<link rel="stylesheet" href="../css/style.css?v=2026101301">
+<link rel="stylesheet" href="../css/scene3d.css?v=2026101301">
 </head>
 <body>
 <div id="prog"></div>
@@ -30,7 +113,7 @@
       <span class="tag-p">Kubernetes</span><span class="tag-p">Gateway API</span><span class="tag-a">Migration</span><span class="tag-g">DevOps</span>
     </div>
     <h1 class="bp-title ri">Replacing ingress-nginx in Production Without Breaking Anything</h1>
-    <div class="bp-meta ri"><span>Jul 2026</span><span class="bp-meta-dot">·</span><span>12 min read</span><span class="bp-meta-dot">·</span><span>Talha Zafar</span></div>
+    <div class="bp-meta ri"><span><time datetime="2026-07">Jul 2026</time></span><span class="bp-meta-dot">·</span><span>12 min read</span><span class="bp-meta-dot">·</span><span>Talha Zafar</span></div>
   </div>
 </header>
 <!-- ══ FIG 1 — interactive 3D ══ -->
@@ -135,9 +218,9 @@
     <p class="ft-privacy">This site logs visits — IP address, approximate location, page — for 30 days to understand who reads it. No cookies.</p>
   </div>
 </footer>
-<script src="../js/blog.js?v=2026100601" defer></script>
-<script src="../js/visit.js?v=2026100601" defer></script>
-<script src="../js/scene3d.js?v=2026100601" defer></script>
-<script src="../js/scenes/ingress.js?v=2026100601" defer></script>
+<script src="../js/blog.js?v=2026101301" defer></script>
+<script src="../js/visit.js?v=2026101301" defer></script>
+<script src="../js/scene3d.js?v=2026101301" defer></script>
+<script src="../js/scenes/ingress.js?v=2026101301" defer></script>
 </body>
 </html>

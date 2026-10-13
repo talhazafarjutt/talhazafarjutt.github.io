@@ -46,3 +46,6 @@ credentials.json
 
 # Wrangler local state (Cloudflare Worker deploys)
 .wrangler/
+
+# Python bytecode (tools/seo)
+__pycache__/

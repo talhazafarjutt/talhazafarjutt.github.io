@@ -1,0 +1,91 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Space+Grotesk:wght@500;700;800&display=block" rel="stylesheet">
+</head><body>
+<script>
+// share-card generator: 1200×630 JPEG per page + favicon PNGs, emitted as data URLs into the DOM
+const CARDS = /*CARDS*/[]/*END*/;
+const W = 1200, H = 630;
+const photo = new Image();
+photo.src = 'photo.jpg';
+
+function wrap(ctx, text, maxW) {
+  const words = text.split(' '), lines = [];
+  let line = '';
+  for (const w of words) {
+    const t = line ? line + ' ' + w : w;
+    if (ctx.measureText(t).width > maxW && line) { lines.push(line); line = w; } else line = t;
+  }
+  if (line) lines.push(line);
+  return lines;
+}
+
+function card(c) {
+  const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+  const x = cv.getContext('2d');
+  x.fillStyle = '#080808'; x.fillRect(0, 0, W, H);
+  // faint grid
+  x.strokeStyle = 'rgba(255,255,255,.04)'; x.lineWidth = 1;
+  for (let i = 0; i < W; i += 40) { x.beginPath(); x.moveTo(i, 0); x.lineTo(i, H); x.stroke(); }
+  for (let j = 0; j < H; j += 40) { x.beginPath(); x.moveTo(0, j); x.lineTo(W, j); x.stroke(); }
+  // red circle eclipsed by the portrait (same motif as the hero)
+  const cx = 930, cy = 300, R = 210;
+  x.fillStyle = '#C8102E'; x.beginPath(); x.arc(cx, cy, R, 0, 7); x.fill();
+  x.save(); x.beginPath(); x.arc(cx + 14, cy + 14, R - 22, 0, 7); x.closePath(); x.clip();
+  x.drawImage(photo, cx + 14 - (R - 22), cy + 14 - (R - 22), (R - 22) * 2, (R - 22) * 2); x.restore();
+  x.strokeStyle = '#080808'; x.lineWidth = 6; x.beginPath(); x.arc(cx + 14, cy + 14, R - 22, 0, 7); x.stroke();
+  // yellow triangle accent
+  x.fillStyle = '#F5C519'; x.beginPath(); x.moveTo(690, 560); x.lineTo(745, 470); x.lineTo(800, 560); x.closePath(); x.fill();
+  // kicker
+  x.fillStyle = '#C8102E'; x.fillRect(64, 70, 34, 5);
+  x.font = '700 22px "JetBrains Mono"'; x.fillStyle = 'rgba(255,255,255,.55)';
+  x.fillText(c.kicker.toUpperCase(), 112, 80);
+  // title
+  // shrink the title until title + one subtitle line fit above the tag row (y = 500)
+  let size = (c.size || 60) + 2, lines, lh, subY;
+  do {
+    size -= 2; x.font = `800 ${size}px "Space Grotesk"`; lines = wrap(x, c.title, 600);
+    lh = size * 1.12; subY = 150 + size + (lines.length - 1) * lh + 58;
+  } while ((lines.length > 4 || subY > 492) && size > 32);
+  x.fillStyle = '#fff';
+  lines.forEach((l, i) => x.fillText(l, 64, 150 + size + i * lh));
+  x.font = '500 26px "Space Grotesk"'; x.fillStyle = '#00e5ff';
+  let sub = c.sub;
+  while (x.measureText(sub).width > 600 && sub.length > 4) sub = sub.slice(0, -2).trimEnd() + '…';
+  x.fillText(sub, 64, subY);
+  // tags
+  x.font = '700 18px "JetBrains Mono"';
+  let tx = 64;
+  for (const t of c.tags) {
+    const tw = x.measureText(t).width + 26;
+    if (tx + tw > 660) break;
+    x.strokeStyle = 'rgba(255,255,255,.25)'; x.lineWidth = 1.5; x.strokeRect(tx, 520, tw, 40);
+    x.fillStyle = 'rgba(255,255,255,.8)'; x.fillText(t, tx + 13, 546);
+    tx += tw + 12;
+  }
+  x.font = '700 20px "JetBrains Mono"'; x.fillStyle = 'rgba(255,255,255,.4)';
+  x.fillText('talhazafarjutt.github.io', 64, 600);
+  return cv.toDataURL('image/jpeg', 0.86);
+}
+
+function icon(size) {
+  const cv = document.createElement('canvas'); cv.width = cv.height = size;
+  const x = cv.getContext('2d'), u = size / 64;
+  x.fillStyle = '#080808'; x.fillRect(0, 0, size, size);
+  x.fillStyle = '#C8102E'; x.fillRect(10 * u, 10 * u, 20 * u, 20 * u);
+  x.fillStyle = '#F5C519'; x.fillRect(34 * u, 34 * u, 20 * u, 20 * u);
+  return cv.toDataURL('image/png');
+}
+
+window.addEventListener('load', async () => {
+  await Promise.all([
+    document.fonts.load('800 60px "Space Grotesk"'), document.fonts.load('500 26px "Space Grotesk"'),
+    document.fonts.load('700 20px "JetBrains Mono"'),
+    photo.decode(),
+  ]);
+  const out = { 'favicon-96.png': icon(96), 'apple-touch-icon.png': icon(180) };
+  for (const c of CARDS) out[c.file] = card(c);
+  const pre = document.createElement('pre'); pre.id = 'out'; pre.textContent = JSON.stringify(out);
+  document.body.appendChild(pre);
+});
+</script></body></html>
