@@ -87,7 +87,7 @@ section{position:relative;padding:100px 0}
 }
 #cube-label{
   font-family:var(--mono);font-size:.46rem;letter-spacing:.22em;
-  color:rgba(255,255,255,.25);text-align:center;margin-bottom:.35rem;
+  color:rgba(255,255,255,.55);text-align:center;margin-bottom:.35rem;
 }
 #cube{
   width:60px;height:60px;position:relative;
@@ -195,14 +195,14 @@ section{position:relative;padding:100px 0}
 }
 #name-b{
   font-size:clamp(.9rem,2vw,2.2rem);font-weight:800;
-  letter-spacing:.5em;color:#fff;opacity:.16;
+  letter-spacing:.5em;color:#fff;opacity:.5;
 }
 #role-line{
   font-family:var(--mono);font-size:clamp(.78rem,1.5vw,1rem);
   color:var(--c);margin-bottom:1.3rem;
   display:flex;align-items:center;gap:.4rem;height:1.6em;
 }
-#role-line .pre{color:rgba(255,255,255,.3)}
+#role-line .pre{color:rgba(255,255,255,.55)}
 #tw{border-right:2px solid var(--c);animation:blink 1s infinite;padding-right:2px}
 @keyframes blink{0%,100%{border-color:var(--c)}50%{border-color:transparent}}
 .blink{display:inline-block;animation:blink 1s infinite}
@@ -226,7 +226,7 @@ section{position:relative;padding:100px 0}
 .scroll-hint{
   position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);
   display:flex;flex-direction:column;align-items:center;gap:.3rem;
-  font-family:var(--mono);font-size:.58rem;color:rgba(255,255,255,.2);
+  font-family:var(--mono);font-size:.58rem;color:rgba(255,255,255,.55);
   text-transform:uppercase;letter-spacing:.2em;
   animation:bob 2.5s ease-in-out infinite;
   z-index:4;
@@ -507,11 +507,11 @@ section{position:relative;padding:100px 0}
 footer{background:rgba(4,3,8,.98);border-top:1px solid rgba(200,16,46,.15);padding:1.5rem 0}
 .ft{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.8rem}
 .ft-logo{color:var(--red);font-weight:800;margin-right:.3rem}
-.ft-l{font-family:var(--mono);font-size:.68rem;color:rgba(255,255,255,.25)}
+.ft-l{font-family:var(--mono);font-size:.68rem;color:rgba(255,255,255,.55)}
 .ft-r{display:flex;gap:1.5rem}
-.ft-r a{font-family:var(--mono);font-size:.62rem;color:rgba(255,255,255,.25);text-transform:uppercase;letter-spacing:.1em;transition:color .2s}
+.ft-r a{font-family:var(--mono);font-size:.62rem;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:.1em;transition:color .2s}
 .ft-r a:hover{color:var(--red)}
-.ft-privacy{font-family:var(--mono);font-size:.58rem;line-height:1.6;color:rgba(255,255,255,.22);margin-top:.8rem}
+.ft-privacy{font-family:var(--mono);font-size:.58rem;line-height:1.6;color:rgba(255,255,255,.5);margin-top:.8rem}
 
 /* ─────────────────────────────
    BLOG ARTICLE PAGES

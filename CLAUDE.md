@@ -40,6 +40,8 @@ new HTML with stale CSS/JS/images. Every local asset link carries `?v=YYYYMMDDnn
 - Keep titles ≤ ~65 chars and descriptions ≤ ~155; only state facts the page itself contains.
 - `robots.txt` blocks `/cloudflare/`, `/tools/`, `blog/*.md`, `resume_source.html`. `404.html` is served by GitHub Pages for unknown URLs.
 - Calendly's widget is loaded on demand (`loadCalendly()` in `js/main.js`), not on every page view.
+- After publishing changes, run `python3 tools/seo/indexnow.py` to notify Bing/IndexNow (key file `c32bbcbaf4d636a80c72007e798ebf97.txt` at the root must stay).
+- Hero portrait uses `srcset` (330w/600w); regenerate `img/talha-zafar-330.*` if the photo changes.
 
 ## Calendly Setup
 1. Create account at https://calendly.com

@@ -102,7 +102,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=2026101301">
+<link rel="stylesheet" href="css/style.css?v=2026101501">
 </head>
 <body>
 
@@ -125,26 +125,27 @@
   </div>
 </div>
 
+<main>
 <!-- ══════════ HERO ══════════ -->
 <section id="hero">
   <!-- Geometric shapes with physics -->
   <div class="shape" id="s0">
     <picture class="s0-photo">
-      <source srcset="img/talha-zafar.webp?v=2026101301" type="image/webp">
-      <img src="img/talha-zafar.jpg?v=2026101301" alt="Talha Zafar, Backend &amp; DevOps Engineer" width="600" height="600" fetchpriority="high" decoding="async">
+      <source type="image/webp" srcset="img/talha-zafar-330.webp?v=2026101501 330w, img/talha-zafar.webp?v=2026101501 600w" sizes="(max-width: 700px) 178px, 294px">
+      <img src="img/talha-zafar.jpg?v=2026101501" srcset="img/talha-zafar-330.jpg?v=2026101501 330w, img/talha-zafar.jpg?v=2026101501 600w" sizes="(max-width: 700px) 178px, 294px" alt="Talha Zafar, Backend &amp; DevOps Engineer" width="600" height="600" fetchpriority="high" decoding="async">
     </picture>
-    <span class="s-num">01</span>
+    <span class="s-num" aria-hidden="true">01</span>
   </div>
-  <div class="shape" id="s1"><span class="s-num">02</span></div>
-  <div class="shape" id="s2"><span class="s-num">03</span></div>
+  <div class="shape" id="s1"><span class="s-num" aria-hidden="true">02</span></div>
+  <div class="shape" id="s2"><span class="s-num" aria-hidden="true">03</span></div>
 
   <!-- Hidden labels revealed by lens -->
-  <span class="hlabel" style="--rx:16%;--ry:44%">GPU · vLLM · K3s</span>
-  <span class="hlabel" style="--rx:78%;--ry:52%">HashiCorp · GDPR</span>
-  <span class="hlabel" style="--rx:50%;--ry:80%">gRPC · Redis · ECDH</span>
-  <span class="hlabel" style="--rx:34%;--ry:14%">OPEN TO WORK</span>
-  <span class="hlabel" style="--rx:70%;--ry:18%">4+ YEARS PRODUCTION</span>
-  <span class="hlabel" style="--rx:82%;--ry:82%">LAHORE, PAKISTAN</span>
+  <span class="hlabel" aria-hidden="true" style="--rx:16%;--ry:44%">GPU · vLLM · K3s</span>
+  <span class="hlabel" aria-hidden="true" style="--rx:78%;--ry:52%">HashiCorp · GDPR</span>
+  <span class="hlabel" aria-hidden="true" style="--rx:50%;--ry:80%">gRPC · Redis · ECDH</span>
+  <span class="hlabel" aria-hidden="true" style="--rx:34%;--ry:14%">OPEN TO WORK</span>
+  <span class="hlabel" aria-hidden="true" style="--rx:70%;--ry:18%">4+ YEARS PRODUCTION</span>
+  <span class="hlabel" aria-hidden="true" style="--rx:82%;--ry:82%">LAHORE, PAKISTAN</span>
 
   <div class="hero-content">
     <div class="h-badges">
@@ -196,7 +197,7 @@
         <div class="help-out">Run your own LLM inference at a fraction of cloud cost</div>
         <p class="help-desc">I stand up production GPU inference end to end — vLLM on bare-metal K3s, a FastAPI load-balancer, and an API gateway with key auth and rate limits. One cluster I run — 4× V100 32 GB — serves 10k+ requests a day at ~$180/month, against ~$8,800 for AWS's closest 4× V100 instance, which has half the VRAM.</p>
         <div class="sp-tags"><span>vLLM</span><span>K3s</span><span>GPU</span><span>FastAPI</span></div>
-        <a href="blog/gpu-inference.html" class="bc-link">See how →</a>
+        <a href="blog/gpu-inference.html" class="bc-link" aria-label="See how it was done: Running LLM Inference on 4× Tesla V100 — Bare Metal to Production">See how →</a>
       </div>
 
       <div class="help-card ri" style="transition-delay:.08s">
@@ -204,7 +205,7 @@
         <div class="help-out">APIs that stay fast and calm under load</div>
         <p class="help-desc">Python and Node microservices that hold sub-100ms P95 at 10k+ daily requests — gRPC where it actually earns its keep, Redis caching that cut database load 60%, and async design that doesn't fall over at the worst possible moment.</p>
         <div class="sp-tags"><span>FastAPI</span><span>gRPC</span><span>Redis</span><span>PostgreSQL</span></div>
-        <a href="blog/grpc-vs-rest.html" class="bc-link">See how →</a>
+        <a href="blog/grpc-vs-rest.html" class="bc-link" aria-label="See how it was done: gRPC vs REST in Production — How We Cut Internal API Overhead by 40%">See how →</a>
       </div>
 
       <div class="help-card ri" style="transition-delay:.16s">
@@ -212,7 +213,7 @@
         <div class="help-out">Lock down the edge before it costs you</div>
         <p class="help-desc">Zero-trust secrets with HashiCorp Vault, CI/CD wired with SAST plus container and secret scanning, and calm incident response when it counts — including shutting down a live Stripe carding attack and taking fraud to zero.</p>
         <div class="sp-tags"><span>Vault</span><span>OWASP</span><span>GitHub Actions</span><span>GDPR</span></div>
-        <a href="blog/stripe-carding.html" class="bc-link">See how →</a>
+        <a href="blog/stripe-carding.html" class="bc-link" aria-label="See how it was done: Stopping a Live Stripe Carding Attack — Zero Fraud Post-Deployment">See how →</a>
       </div>
     </div>
   </div>
@@ -445,7 +446,7 @@
           <div class="bc-tags"><span class="tag-c">FastAPI</span><span class="tag-p">Redis Streams</span><span class="tag-a">Fraud Detection</span><span class="tag-g">Interactive 3D</span></div>
           <h3 class="bc-title">How a Fraud Platform Can Look Healthy While Catching Nothing</h3>
           <p class="bc-exc">Every transaction got a 202, the dashboard stayed green — and 0 of 61 were ever scored. Platform notes from a financial-crime proof of concept on synthetic data: async scoring, security the build enforces, and three optimizations I measured and reverted. Includes an interactive 3D replay of the bug.</p>
-          <div class="bc-foot"><span>Sep 2026 · 16 min read</span><a href="blog/civitas-fraud-platform.html" class="bc-link">Read →</a></div>
+          <div class="bc-foot"><span>Sep 2026 · 16 min read</span><a href="blog/civitas-fraud-platform.html" class="bc-link" aria-label="Read the article: How a Fraud Platform Can Look Healthy While Catching Nothing">Read →</a></div>
         </div>
       </article>
 
@@ -455,7 +456,7 @@
           <div class="bc-tags"><span class="tag-p">Kubernetes</span><span class="tag-p">Gateway API</span><span class="tag-a">Migration</span></div>
           <h3 class="bc-title">Replacing ingress-nginx in Production Without Breaking Anything</h3>
           <p class="bc-exc">ingress-nginx retired in March 2026 — archived, read-only, no more security patches, sitting at the public edge. The exact cutover to Gateway API I ran across our clusters: audit, dual edges, one hostname at a time, zero dropped requests.</p>
-          <div class="bc-foot"><span>Jul 2026 · 12 min read</span><a href="blog/ingress-nginx-migration.html" class="bc-link">Read →</a></div>
+          <div class="bc-foot"><span>Jul 2026 · 12 min read</span><a href="blog/ingress-nginx-migration.html" class="bc-link" aria-label="Read the article: Replacing ingress-nginx in Production Without Breaking Anything">Read →</a></div>
         </div>
       </article>
 
@@ -465,7 +466,7 @@
           <div class="bc-tags"><span class="tag-p">GPU</span><span class="tag-p">vLLM</span><span class="tag-p">K3s</span></div>
           <h3 class="bc-title">Running LLM Inference on 4× Tesla V100 — Bare Metal to Production</h3>
           <p class="bc-exc">AWS p3.8xlarge costs ~$8,800/month. We own the hardware. Full stack: K3s, vLLM, FastAPI load-balancer, nginx API key auth — serving 10,000+ daily requests at sub-400ms P95.</p>
-          <div class="bc-foot"><span>Mar 2026 · 10 min read</span><a href="blog/gpu-inference.html" class="bc-link">Read →</a></div>
+          <div class="bc-foot"><span>Mar 2026 · 10 min read</span><a href="blog/gpu-inference.html" class="bc-link" aria-label="Read the article: Running LLM Inference on 4× Tesla V100 — Bare Metal to Production">Read →</a></div>
         </div>
       </article>
 
@@ -475,7 +476,7 @@
           <div class="bc-tags"><span class="tag-a">Security</span><span class="tag-a">Stripe</span><span class="tag-c">Redis</span></div>
           <h3 class="bc-title">Stopping a Live Stripe Carding Attack — Zero Fraud Post-Deployment</h3>
           <p class="bc-exc">400+ failed charges in two hours, all $0.99. We went from 12% fraud rate to 0.02% with Stripe Radar rules, Redis rate limiting, and HMAC inter-service authentication.</p>
-          <div class="bc-foot"><span>Feb 2026 · 6 min read</span><a href="blog/stripe-carding.html" class="bc-link">Read →</a></div>
+          <div class="bc-foot"><span>Feb 2026 · 6 min read</span><a href="blog/stripe-carding.html" class="bc-link" aria-label="Read the article: Stopping a Live Stripe Carding Attack — Zero Fraud Post-Deployment">Read →</a></div>
         </div>
       </article>
 
@@ -485,7 +486,7 @@
           <div class="bc-tags"><span class="tag-c">gRPC</span><span class="tag-c">FastAPI</span><span class="tag-c">Microservices</span></div>
           <h3 class="bc-title">gRPC vs REST in Production — How We Cut Internal API Overhead by 40%</h3>
           <p class="bc-exc">Six microservices, all talking REST. A single agent task triggered 5 synchronous cross-service calls. What we measured, how we migrated, and when gRPC is — and isn't — the right call.</p>
-          <div class="bc-foot"><span>Jan 2026 · 7 min read</span><a href="blog/grpc-vs-rest.html" class="bc-link">Read →</a></div>
+          <div class="bc-foot"><span>Jan 2026 · 7 min read</span><a href="blog/grpc-vs-rest.html" class="bc-link" aria-label="Read the article: gRPC vs REST in Production — How We Cut Internal API Overhead by 40%">Read →</a></div>
         </div>
       </article>
 
@@ -495,7 +496,7 @@
           <div class="bc-tags"><span class="tag-a">Vault</span><span class="tag-a">Security</span><span class="tag-g">GDPR</span></div>
           <h3 class="bc-title">Zero-Trust Secrets with HashiCorp Vault — GDPR-Compliant on Bare Metal</h3>
           <p class="bc-exc">Secrets in .env files, CI variables, SSH keys in repos. Here's how we replaced all of it with AppRole auth, policy-based access, and on-prem secret residency for GDPR compliance.</p>
-          <div class="bc-foot"><span>Dec 2025 · 8 min read</span><a href="blog/vault-gdpr.html" class="bc-link">Read →</a></div>
+          <div class="bc-foot"><span>Dec 2025 · 8 min read</span><a href="blog/vault-gdpr.html" class="bc-link" aria-label="Read the article: Zero-Trust Secrets with HashiCorp Vault — GDPR-Compliant on Bare Metal">Read →</a></div>
         </div>
       </article>
     </div>
@@ -537,6 +538,7 @@
     </div>
   </div>
 </section>
+</main>
 
 <!-- ══════════ FOOTER ══════════ -->
 <footer>
@@ -553,7 +555,7 @@
   </div>
 </footer>
 
-<script src="js/main.js?v=2026101301" defer></script>
-<script src="js/visit.js?v=2026101301" defer></script>
+<script src="js/main.js?v=2026101501" defer></script>
+<script src="js/visit.js?v=2026101501" defer></script>
 </body>
 </html>
