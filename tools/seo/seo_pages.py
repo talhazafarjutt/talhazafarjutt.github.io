@@ -18,7 +18,7 @@ PAGES = [
     dict(file="blog/ingress-nginx-migration.html", og="img/og/ingress-nginx-migration.jpg", published="2026-07",
          headline="Replacing ingress-nginx in Production Without Breaking Anything",
          title="Replacing ingress-nginx with Gateway API in Production — Talha Zafar",
-         desc="ingress-nginx was retired in March 2026. The exact cutover to Gateway API I ran: audit, parallel edges, one hostname at a time, zero dropped requests.",
+         desc="ingress-nginx hit end of life in March 2026: no more security patches. The exact Gateway API cutover I ran, one hostname at a time, zero dropped requests.",
          tags=["Kubernetes", "Gateway API", "ingress-nginx", "Migration"],
          card=dict(kicker="Kubernetes · Migration", sub="Step-by-step cutover · interactive 3D")),
     dict(file="blog/gpu-inference.html", og="img/og/gpu-inference.jpg", published="2026-03",
