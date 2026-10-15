@@ -1,6 +1,6 @@
 """SEO metadata for every page — titles ≤ ~65 chars, descriptions ≤ ~155 chars, facts from the pages themselves."""
 SITE = "https://talhazafarjutt.github.io"
-TODAY = "2026-10-13"
+TODAY = "2026-10-15"
 
 PAGES = [
     dict(file="index.html", url=SITE + "/", og="img/og/home.jpg", type="website",
@@ -24,25 +24,25 @@ PAGES = [
     dict(file="blog/gpu-inference.html", og="img/og/gpu-inference.jpg", published="2026-03",
          headline="Running LLM Inference on 4× Tesla V100 — Bare Metal to Production",
          title="Self-Hosted LLM Inference on 4× V100 (vLLM, K3s) — Talha Zafar",
-         desc="How I set up a 4× NVIDIA Tesla V100 GPU cluster on bare metal for LLM inference — K3s, vLLM, a FastAPI load balancer and nginx API-key auth.",
+         desc="How to self-host an LLM on bare metal: 4× Tesla V100 GPUs, K3s, vLLM, a FastAPI load balancer and nginx API-key auth — ~$180/month vs ~$8,800 on AWS.",
          tags=["vLLM", "K3s", "GPU", "LLM inference", "FastAPI"],
          card=dict(kicker="Self-hosted LLM inference", sub="~$180/month vs ~$8,800 on AWS")),
     dict(file="blog/stripe-carding.html", og="img/og/stripe-carding.jpg", published="2026-02",
          headline="Stopping a Live Stripe Carding Attack — Zero Fraud Post-Deployment",
-         title="Stopping a Live Stripe Carding Attack — Talha Zafar",
-         desc="How we stopped a live Stripe carding attack in under 4 hours: Radar rules, Redis IP + BIN rate limiting and HMAC between services. Fraud 12% → 0.02%.",
+         title="Stopping a Stripe Card-Testing (Carding) Attack — Talha Zafar",
+         desc="How to stop a card testing attack on Stripe: three Radar rules, Redis IP + BIN rate limits and HMAC between services. Fraud 12% → 0.02% in under 4 hours.",
          tags=["Stripe", "Security", "Redis", "HMAC", "Fraud prevention"],
          card=dict(kicker="Security · Incident response", sub="Fraud rate 12% → 0.02% · interactive 3D")),
     dict(file="blog/grpc-vs-rest.html", og="img/og/grpc-vs-rest.jpg", published="2026-01",
          headline="gRPC vs REST in Production — How We Cut Internal API Overhead by 40%",
          title="gRPC vs REST: 40% Overhead Reduction in Production — Talha Zafar",
-         desc="Real numbers from moving 6 microservices from REST to gRPC: 42% lower internal latency, 76% smaller payloads, and when REST is still the right call.",
+         desc="Which is faster, gRPC or REST? Measured on 6 microservices: 42% lower internal latency, 76% smaller payloads — and when REST is still the right call.",
          tags=["gRPC", "REST", "FastAPI", "Microservices", "Python"],
          card=dict(kicker="Microservices · Performance", sub="−42% latency, −76% payload · interactive 3D")),
     dict(file="blog/vault-gdpr.html", og="img/og/vault-gdpr.jpg", published="2025-12",
          headline="Zero-Trust Secrets with HashiCorp Vault — GDPR-Compliant on Bare Metal",
          title="Zero-Trust Secrets with HashiCorp Vault — Talha Zafar",
-         desc="How we replaced .env files with HashiCorp Vault — AppRole auth, policy-based access, CI/CD integration, and on-prem audit logs for GDPR Article 32.",
+         desc="Why use HashiCorp Vault? How we replaced .env files with AppRole auth, least-privilege policies, CI/CD secrets and on-prem audit logs for GDPR Article 32.",
          tags=["HashiCorp Vault", "Security", "GDPR", "AppRole", "DevOps"],
          card=dict(kicker="Security · GDPR", sub="Least-privilege secrets · interactive 3D")),
 ]
