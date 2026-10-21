@@ -23,22 +23,22 @@ function wrap(ctx, text, maxW) {
 function card(c) {
   const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
   const x = cv.getContext('2d');
-  x.fillStyle = '#080808'; x.fillRect(0, 0, W, H);
-  // faint grid
-  x.strokeStyle = 'rgba(255,255,255,.04)'; x.lineWidth = 1;
-  for (let i = 0; i < W; i += 40) { x.beginPath(); x.moveTo(i, 0); x.lineTo(i, H); x.stroke(); }
-  for (let j = 0; j < H; j += 40) { x.beginPath(); x.moveTo(0, j); x.lineTo(W, j); x.stroke(); }
-  // red circle eclipsed by the portrait (same motif as the hero)
+  // palette: Nordic Indigo #263BAA on Vanilla Mist #FFF4D6 (same as the site)
+  x.fillStyle = '#FFF4D6'; x.fillRect(0, 0, W, H);
+  // faint indigo dot grid (same texture as the hero)
+  x.fillStyle = 'rgba(38,59,170,.13)';
+  for (let i = 12; i < W; i += 24) for (let j = 12; j < H; j += 24) { x.beginPath(); x.arc(i, j, 1.2, 0, 7); x.fill(); }
+  // indigo circle eclipsed by the portrait (same motif as the hero)
   const cx = 930, cy = 300, R = 210;
-  x.fillStyle = '#C8102E'; x.beginPath(); x.arc(cx, cy, R, 0, 7); x.fill();
+  x.fillStyle = '#263BAA'; x.beginPath(); x.arc(cx, cy, R, 0, 7); x.fill();
   x.save(); x.beginPath(); x.arc(cx + 14, cy + 14, R - 22, 0, 7); x.closePath(); x.clip();
   x.drawImage(photo, cx + 14 - (R - 22), cy + 14 - (R - 22), (R - 22) * 2, (R - 22) * 2); x.restore();
-  x.strokeStyle = '#080808'; x.lineWidth = 6; x.beginPath(); x.arc(cx + 14, cy + 14, R - 22, 0, 7); x.stroke();
-  // yellow triangle accent
-  x.fillStyle = '#F5C519'; x.beginPath(); x.moveTo(690, 560); x.lineTo(745, 470); x.lineTo(800, 560); x.closePath(); x.fill();
+  x.strokeStyle = '#FFF4D6'; x.lineWidth = 7; x.beginPath(); x.arc(cx + 14, cy + 14, R - 22, 0, 7); x.stroke();
+  // pale-indigo triangle accent
+  x.fillStyle = '#C9D0F2'; x.beginPath(); x.moveTo(690, 560); x.lineTo(745, 470); x.lineTo(800, 560); x.closePath(); x.fill();
   // kicker
-  x.fillStyle = '#C8102E'; x.fillRect(64, 70, 34, 5);
-  x.font = '700 22px "JetBrains Mono"'; x.fillStyle = 'rgba(255,255,255,.55)';
+  x.fillStyle = '#263BAA'; x.fillRect(64, 70, 34, 5);
+  x.font = '700 22px "JetBrains Mono"'; x.fillStyle = 'rgba(22,30,77,.72)';
   x.fillText(c.kicker.toUpperCase(), 112, 80);
   // title
   // shrink the title until title + one subtitle line fit above the tag row (y = 500)
@@ -47,9 +47,9 @@ function card(c) {
     size -= 2; x.font = `800 ${size}px "Space Grotesk"`; lines = wrap(x, c.title, 600);
     lh = size * 1.12; subY = 150 + size + (lines.length - 1) * lh + 58;
   } while ((lines.length > 4 || subY > 492) && size > 32);
-  x.fillStyle = '#fff';
+  x.fillStyle = '#161E4D';
   lines.forEach((l, i) => x.fillText(l, 64, 150 + size + i * lh));
-  x.font = '500 26px "Space Grotesk"'; x.fillStyle = '#00e5ff';
+  x.font = '500 26px "Space Grotesk"'; x.fillStyle = '#263BAA';
   let sub = c.sub;
   while (x.measureText(sub).width > 600 && sub.length > 4) sub = sub.slice(0, -2).trimEnd() + '…';
   x.fillText(sub, 64, subY);
@@ -59,11 +59,12 @@ function card(c) {
   for (const t of c.tags) {
     const tw = x.measureText(t).width + 26;
     if (tx + tw > 660) break;
-    x.strokeStyle = 'rgba(255,255,255,.25)'; x.lineWidth = 1.5; x.strokeRect(tx, 520, tw, 40);
-    x.fillStyle = 'rgba(255,255,255,.8)'; x.fillText(t, tx + 13, 546);
+    x.fillStyle = 'rgba(38,59,170,.06)'; x.fillRect(tx, 520, tw, 40);
+    x.strokeStyle = 'rgba(38,59,170,.35)'; x.lineWidth = 1.5; x.strokeRect(tx, 520, tw, 40);
+    x.fillStyle = '#263BAA'; x.fillText(t, tx + 13, 546);
     tx += tw + 12;
   }
-  x.font = '700 20px "JetBrains Mono"'; x.fillStyle = 'rgba(255,255,255,.4)';
+  x.font = '700 20px "JetBrains Mono"'; x.fillStyle = 'rgba(22,30,77,.6)';
   x.fillText('talhazafarjutt.github.io', 64, 600);
   return cv.toDataURL('image/jpeg', 0.86);
 }
@@ -71,9 +72,9 @@ function card(c) {
 function icon(size) {
   const cv = document.createElement('canvas'); cv.width = cv.height = size;
   const x = cv.getContext('2d'), u = size / 64;
-  x.fillStyle = '#080808'; x.fillRect(0, 0, size, size);
-  x.fillStyle = '#C8102E'; x.fillRect(10 * u, 10 * u, 20 * u, 20 * u);
-  x.fillStyle = '#F5C519'; x.fillRect(34 * u, 34 * u, 20 * u, 20 * u);
+  x.fillStyle = '#263BAA'; x.fillRect(0, 0, size, size);
+  x.fillStyle = '#FFF4D6'; x.fillRect(10 * u, 10 * u, 20 * u, 20 * u);
+  x.fillStyle = '#C9D0F2'; x.fillRect(34 * u, 34 * u, 20 * u, 20 * u);
   return cv.toDataURL('image/png');
 }
 

@@ -247,14 +247,16 @@ if (calBtn) {
   new IntersectionObserver((es, o) => {
     if (es[0].isIntersecting) { loadCalendly().catch(() => {}); o.disconnect(); }
   }, { rootMargin: '600px 0px' }).observe(calBtn);
+  // themed to the site palette (vanilla background, indigo ink + buttons)
+  const CAL_URL = 'https://calendly.com/talha-zafar-j/30min?background_color=fff4d6&text_color=161e4d&primary_color=263baa';
   calBtn.addEventListener('click', () => {
     loadCalendly()
-      .then(() => Calendly.initPopupWidget({ url: 'https://calendly.com/talha-zafar-j/30min' }))
-      .catch(() => window.open('https://calendly.com/talha-zafar-j/30min', '_blank', 'noopener'));
+      .then(() => Calendly.initPopupWidget({ url: CAL_URL }))
+      .catch(() => window.open(CAL_URL, '_blank', 'noopener'));
   });
 }
 
 /* ── FACE-ACTIVE CSS INJECT (no extra class needed in HTML) ── */
 const faceActiveStyle = document.createElement('style');
-faceActiveStyle.textContent = '.face-active{background:var(--red)!important;color:#fff!important;border-color:var(--red)!important;opacity:1!important}';
+faceActiveStyle.textContent = '.face-active{background:var(--indigo)!important;color:var(--vanilla)!important;border-color:var(--indigo)!important;opacity:1!important}';
 document.head.appendChild(faceActiveStyle);

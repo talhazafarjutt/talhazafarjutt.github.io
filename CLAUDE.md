@@ -12,6 +12,14 @@ Live URL: https://talhazafarjutt.github.io
 - Google Fonts (JetBrains Mono + Space Grotesk) via official CDN link tag
 - Calendly scheduling embed via official Calendly async widget script
 - Canvas API for animated neural-network background
+
+## Design palette
+- Brand pair: **Nordic Indigo `#263BAA`** + **Vanilla Mist `#FFF4D6`** — tokens in `:root` of `css/style.css`
+  (`--indigo`, `--vanilla`, derived `--fg` ink, `--night` dark panel, `--tint`, `--t2`/`--t3` text, `--ok`/`--warn`/`--bad`).
+- Pages are vanilla with indigo type; dark "night" panels (`--night`) hold the terminal, blog 3D figures and code blocks.
+- Text contrast floors: `--t3` (muted) ≥5.6:1 on vanilla, `--v2` ≥5.9:1 on indigo. Check new colours before adding them.
+- `--c/--p/--g/--a` are neon data colours for the dark 3D figures only — never put them on vanilla.
+- Share cards (`tools/seo/og.html`) and `favicon.svg` use the same palette; re-run `cards.py` after changing it.
 - Intersection Observer API for scroll-triggered fade-ins
 
 ## Security Posture
@@ -49,8 +57,8 @@ new HTML with stale CSS/JS/images. Every local asset link carries `?v=YYYYMMDDnn
    ```
    data-url="https://calendly.com/YOUR_USERNAME/30min"
    ```
-3. The `?background_color=0a0a1a&text_color=e2e8f0&primary_color=00e5ff` query params
-   theme the widget to match the dark design — keep them.
+3. `CAL_URL` in `js/main.js` carries `?background_color=fff4d6&text_color=161e4d&primary_color=263baa`
+   to theme the popup to the vanilla/indigo palette — keep them (Calendly ignores them on plans without colour customisation).
 
 ## Resume Files
 Six `.docx` files (backend/devops × local/germany variants) live in the repo root locally

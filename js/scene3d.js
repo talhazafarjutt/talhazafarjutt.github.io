@@ -302,14 +302,14 @@
         if (frame) s[0] = Math.min(s[0], W - tw - 4 * dpr);
         else s[0] = Math.max(tw / 2 + 4 * dpr, Math.min(W - tw / 2 - 4 * dpr, s[0]));
         const bx = frame ? s[0] - 5 * dpr : s[0] - tw / 2;
-        ctx.fillStyle = 'rgba(6,6,8,.75)'; ctx.fillRect(bx, s[1] - fs * 0.8, tw, fs * 1.6);
+        ctx.fillStyle = 'rgba(14,21,64,.82)'; ctx.fillRect(bx, s[1] - fs * 0.8, tw, fs * 1.6);
         ctx.fillStyle = n.state === 'off' ? 'rgba(160,160,170,.6)' : hot ? '#fff' : hexA(n.c, 0.95);
         ctx.fillText(text, s[0], s[1]);
         const badge = narrow && n.badgeShort != null ? n.badgeShort : n.badge;
         if (badge) {
           ctx.font = `600 ${fs * 0.85}px "JetBrains Mono",monospace`;
           const bw = ctx.measureText(badge).width + 8 * dpr;
-          ctx.fillStyle = 'rgba(6,6,8,.7)'; ctx.fillRect(s[0] - bw / 2, s[1] + fs * 0.75, bw, fs * 1.2);
+          ctx.fillStyle = 'rgba(14,21,64,.78)'; ctx.fillRect(s[0] - bw / 2, s[1] + fs * 0.75, bw, fs * 1.2);
           ctx.fillStyle = n.state === 'down' ? '#ff6b81' : 'rgba(255,255,255,.7)';
           ctx.fillText(badge, s[0], s[1] + fs * 1.35);
         }

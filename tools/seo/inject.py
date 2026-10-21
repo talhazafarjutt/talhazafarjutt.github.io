@@ -51,7 +51,7 @@ def block(page):
         f'<link rel="canonical" href="{page["url"]}">',
         '<meta name="author" content="Talha Zafar">',
         '<meta name="robots" content="index, follow, max-image-preview:large">',
-        '<meta name="theme-color" content="#080808">',
+        '<meta name="theme-color" content="#FFF4D6">',
         '<link rel="icon" href="/favicon.svg" type="image/svg+xml">',
         '<link rel="icon" href="/favicon-96.png" type="image/png" sizes="96x96">',
         '<link rel="apple-touch-icon" href="/apple-touch-icon.png">',
