@@ -102,28 +102,28 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=2026102101">
+<link rel="stylesheet" href="css/style.css?v=2026102102">
 </head>
 <body>
-
-<!-- LENS CURSOR -->
-<div id="lens"></div>
 
 <!-- SCROLL PROGRESS -->
 <div id="prog"></div>
 
-<!-- FIXED CUBE NAV -->
-<div id="cube-wrap">
-  <div id="cube-label">NAV</div>
-  <div id="cube">
-    <div class="face face-f" data-goto="hero">INTRO</div>
-    <div class="face face-r" data-goto="about">ABOUT</div>
-    <div class="face face-b" data-goto="blog">BLOG</div>
-    <div class="face face-l" data-goto="contact">HIRE</div>
-    <div class="face face-t" data-goto="skills">STACK</div>
-    <div class="face face-bt" data-goto="experience">EXP</div>
-  </div>
-</div>
+<!-- TOP BAR -->
+<header id="site-nav">
+  <nav class="nv" aria-label="Main">
+    <a href="#hero" class="nv-logo"><span class="nv-mark" aria-hidden="true"></span>Talha Zafar</a>
+    <button class="nv-menu" id="nvMenu" type="button" aria-expanded="false" aria-controls="nvLinks">Menu</button>
+    <ul class="nv-links" id="nvLinks">
+      <li><a href="#services">Services</a></li>
+      <li><a href="#projects">Work</a></li>
+      <li><a href="#blog">Articles</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#process">Process</a></li>
+    </ul>
+    <a href="#contact" class="nv-cta">Book a call</a>
+  </nav>
+</header>
 
 <main>
 <!-- ══════════ HERO ══════════ -->
@@ -132,37 +132,27 @@
   <div class="shape" id="s0">
     <picture class="s0-photo">
       <source type="image/webp" srcset="img/talha-zafar-330.webp?v=2026101502 330w, img/talha-zafar.webp?v=2026101502 600w" sizes="(max-width: 700px) 178px, 294px">
-      <img src="img/talha-zafar.jpg?v=2026102101" srcset="img/talha-zafar-330.jpg?v=2026101502 330w, img/talha-zafar.jpg?v=2026101502 600w" sizes="(max-width: 700px) 178px, 294px" alt="Talha Zafar, Backend &amp; DevOps Engineer" width="600" height="600" fetchpriority="high" decoding="async">
+      <img src="img/talha-zafar.jpg?v=2026102102" srcset="img/talha-zafar-330.jpg?v=2026101502 330w, img/talha-zafar.jpg?v=2026101502 600w" sizes="(max-width: 700px) 178px, 294px" alt="Talha Zafar, Backend &amp; DevOps Engineer" width="600" height="600" fetchpriority="high" decoding="async">
     </picture>
-    <span class="s-num" aria-hidden="true">01</span>
   </div>
-  <div class="shape" id="s1"><span class="s-num" aria-hidden="true">02</span></div>
-  <div class="shape" id="s2"><span class="s-num" aria-hidden="true">03</span></div>
-
-  <!-- Hidden labels revealed by lens -->
-  <span class="hlabel" aria-hidden="true" style="--rx:16%;--ry:44%">GPU · vLLM · K3s</span>
-  <span class="hlabel" aria-hidden="true" style="--rx:78%;--ry:52%">HashiCorp · GDPR</span>
-  <span class="hlabel" aria-hidden="true" style="--rx:50%;--ry:80%">gRPC · Redis · ECDH</span>
-  <span class="hlabel" aria-hidden="true" style="--rx:34%;--ry:14%">OPEN TO WORK</span>
-  <span class="hlabel" aria-hidden="true" style="--rx:70%;--ry:18%">4+ YEARS PRODUCTION</span>
-  <span class="hlabel" aria-hidden="true" style="--rx:82%;--ry:82%">LAHORE, PAKISTAN</span>
+  <div class="shape" id="s1" aria-hidden="true"></div>
+  <div class="shape" id="s2" aria-hidden="true"></div>
 
   <div class="hero-content">
     <div class="h-badges">
-      <span class="badge badge-g"><span class="dot-g"></span>Available — freelance projects &amp; full-time roles</span>
-      <span class="badge badge-a">🌍 Remote worldwide · PKT (UTC+5) · open to relocation</span>
+      <span class="badge badge-g"><span class="dot-g"></span>Available for freelance projects</span>
+      <span class="badge badge-a">Remote worldwide · PKT (UTC+5)</span>
     </div>
     <h1 id="name-block">
       <span id="name-a">TALHA</span>
       <span id="name-b">ZAFAR</span>
       <span class="sr-only"> — Freelance Backend &amp; DevOps Engineer</span>
     </h1>
-    <div id="role-line"><span class="pre">~/role $&nbsp;</span><span id="tw"></span></div>
-    <p class="hero-desc">Backend &amp; DevOps engineer with <strong>4+ years</strong> building <strong>AI inference infrastructure</strong>, distributed microservices, and <strong>zero-trust security pipelines</strong>.</p>
+    <p id="role-line">Backend &amp; DevOps Engineer · FastAPI · Kubernetes · LLMs</p>
+    <p class="hero-desc">I build and run backend and AI infrastructure that doesn't fall over: fast APIs, Kubernetes clusters, self-hosted LLM inference and the security around them. <strong>4+ years</strong> in production.</p>
     <div class="hero-btns">
-      <a href="#contact" class="btn btn-fill">Hire me for a project →</a>
-      <a href="#projects" class="btn btn-out">View Work ↓</a>
-      <a href="talha_zafar_resume.pdf" download class="btn btn-out">Full-time roles · Resume ↓</a>
+      <a href="#contact" class="btn btn-fill">Book a 30-min call →</a>
+      <a href="#projects" class="btn btn-out">See case studies ↓</a>
     </div>
   </div>
 
@@ -181,6 +171,7 @@
       <div class="impact-item ri" style="transition-delay:.14s"><div class="imp-n">99.8%</div><div class="imp-l">Infrastructure Uptime</div><div class="imp-s">bare-metal K3s cluster</div></div>
       <div class="impact-item ri" style="transition-delay:.21s"><div class="imp-n">4×</div><div class="imp-l">Tesla V100 GPUs</div><div class="imp-s">LLM inference at scale</div></div>
     </div>
+    <p class="imp-co ri">Production work at <b>Augai</b> · <b>BoolMind</b> · <b>Techleadz</b></p>
   </div>
 </div>
 
@@ -195,7 +186,7 @@
       <div class="help-card ri">
         <div class="sp-accent"></div>
         <div class="help-out">Run your own LLM inference at a fraction of cloud cost</div>
-        <p class="help-desc">I stand up production GPU inference end to end — vLLM on bare-metal K3s, a FastAPI load-balancer, and an API gateway with key auth and rate limits. One cluster I run — 4× V100 32 GB — serves 10k+ requests a day at ~$180/month, against ~$8,800 for AWS's closest 4× V100 instance, which has half the VRAM.</p>
+        <p class="help-desc">I stand up production GPU inference end to end — vLLM on bare-metal K3s, a FastAPI load-balancer, and an API gateway with key auth and rate limits. One cluster I built — 4× V100 32 GB — serves 10k+ requests a day at ~$180/month, against ~$8,800 for AWS's closest 4× V100 instance, which has half the VRAM.</p>
         <div class="sp-tags"><span>vLLM</span><span>K3s</span><span>GPU</span><span>FastAPI</span></div>
         <a href="blog/gpu-inference.html" class="bc-link" aria-label="See how it was done: Running LLM Inference on 4× Tesla V100 — Bare Metal to Production">See how →</a>
       </div>
@@ -219,212 +210,44 @@
   </div>
 </section>
 
-<!-- ══════════ ABOUT ══════════ -->
-<section id="about">
-  <div class="sec-wrap">
-    <div class="about-grid">
-      <div class="about-left ri">
-        <div class="sec-label"><span class="sec-num">02</span>about me</div>
-        <h2 class="sec-title">Building systems that <span>don't break</span></h2>
-        <p>Expert in <strong>Python microservices</strong> (FastAPI, Django, Flask) and <strong>Node.js/NestJS</strong>. I architect backends that serve 10k+ daily requests with sub-100ms P95 latency — then lock them down with OWASP practices, ECDH encryption, and zero-trust infrastructure.</p>
-        <p>On the infra side I own a <strong>bare-metal GPU cluster</strong> (4× Tesla V100), K3s Kubernetes, LXD containers, and HashiCorp Vault. Currently building <strong>AI agent platforms</strong> and LLM deployment pipelines at production scale.</p>
-        <div class="about-links">
-          <a href="mailto:talha.zafar.j@gmail.com" class="al"><div class="al-mark">✉</div>talha.zafar.j@gmail.com</a>
-          <a href="https://linkedin.com/in/talhazafarj" target="_blank" rel="noopener noreferrer" class="al"><div class="al-mark">in</div>linkedin.com/in/talhazafarj</a>
-          <a href="https://github.com/talhazafarjutt" target="_blank" rel="noopener noreferrer" class="al"><div class="al-mark">gh</div>github.com/talhazafarjutt</a>
-          <a href="tel:+923073576146" class="al"><div class="al-mark">☏</div>+92 307 357 6146 · Lahore, Pakistan</a>
-        </div>
-      </div>
-      <div class="about-right rr">
-        <div class="terminal-box">
-          <div class="tb-bar"><div class="tb-dots"><span></span><span></span><span></span></div><span class="tb-title">talha@system ~ $ whoami</span></div>
-          <div class="tb-body">
-            <div class="tb-line"><span class="cmt"># system profile</span></div>
-            <div class="tb-line"><span class="key">name</span>: <span class="str">"Talha Zafar"</span></div>
-            <div class="tb-line"><span class="key">role</span>: <span class="str">"Backend &amp; DevOps Engineer"</span></div>
-            <div class="tb-line"><span class="key">location</span>: <span class="str">"Lahore, Pakistan"</span></div>
-            <div class="tb-line"><span class="key">experience</span>: <span class="val">4+ years production</span></div>
-            <div class="tb-line">&nbsp;</div>
-            <div class="tb-line"><span class="cmt"># current stack</span></div>
-            <div class="tb-line"><span class="key">languages</span>: [<span class="val">Python, TypeScript, Go, Bash</span>]</div>
-            <div class="tb-line"><span class="key">frameworks</span>: [<span class="val">FastAPI, Django, NestJS</span>]</div>
-            <div class="tb-line"><span class="key">infra</span>: [<span class="val">K3s, LXD, Docker, Vault</span>]</div>
-            <div class="tb-line"><span class="key">ai_mlops</span>: [<span class="val">vLLM, V100 GPU cluster</span>]</div>
-            <div class="tb-line">&nbsp;</div>
-            <div class="tb-line"><span class="key">available</span>: <span class="val-g">true</span></div>
-            <div class="tb-line"><span class="key">remote_ok</span>: <span class="val-g">true</span></div>
-            <div class="tb-line"><span class="key">notice_period</span>: <span class="str">"1 month"</span></div>
-            <div class="tb-line">&nbsp;</div>
-            <div class="tb-line"><span class="cur">$</span> <span class="blink">█</span></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ══════════ SKILLS ══════════ -->
-<section id="skills">
-  <div class="sec-wrap">
-    <div class="sec-label ri"><span class="sec-num">03</span>tech stack</div>
-    <h2 class="sec-title ri">Skills &amp; <span>Technologies</span></h2>
-
-    <div class="skills-grid">
-      <div class="skill-panel ri">
-        <div class="sp-accent"></div>
-        <div class="sp-title">Backend &amp; APIs</div>
-        <div class="sp-tags">
-          <span>Python</span><span>FastAPI</span><span>Django</span><span>Flask</span>
-          <span>TypeScript</span><span>Node.js</span><span>NestJS</span>
-          <span>gRPC</span><span>REST</span><span>GraphQL</span><span>asyncio</span><span>Go</span>
-        </div>
-      </div>
-      <div class="skill-panel ri" style="transition-delay:.08s">
-        <div class="sp-accent"></div>
-        <div class="sp-title">DevOps &amp; Infra</div>
-        <div class="sp-tags">
-          <span>Kubernetes</span><span>K3s</span><span>Docker</span><span>LXD</span>
-          <span>GitHub Actions</span><span>nginx</span><span>cert-manager</span>
-          <span>Helm</span><span>Linux</span><span>iptables</span><span>fail2ban</span>
-        </div>
-      </div>
-      <div class="skill-panel ri" style="transition-delay:.16s">
-        <div class="sp-accent"></div>
-        <div class="sp-title">Data &amp; Cloud</div>
-        <div class="sp-tags">
-          <span>PostgreSQL</span><span>MongoDB</span><span>Redis</span>
-          <span>AWS</span><span>GCP</span><span>vLLM</span>
-          <span>4× Tesla V100</span><span>MLOps</span>
-        </div>
-      </div>
-      <div class="skill-panel ri" style="transition-delay:.24s">
-        <div class="sp-accent"></div>
-        <div class="sp-title">Security &amp; Monitoring</div>
-        <div class="sp-tags">
-          <span>HCP Vault</span><span>OWASP</span><span>ECDH</span><span>ABE</span>
-          <span>Zabbix</span><span>Grafana</span><span>Trivy</span>
-          <span>SonarQube</span><span>Gitleaks</span>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ══════════ EXPERIENCE ══════════ -->
-<section id="experience">
-  <div class="sec-wrap">
-    <div class="sec-label ri"><span class="sec-num">04</span>work history</div>
-    <h2 class="sec-title ri">Professional <span>Experience</span></h2>
-
-    <div class="exp-pipeline">
-
-      <div class="exp-item ri">
-        <div class="exp-meta">
-          <div class="exp-co">Augai</div>
-          <div class="exp-date active-date">Jan 2026 – Present</div>
-          <div class="exp-badge live"><span></span>RUNNING</div>
-        </div>
-        <div class="exp-card">
-          <div class="ec-bar"><div class="ec-dots"><span></span><span></span><span></span></div><span class="ec-file">devops_infra.sh</span><span class="ec-status">● active</span></div>
-          <div class="ec-body">
-            <div class="ec-role">DevOps &amp; Infrastructure Engineer</div>
-            <div class="ec-co">Augai · Infrastructure &amp; Security Consulting · Remote</div>
-            <ul class="ec-ul">
-              <li>Sole infrastructure owner for bare-metal Ubuntu 22.04: 4× NVIDIA Tesla V100, K3s Kubernetes, 8+ LXD developer containers — 99.8% uptime.</li>
-              <li>Designed K3s cluster from scratch: nginx ingress, cert-manager TLS, CoreDNS, GPU passthrough.</li>
-              <li>Deployed HashiCorp Vault (AppRole auth, dynamic secrets) in isolated LXD container — GDPR data residency compliant.</li>
-              <li>Full security hardening: iptables firewall, fail2ban, kernel lockdown, rsyslog across all containers.</li>
-              <li>GitHub Actions CI/CD with SAST (SonarQube), container scanning (Trivy), secret detection (Gitleaks).</li>
-              <li>Zabbix monitoring with K8s pod dashboards and Gmail SMTP alerting for 15+ components.</li>
-            </ul>
-            <div class="ec-tags"><span class="tag-g">K3s</span><span class="tag-g">HashiCorp Vault</span><span class="tag-g">LXD</span><span class="tag-g">iptables</span><span class="tag-g">Zabbix</span><span class="tag-g">GitHub Actions</span><span class="tag-g">Trivy</span><span class="tag-g">vLLM</span></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="exp-item ri" style="transition-delay:.1s">
-        <div class="exp-meta">
-          <div class="exp-co">BoolMind</div>
-          <div class="exp-date">Jan 2024 – Dec 2025</div>
-          <div class="exp-badge done">COMPLETED</div>
-        </div>
-        <div class="exp-card">
-          <div class="ec-bar"><div class="ec-dots"><span></span><span></span><span></span></div><span class="ec-file">backend_api.py</span><span class="ec-status">✓ deployed</span></div>
-          <div class="ec-body">
-            <div class="ec-role">Backend Engineer</div>
-            <div class="ec-co">BoolMind · AI &amp; Automation Platform · Remote</div>
-            <ul class="ec-ul">
-              <li>Architected production microservices — 10k+ daily requests, sub-100ms P95, FastAPI + asyncio.</li>
-              <li>gRPC inter-service communication across 6 services — 40% less overhead vs REST; Redis caching cut DB load 60%.</li>
-              <li>Deployed LLM inference on 4× V100: vLLM serving Qwen2.5-Coder-32B, FastAPI load-balancer, nginx API gateway.</li>
-              <li>OWASP Top 10 mitigations, ECDH key exchange, ABE encryption for multi-tenant data isolation.</li>
-              <li>Stripe security hardening post-carding attack: Radar rules, Redis rate-limiting, HMAC auth — zero fraud post-deployment.</li>
-            </ul>
-            <div class="ec-tags"><span class="tag-c">FastAPI</span><span class="tag-c">gRPC</span><span class="tag-c">Redis</span><span class="tag-c">PostgreSQL</span><span class="tag-c">OWASP</span><span class="tag-c">ECDH</span><span class="tag-c">vLLM</span></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="exp-item ri" style="transition-delay:.2s">
-        <div class="exp-meta">
-          <div class="exp-co">Techleadz</div>
-          <div class="exp-date">Sep 2022 – Dec 2023</div>
-          <div class="exp-badge done">COMPLETED</div>
-        </div>
-        <div class="exp-card">
-          <div class="ec-bar"><div class="ec-dots"><span></span><span></span><span></span></div><span class="ec-file">api_service.py</span><span class="ec-status">✓ deployed</span></div>
-          <div class="ec-body">
-            <div class="ec-role">Junior Backend Engineer</div>
-            <div class="ec-co">Techleadz · Software Development Agency · Lahore</div>
-            <ul class="ec-ul">
-              <li>RESTful APIs (Django REST, NestJS) for SaaS products with 50k+ registered users.</li>
-              <li>PostgreSQL multi-tenant schemas with row-level security — 35% query time reduction; MongoDB Beanie ODM for 500k+ daily events.</li>
-              <li>Integrated Stripe, Firebase, and OAuth2 for payments, notifications, and authentication.</li>
-            </ul>
-            <div class="ec-tags"><span class="tag-p">Django</span><span class="tag-p">NestJS</span><span class="tag-p">PostgreSQL</span><span class="tag-p">MongoDB</span><span class="tag-p">Redis</span><span class="tag-p">Stripe</span><span class="tag-p">OAuth2</span></div>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </div>
-</section>
-
 <!-- ══════════ PROJECTS ══════════ -->
 <section id="projects">
   <div class="sec-wrap">
-    <div class="sec-label ri"><span class="sec-num">05</span>selected work</div>
+    <div class="sec-label ri"><span class="sec-num">02</span>selected work</div>
     <h2 class="sec-title ri">Key <span>Projects</span></h2>
 
     <div class="proj-grid">
 
       <div class="proj-card ri">
         <div class="pc-stripe"></div>
-        <div class="pc-top"><div class="pc-dots"><span></span><span></span><span></span></div><span class="pc-cmd">docker run codsy/llm</span><span class="pc-live"><span></span>running</span></div>
         <div class="pc-body">
-          <div class="pc-name">LLM Inference Platform (Codsy)</div>
+          <p class="pc-result"><b>~$180/month</b> vs ~$8,800 on AWS</p>
+          <h3 class="pc-name">LLM Inference Platform (Codsy)</h3>
           <p class="pc-desc">Production-grade multi-GPU LLM inference cluster on 4× Tesla V100. FastAPI load-balancing router, nginx API gateway with key auth, vLLM engine management, and drop-in Python SDK. Serving active developer team.</p>
           <div class="pc-tech"><span>vLLM</span><span>FastAPI</span><span>nginx</span><span>K3s</span><span>V100</span><span>Python SDK</span></div>
+          <a href="blog/gpu-inference.html" class="bc-link pc-link" aria-label="Read the case study: Running LLM Inference on 4× Tesla V100 — Bare Metal to Production">Read the case study →</a>
         </div>
       </div>
 
       <div class="proj-card ri" style="transition-delay:.1s">
         <div class="pc-stripe"></div>
-        <div class="pc-top"><div class="pc-dots"><span></span><span></span><span></span></div><span class="pc-cmd">vault status --policy</span><span class="pc-live"><span class="sd-sealed"></span>sealed</span></div>
         <div class="pc-body">
-          <div class="pc-name">Zero-Trust Secrets Pipeline</div>
+          <p class="pc-result"><b>.env files → Vault</b> · on-prem audit logs for GDPR</p>
+          <h3 class="pc-name">Zero-Trust Secrets Pipeline</h3>
           <p class="pc-desc">HashiCorp Vault in LXD with AppRole auth, dynamic credential rotation for SSH and SonarQube CI/CD. Policy-based secret access with GDPR data residency compliance on bare metal.</p>
           <div class="pc-tech"><span>HashiCorp Vault</span><span>LXD</span><span>AppRole</span><span>GitHub Actions</span><span>GDPR</span></div>
+          <a href="blog/vault-gdpr.html" class="bc-link pc-link" aria-label="Read the case study: Zero-Trust Secrets with HashiCorp Vault — GDPR-Compliant on Bare Metal">Read the case study →</a>
         </div>
       </div>
 
       <div class="proj-card ri" style="transition-delay:.2s">
         <div class="pc-stripe"></div>
-        <div class="pc-top"><div class="pc-dots"><span></span><span></span><span></span></div><span class="pc-cmd">kubectl get pods -n ai</span><span class="pc-live"><span></span>6/6 running</span></div>
         <div class="pc-body">
-          <div class="pc-name">AI Agent Microservices Platform</div>
+          <p class="pc-result"><b>−40%</b> internal API overhead with gRPC</p>
+          <h3 class="pc-name">AI Agent Microservices Platform</h3>
           <p class="pc-desc">6 independent gRPC-connected services with Redis job queuing, ECDH + ABE multi-tenant isolation. Sub-100ms P95 latency serving 10k+ daily API requests at production scale.</p>
           <div class="pc-tech"><span>FastAPI</span><span>gRPC</span><span>Redis</span><span>ECDH</span><span>ABE</span><span>PostgreSQL</span></div>
+          <a href="blog/grpc-vs-rest.html" class="bc-link pc-link" aria-label="Read the case study: gRPC vs REST in Production — How We Cut Internal API Overhead by 40%">Read the case study →</a>
         </div>
       </div>
 
@@ -435,7 +258,7 @@
 <!-- ══════════ BLOG ══════════ -->
 <section id="blog">
   <div class="sec-wrap">
-    <div class="sec-label ri"><span class="sec-num">06</span>writing</div>
+    <div class="sec-label ri"><span class="sec-num">03</span>writing</div>
     <h2 class="sec-title ri">Technical <span>Blog</span></h2>
     <p class="sec-sub ri">Real war stories from production systems — GPU clusters, security incidents, and architecture decisions.</p>
 
@@ -503,12 +326,184 @@
   </div>
 </section>
 
+<!-- ══════════ ABOUT ══════════ -->
+<section id="about">
+  <div class="sec-wrap">
+    <div class="about-grid">
+      <div class="about-left ri">
+        <div class="sec-label"><span class="sec-num">04</span>about me</div>
+        <h2 class="sec-title">Building systems that <span>don't break</span></h2>
+        <p>I specialise in <strong>Python microservices</strong> (FastAPI, Django, Flask) and <strong>Node.js/NestJS</strong>: backends that serve 10k+ daily requests at sub-100ms P95 latency, locked down with OWASP practices, ECDH encryption and zero-trust infrastructure.</p>
+        <p>On the infra side I've run a <strong>bare-metal GPU cluster</strong> (4× Tesla V100), K3s Kubernetes, LXD containers and HashiCorp Vault, and built <strong>AI agent platforms</strong> and LLM deployment pipelines in production.</p>
+        <div class="about-links">
+          <a href="mailto:talha.zafar.j@gmail.com" class="al"><div class="al-mark">✉</div>talha.zafar.j@gmail.com</a>
+          <a href="https://linkedin.com/in/talhazafarj" target="_blank" rel="noopener noreferrer" class="al"><div class="al-mark">in</div>linkedin.com/in/talhazafarj</a>
+          <a href="https://github.com/talhazafarjutt" target="_blank" rel="noopener noreferrer" class="al"><div class="al-mark">gh</div>github.com/talhazafarjutt</a>
+          <a href="tel:+923073576146" class="al"><div class="al-mark">☏</div>+92 307 357 6146 · Lahore, Pakistan</a>
+        </div>
+      </div>
+      <div class="about-right rr">
+        <div class="glance">
+          <h3 class="gl-h">At a glance</h3>
+          <dl class="gl-list">
+            <div><dt>Focus</dt><dd>Backend APIs · Kubernetes · LLM inference · Security</dd></div>
+            <div><dt>Experience</dt><dd>4+ years in production, since Sep 2022</dd></div>
+            <div><dt>Languages</dt><dd>Python, TypeScript, Go, Bash</dd></div>
+            <div><dt>Frameworks</dt><dd>FastAPI, Django, NestJS</dd></div>
+            <div><dt>Infra</dt><dd>K3s, Docker, LXD, Vault · vLLM on 4× V100</dd></div>
+            <div><dt>Based in</dt><dd>Lahore, Pakistan · PKT (UTC+5) · remote worldwide</dd></div>
+            <div><dt>Status</dt><dd class="gl-ok"><span class="dot-g"></span>Available for freelance projects</dd></div>
+          </dl>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ EXPERIENCE ══════════ -->
+<section id="experience">
+  <div class="sec-wrap">
+    <div class="sec-label ri"><span class="sec-num">05</span>work history</div>
+    <h2 class="sec-title ri">Professional <span>Experience</span></h2>
+
+    <div class="exp-pipeline">
+
+      <div class="exp-item ri">
+        <div class="exp-meta">
+          <div class="exp-co">Augai</div>
+          <div class="exp-date">Jan 2026 – 2026</div>
+          <div class="exp-badge done">COMPLETED</div>
+        </div>
+        <div class="exp-card">
+          <div class="ec-body">
+            <div class="ec-role">DevOps &amp; Infrastructure Engineer</div>
+            <div class="ec-co">Augai · Infrastructure &amp; Security Consulting · Remote</div>
+            <ul class="ec-ul">
+              <li>Sole infrastructure owner for bare-metal Ubuntu 22.04: 4× NVIDIA Tesla V100, K3s Kubernetes, 8+ LXD developer containers — 99.8% uptime.</li>
+              <li>Designed K3s cluster from scratch: nginx ingress, cert-manager TLS, CoreDNS, GPU passthrough.</li>
+              <li>Deployed HashiCorp Vault (AppRole auth, dynamic secrets) in isolated LXD container — GDPR data residency compliant.</li>
+              <li>Full security hardening: iptables firewall, fail2ban, kernel lockdown, rsyslog across all containers.</li>
+              <li>GitHub Actions CI/CD with SAST (SonarQube), container scanning (Trivy), secret detection (Gitleaks).</li>
+              <li>Zabbix monitoring with K8s pod dashboards and Gmail SMTP alerting for 15+ components.</li>
+            </ul>
+            <div class="ec-tags"><span class="tag-g">K3s</span><span class="tag-g">HashiCorp Vault</span><span class="tag-g">LXD</span><span class="tag-g">iptables</span><span class="tag-g">Zabbix</span><span class="tag-g">GitHub Actions</span><span class="tag-g">Trivy</span><span class="tag-g">vLLM</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="exp-item ri" style="transition-delay:.1s">
+        <div class="exp-meta">
+          <div class="exp-co">BoolMind</div>
+          <div class="exp-date">Jan 2024 – Dec 2025</div>
+          <div class="exp-badge done">COMPLETED</div>
+        </div>
+        <div class="exp-card">
+          <div class="ec-body">
+            <div class="ec-role">Backend Engineer</div>
+            <div class="ec-co">BoolMind · AI &amp; Automation Platform · Remote</div>
+            <ul class="ec-ul">
+              <li>Architected production microservices — 10k+ daily requests, sub-100ms P95, FastAPI + asyncio.</li>
+              <li>gRPC inter-service communication across 6 services — 40% less overhead vs REST; Redis caching cut DB load 60%.</li>
+              <li>Deployed LLM inference on 4× V100: vLLM serving Qwen2.5-Coder-32B, FastAPI load-balancer, nginx API gateway.</li>
+              <li>OWASP Top 10 mitigations, ECDH key exchange, ABE encryption for multi-tenant data isolation.</li>
+              <li>Stripe security hardening post-carding attack: Radar rules, Redis rate-limiting, HMAC auth — zero fraud post-deployment.</li>
+            </ul>
+            <div class="ec-tags"><span class="tag-c">FastAPI</span><span class="tag-c">gRPC</span><span class="tag-c">Redis</span><span class="tag-c">PostgreSQL</span><span class="tag-c">OWASP</span><span class="tag-c">ECDH</span><span class="tag-c">vLLM</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="exp-item ri" style="transition-delay:.2s">
+        <div class="exp-meta">
+          <div class="exp-co">Techleadz</div>
+          <div class="exp-date">Sep 2022 – Dec 2023</div>
+          <div class="exp-badge done">COMPLETED</div>
+        </div>
+        <div class="exp-card">
+          <div class="ec-body">
+            <div class="ec-role">Junior Backend Engineer</div>
+            <div class="ec-co">Techleadz · Software Development Agency · Lahore</div>
+            <ul class="ec-ul">
+              <li>RESTful APIs (Django REST, NestJS) for SaaS products with 50k+ registered users.</li>
+              <li>PostgreSQL multi-tenant schemas with row-level security — 35% query time reduction; MongoDB Beanie ODM for 500k+ daily events.</li>
+              <li>Integrated Stripe, Firebase, and OAuth2 for payments, notifications, and authentication.</li>
+            </ul>
+            <div class="ec-tags"><span class="tag-p">Django</span><span class="tag-p">NestJS</span><span class="tag-p">PostgreSQL</span><span class="tag-p">MongoDB</span><span class="tag-p">Redis</span><span class="tag-p">Stripe</span><span class="tag-p">OAuth2</span></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ SKILLS ══════════ -->
+<section id="skills">
+  <div class="sec-wrap">
+    <div class="sec-label ri"><span class="sec-num">06</span>tech stack</div>
+    <h2 class="sec-title ri">Skills &amp; <span>Technologies</span></h2>
+
+    <div class="skills-grid">
+      <div class="skill-panel ri">
+        <div class="sp-accent"></div>
+        <div class="sp-title">Backend &amp; APIs</div>
+        <div class="sp-tags">
+          <span>Python</span><span>FastAPI</span><span>Django</span><span>Flask</span>
+          <span>TypeScript</span><span>Node.js</span><span>NestJS</span>
+          <span>gRPC</span><span>REST</span><span>GraphQL</span><span>asyncio</span><span>Go</span>
+        </div>
+      </div>
+      <div class="skill-panel ri" style="transition-delay:.08s">
+        <div class="sp-accent"></div>
+        <div class="sp-title">DevOps &amp; Infra</div>
+        <div class="sp-tags">
+          <span>Kubernetes</span><span>K3s</span><span>Docker</span><span>LXD</span>
+          <span>GitHub Actions</span><span>nginx</span><span>cert-manager</span>
+          <span>Helm</span><span>Linux</span><span>iptables</span><span>fail2ban</span>
+        </div>
+      </div>
+      <div class="skill-panel ri" style="transition-delay:.16s">
+        <div class="sp-accent"></div>
+        <div class="sp-title">Data &amp; Cloud</div>
+        <div class="sp-tags">
+          <span>PostgreSQL</span><span>MongoDB</span><span>Redis</span>
+          <span>AWS</span><span>GCP</span><span>vLLM</span>
+          <span>4× Tesla V100</span><span>MLOps</span>
+        </div>
+      </div>
+      <div class="skill-panel ri" style="transition-delay:.24s">
+        <div class="sp-accent"></div>
+        <div class="sp-title">Security &amp; Monitoring</div>
+        <div class="sp-tags">
+          <span>HCP Vault</span><span>OWASP</span><span>ECDH</span><span>ABE</span>
+          <span>Zabbix</span><span>Grafana</span><span>Trivy</span>
+          <span>SonarQube</span><span>Gitleaks</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ HOW I WORK ══════════ -->
+<section id="process">
+  <div class="sec-wrap">
+    <div class="sec-label ri"><span class="sec-num">07</span>how i work</div>
+    <h2 class="sec-title ri">From first call <span>to handover</span></h2>
+    <ol class="steps">
+      <li class="step ri"><span class="step-n" aria-hidden="true">1</span><h3>30-minute call</h3><p>You walk me through the system and the problem; I ask the awkward questions.</p></li>
+      <li class="step ri" style="transition-delay:.08s"><span class="step-n" aria-hidden="true">2</span><h3>Written plan</h3><p>Scope, approach, risks and cost on one page — agreed before any work starts.</p></li>
+      <li class="step ri" style="transition-delay:.16s"><span class="step-n" aria-hidden="true">3</span><h3>Build in small steps</h3><p>Reviewed changes in your repo and short written updates, so you always know where things stand.</p></li>
+      <li class="step ri" style="transition-delay:.24s"><span class="step-n" aria-hidden="true">4</span><h3>Handover</h3><p>Docs, runbooks and a walkthrough, so your team owns the result — not me.</p></li>
+    </ol>
+  </div>
+</section>
+
 <!-- ══════════ CONTACT ══════════ -->
 <section id="contact">
   <div class="sec-wrap">
-    <div class="sec-label ri" style="justify-content:center"><span class="sec-num">07</span>get in touch</div>
+    <div class="sec-label ri" style="justify-content:center"><span class="sec-num">08</span>get in touch</div>
     <h2 class="sec-title ri" style="text-align:center">Let's <span>Connect</span></h2>
-    <p class="sec-sub ri" style="text-align:center">Two ways to work together — <strong>book a call</strong> to scope a freelance project, or <strong>grab my resume</strong> for a full-time role. Either way, I reply within 5 minutes.</p>
+    <p class="sec-sub ri" style="text-align:center">Tell me what you're building. <strong>Book a 30-minute call</strong> or email me — I reply within 24 hours.</p>
 
     <div class="contact-grid">
       <div class="contact-links rl">
@@ -525,7 +520,7 @@
             <div class="cs"><div class="cs-l">Duration</div><div class="cs-v"><span>30</span> min</div></div>
             <div class="cs"><div class="cs-l">Format</div><div class="cs-v"><span>Video</span> call</div></div>
             <div class="cs"><div class="cs-l">Timezone</div><div class="cs-v"><span>PKT</span> +5</div></div>
-            <div class="cs"><div class="cs-l">Response</div><div class="cs-v">&lt;<span>5</span> min</div></div>
+            <div class="cs"><div class="cs-l">Reply</div><div class="cs-v">&lt;<span>24</span> h</div></div>
           </div>
           <div class="cal-avail"><div class="ca-dot"></div><div><strong>Currently accepting meetings</strong> — Mon–Sat, flexible hours</div></div>
           <button id="calBtn">
@@ -555,7 +550,7 @@
   </div>
 </footer>
 
-<script src="js/main.js?v=2026102101" defer></script>
-<script src="js/visit.js?v=2026102101" defer></script>
+<script src="js/main.js?v=2026102102" defer></script>
+<script src="js/visit.js?v=2026102102" defer></script>
 </body>
 </html>

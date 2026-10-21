@@ -77,10 +77,17 @@ or send directly.
 | `js/scenes/*.js` | One scene per post: nodes, edges, modes, `tick()`. Facts in tooltips/notes must come from that post |
 
 ## Content Updates
-All content is in `index.html`. Sections in order:
-1. **Hero** — name, typewriter roles, CTA buttons
-2. **About** — bio paragraphs, stats, contact card
-3. **Skills** — four terminal panels (backend, devops, data/cloud, security)
-4. **Experience** — timeline cards (Augai → BoolMind → Techleadz)
-5. **Projects** — three project cards
-6. **Contact** — contact links + Calendly embed
+All content is in `index.html`. A fixed top bar (`#site-nav`, links highlight the section in view — `syncNav()` in
+`js/main.js`) sits above these sections, in order (proof before biography — the page is aimed at freelance clients):
+1. **Hero** — name, static role line, one-line pitch, two CTAs (book a call, case studies); impact strip + "Production work at" row
+2. **Services** (`#services`) — three "how I help" cards linking to articles
+3. **Work** (`#projects`) — three project cards: result first, then a "Read the case study" link
+4. **Articles** (`#blog`) — six article cards
+5. **About** (`#about`) — bio + "At a glance" card
+6. **Experience** (`#experience`) — timeline cards (Augai → BoolMind → Techleadz)
+7. **Skills** (`#skills`) — four tag panels
+8. **Process** (`#process`) — four steps, first call to handover
+9. **Contact** (`#contact`) — contact links + Calendly button
+
+Keep it professional: no custom cursor, no typing effects, no fake terminal chrome; text ≥ 12px (`.75rem`).
+Every number on the page must come from an article or the resume; no invented testimonials, clients or prices.
