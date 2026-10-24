@@ -8,13 +8,13 @@ from seo_pages import PAGES, SITE, TODAY
 esc = lambda s: html.escape(s, quote=True)
 PERSON = {
     "@type": "Person", "@id": SITE + "/#person", "name": "Talha Zafar", "url": SITE + "/",
-    "image": SITE + "/img/talha-zafar.jpg", "jobTitle": "Backend & DevOps Engineer",
-    "description": "Freelance backend and DevOps engineer: Python/FastAPI microservices, Kubernetes, self-hosted LLM inference and security hardening.",
+    "image": SITE + "/img/talha-zafar.jpg", "jobTitle": "Backend, DevOps & LLMOps Engineer",
+    "description": "Freelance backend, DevOps and LLMOps engineer: Python/FastAPI microservices, Kubernetes, self-hosted LLM inference (vLLM on GPUs) and security hardening.",
     "email": "mailto:talha.zafar.j@gmail.com",
     "address": {"@type": "PostalAddress", "addressLocality": "Lahore", "addressCountry": "PK"},
     "sameAs": ["https://github.com/talhazafarjutt", "https://www.linkedin.com/in/talhazafarj"],
-    "knowsAbout": ["Python", "FastAPI", "Django", "NestJS", "Kubernetes", "K3s", "Docker", "DevOps", "vLLM",
-                   "LLM inference", "gRPC", "Redis", "PostgreSQL", "HashiCorp Vault", "Application security", "GDPR"],
+    "knowsAbout": ["Python", "FastAPI", "Django", "NestJS", "Kubernetes", "K3s", "Docker", "DevOps", "LLMOps", "MLOps", "vLLM",
+                   "LLM inference", "GPU infrastructure", "gRPC", "Redis", "PostgreSQL", "HashiCorp Vault", "Application security", "GDPR"],
 }
 
 
@@ -104,3 +104,28 @@ open(f"{R}/sitemap.xml", "w").write('<?xml version="1.0" encoding="UTF-8"?>\n'
     '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n'
     + urls + "\n</urlset>\n")
 print("sitemap.xml:", len(PAGES), "URLs")
+
+# llms.txt (llmstxt.org): a plain summary for AI assistants and answer engines. Facts only from the site.
+articles = "\n".join(f"- [{p['headline']}]({p['url']}): {p['desc']}" for p in PAGES if p["type"] != "website")
+open(f"{R}/llms.txt", "w").write(f"""# Talha Zafar — Freelance Backend, DevOps & LLMOps Engineer
+
+> Freelance backend, DevOps and LLMOps engineer based in Lahore, Pakistan (PKT, UTC+5), working remotely worldwide.
+> 4+ years in production since Sep 2022: Python/FastAPI microservices, Kubernetes (K3s), self-hosted LLM inference
+> with vLLM on GPUs, and security hardening (HashiCorp Vault, OWASP, GDPR). Available for freelance projects.
+
+## What he does
+- LLMOps / self-hosted LLM inference: vLLM on bare-metal K3s, a FastAPI load balancer and an nginx API gateway with key auth and rate limits. One 4× Tesla V100 (32 GB) cluster served 10k+ requests a day at ~$180/month, against ~$8,800/month for AWS's closest 4× V100 instance.
+- Backend APIs: Python and Node microservices holding sub-100ms P95 at 10k+ daily requests; gRPC between six services (40% less internal API overhead than REST); Redis caching that cut database load 60%.
+- Security and DevOps: zero-trust secrets with HashiCorp Vault, GitHub Actions CI/CD with SAST, container and secret scanning; stopped a live Stripe carding attack (fraud rate 12% → 0.02%).
+
+## Case studies
+{articles}
+
+## Contact
+- Book a 30-minute call: https://calendly.com/talha-zafar-j/30min
+- Email: talha.zafar.j@gmail.com
+- LinkedIn: https://www.linkedin.com/in/talhazafarj
+- GitHub: https://github.com/talhazafarjutt
+- Portfolio: {SITE}/
+""")
+print("llms.txt: written")

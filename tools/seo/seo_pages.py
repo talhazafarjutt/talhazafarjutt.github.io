@@ -4,10 +4,10 @@ TODAY = "2026-10-15"
 
 PAGES = [
     dict(file="index.html", url=SITE + "/", og="img/og/home.jpg", type="website",
-         title="Talha Zafar — Freelance Backend & DevOps Engineer | FastAPI · K8s",
-         desc="Freelance backend & DevOps engineer for hire: FastAPI APIs, Kubernetes, self-hosted LLM inference and security hardening. Remote worldwide — book a call.",
+         title="Talha Zafar — Freelance Backend, DevOps & LLMOps Engineer",
+         desc="Freelance backend, DevOps & LLMOps engineer: FastAPI APIs, Kubernetes, self-hosted LLM inference (vLLM on GPUs) and security. Remote — book a call.",
          card=dict(kicker="Freelance · Remote worldwide", title="Talha Zafar", size=96,
-                   sub="Backend & DevOps engineer for hire",
+                   sub="Backend, DevOps & LLMOps engineer for hire",
                    tags=["FastAPI", "Kubernetes", "vLLM", "Vault"])),
     dict(file="blog/civitas-fraud-platform.html", og="img/og/civitas-fraud-platform.jpg", published="2026-09-11",
          headline="How a Fraud Platform Can Look Healthy While Catching Nothing",

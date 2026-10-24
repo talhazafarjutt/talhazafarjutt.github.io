@@ -1,0 +1,25 @@
+# Talha Zafar — Freelance Backend, DevOps & LLMOps Engineer
+
+> Freelance backend, DevOps and LLMOps engineer based in Lahore, Pakistan (PKT, UTC+5), working remotely worldwide.
+> 4+ years in production since Sep 2022: Python/FastAPI microservices, Kubernetes (K3s), self-hosted LLM inference
+> with vLLM on GPUs, and security hardening (HashiCorp Vault, OWASP, GDPR). Available for freelance projects.
+
+## What he does
+- LLMOps / self-hosted LLM inference: vLLM on bare-metal K3s, a FastAPI load balancer and an nginx API gateway with key auth and rate limits. One 4× Tesla V100 (32 GB) cluster served 10k+ requests a day at ~$180/month, against ~$8,800/month for AWS's closest 4× V100 instance.
+- Backend APIs: Python and Node microservices holding sub-100ms P95 at 10k+ daily requests; gRPC between six services (40% less internal API overhead than REST); Redis caching that cut database load 60%.
+- Security and DevOps: zero-trust secrets with HashiCorp Vault, GitHub Actions CI/CD with SAST, container and secret scanning; stopped a live Stripe carding attack (fraud rate 12% → 0.02%).
+
+## Case studies
+- [How a Fraud Platform Can Look Healthy While Catching Nothing](https://talhazafarjutt.github.io/blog/civitas-fraud-platform.html): How a fraud-detection platform looked healthy while scoring 0 of 61 transactions — async scoring, build-enforced security and measured performance work.
+- [Replacing ingress-nginx in Production Without Breaking Anything](https://talhazafarjutt.github.io/blog/ingress-nginx-migration.html): ingress-nginx hit end of life in March 2026: no more security patches. The exact Gateway API cutover I ran, one hostname at a time, zero dropped requests.
+- [Running LLM Inference on 4× Tesla V100 — Bare Metal to Production](https://talhazafarjutt.github.io/blog/gpu-inference.html): How to self-host an LLM on bare metal: 4× Tesla V100 GPUs, K3s, vLLM, a FastAPI load balancer and nginx API-key auth — ~$180/month vs ~$8,800 on AWS.
+- [Stopping a Live Stripe Carding Attack — Zero Fraud Post-Deployment](https://talhazafarjutt.github.io/blog/stripe-carding.html): How to stop a card testing attack on Stripe: three Radar rules, Redis IP + BIN rate limits and HMAC between services. Fraud 12% → 0.02% in under 4 hours.
+- [gRPC vs REST in Production — How We Cut Internal API Overhead by 40%](https://talhazafarjutt.github.io/blog/grpc-vs-rest.html): Which is faster, gRPC or REST? Measured on 6 microservices: 42% lower internal latency, 76% smaller payloads — and when REST is still the right call.
+- [Zero-Trust Secrets with HashiCorp Vault — GDPR-Compliant on Bare Metal](https://talhazafarjutt.github.io/blog/vault-gdpr.html): Why use HashiCorp Vault? How we replaced .env files with AppRole auth, least-privilege policies, CI/CD secrets and on-prem audit logs for GDPR Article 32.
+
+## Contact
+- Book a 30-minute call: https://calendly.com/talha-zafar-j/30min
+- Email: talha.zafar.j@gmail.com
+- LinkedIn: https://www.linkedin.com/in/talhazafarj
+- GitHub: https://github.com/talhazafarjutt
+- Portfolio: https://talhazafarjutt.github.io/

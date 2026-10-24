@@ -42,7 +42,8 @@ new HTML with stale CSS/JS/images. Every local asset link carries `?v=YYYYMMDDnn
 ## SEO
 - Page titles, descriptions, publish dates and share-card text live in **`tools/seo/seo_pages.py`** (single source of truth).
 - `python3 tools/seo/inject.py` rewrites the `<!-- SEO:start … SEO:end -->` block in every page (canonical, Open Graph, Twitter,
-  JSON-LD: ProfilePage/Person/WebSite on home, BlogPosting + BreadcrumbList on articles) and regenerates `sitemap.xml`. Idempotent.
+  JSON-LD: ProfilePage/Person/WebSite on home, BlogPosting + BreadcrumbList on articles) and regenerates `sitemap.xml` and
+  `llms.txt` (plain-text summary for AI assistants; its facts must match the site). Idempotent.
 - `python3 tools/seo/cards.py` renders the 1200×630 share cards in `img/og/` + favicon PNGs (headless Chrome).
 - **New article:** add it to `seo_pages.py` → run `cards.py` and `inject.py` → add its card to the homepage blog grid → bump `?v=`.
 - Keep titles ≤ ~65 chars and descriptions ≤ ~155; only state facts the page itself contains.
@@ -73,7 +74,7 @@ or send directly.
 | `CLAUDE.md` | This file |
 | `js/scene3d.js` + `css/scene3d.css` | Dependency-free 3D figure engine used by every blog post (canvas 2D, auto-fit camera) |
 | `js/visit.js` | Visit log: one `sendBeacon` per page view to the Cloudflare Worker `visits.talha-zafar-j.workers.dev` (D1 db `portfolio`, table `visits`, 30-day cron cleanup). Skips GPC/DNT; `?notrack` opts this browser out. Worker URL must stay in `connect-src` of every page with a CSP |
-| `cloudflare/visits-worker.js` | Source of the `visits` Worker (pasted into the Cloudflare editor, not served by Pages): beacon endpoint, password-protected map dashboard at `/dashboard` (secret `DASH_PASSWORD`), `/api/visits`, daily cleanup. Render visitor data with `textContent` only |
+| `cloudflare/visits-worker.js` | Source of the `visits` Worker (pasted into the Cloudflare editor, not served by Pages): beacon endpoint, password-protected map dashboard at `/dashboard` (secret `DASH_PASSWORD`; one non-wrapping world, zoom bounded from world-fits-box to city level 10, Refresh button + 60 s auto-refresh), `/api/visits`, daily cleanup. Render visitor data with `textContent` only |
 | `js/scenes/*.js` | One scene per post: nodes, edges, modes, `tick()`. Facts in tooltips/notes must come from that post |
 
 ## Content Updates

@@ -199,6 +199,7 @@ header{display:flex;flex-wrap:wrap;gap:.8rem;align-items:center;justify-content:
 h1{font-size:1rem;margin:0}h1 span{color:var(--dim);font-weight:400}
 .ctl{display:flex;gap:.7rem;align-items:center;flex-wrap:wrap;font:600 .7rem var(--mono);color:var(--dim)}
 select,.ctl button{background:#000;color:#fff;border:1px solid var(--line);padding:.45rem .6rem;font:600 .72rem var(--mono);cursor:pointer}
+.ctl button:hover:not(:disabled){border-color:var(--cyan)}.ctl button:disabled{opacity:.55;cursor:progress}
 .ctl label{display:flex;gap:.35rem;align-items:center;cursor:pointer}
 main{padding:1.2rem 1.4rem 2rem;display:grid;gap:1rem}
 .kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.8rem}
@@ -228,6 +229,7 @@ td.n{text-align:right;font-family:var(--mono);color:var(--cyan);white-space:nowr
 <header><h1>Portfolio visitors <span>· talhazafarjutt.github.io</span></h1>
 <div class="ctl"><label>Range <select id="range"><option value="1">24 hours</option><option value="7" selected>7 days</option><option value="30">30 days</option></select></label>
 <label><input type="checkbox" id="bots" checked> Hide bots</label><span id="updated"></span>
+<button type="button" id="refresh" title="Fetch the latest visits from the database">Refresh</button>
 <form method="post" action="/logout"><button type="submit">Sign out</button></form></div></header>
 <main>
 <section class="kpis">
@@ -256,11 +258,27 @@ function dashboard() {
   const OWN = 'talhazafarjutt.github.io';
   let rows = [], fitted = false;
 
-  const map = L.map('map', { worldCopyJump: true }).setView([25, 15], 2);
+  // One copy of the world: no wrapping, panning stops at its edges, and zoom is bounded —
+  // out to "world fills the box" (so no repeated maps or empty bands), in to city level
+  // (IP geolocation is city-accurate at best; street zoom would be false precision).
+  const WORLD = [[-85.05, -180], [85.05, 180]];
+  const MAX_ZOOM = 10;
+  const map = L.map('map', {
+    worldCopyJump: false, maxBounds: WORLD, maxBoundsViscosity: 1, maxZoom: MAX_ZOOM,
+  });
   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 18, referrerPolicy: 'strict-origin-when-cross-origin',
+    noWrap: true, bounds: WORLD, maxZoom: MAX_ZOOM, referrerPolicy: 'strict-origin-when-cross-origin',
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
   }).addTo(map);
+  // lowest zoom at which the 256px-per-tile world covers the whole map box
+  function fitMinZoom() {
+    const size = map.getSize(), z = Math.ceil(Math.log2(Math.max(size.x, size.y) / 256));
+    map.setMinZoom(z);
+    if (map.getZoom() < z) map.setZoom(z);
+    return z;
+  }
+  map.setView([25, 15], fitMinZoom());
+  window.addEventListener('resize', () => { map.invalidateSize(); fitMinZoom(); });
   const layer = L.layerGroup().addTo(map);
 
   const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
@@ -344,6 +362,7 @@ function dashboard() {
     }
     $('nogeo').textContent = noGeo ? noGeo + ' without coordinates (logged before the map existed)' : '';
     if (pts.length && !fitted) { map.fitBounds(pts, { padding: [40, 40], maxZoom: 5 }); fitted = true; }
+    else if (!pts.length && !fitted) map.setView([25, 15], map.getMinZoom());
 
     // views per day
     const days = new Map();
@@ -364,14 +383,28 @@ function dashboard() {
     ]));
   }
 
-  async function load() {
-    const res = await fetch('/api/visits?days=' + $('range').value, { credentials: 'same-origin', cache: 'no-store' });
-    if (res.status === 401) { location.reload(); return; }
-    if (!res.ok) { $('updated').textContent = 'Load failed (' + res.status + ')'; return; }
-    rows = (await res.json()).rows || [];
-    render();
-    $('updated').textContent = 'updated ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  let loading = null;
+  function load() {
+    // one request at a time: the 60 s timer and the button share it
+    loading ??= (async () => {
+      const btn = $('refresh');
+      btn.disabled = true; btn.textContent = 'Refreshing…';
+      try {
+        const res = await fetch('/api/visits?days=' + $('range').value + '&t=' + Date.now(), { credentials: 'same-origin', cache: 'no-store' });
+        if (res.status === 401) { location.reload(); return; }
+        if (!res.ok) { $('updated').textContent = 'Load failed (' + res.status + ')'; return; }
+        rows = (await res.json()).rows || [];
+        render();
+        $('updated').textContent = 'updated ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      } catch {
+        $('updated').textContent = 'Load failed (network)';
+      } finally {
+        btn.disabled = false; btn.textContent = 'Refresh'; loading = null;
+      }
+    })();
+    return loading;
   }
+  $('refresh').addEventListener('click', load);
   $('range').addEventListener('change', () => { fitted = false; load(); });
   $('bots').addEventListener('change', render);
   load();
