@@ -2,13 +2,14 @@
    Bindings: DB → D1 database "portfolio".   Secret: DASH_PASSWORD (Settings → Variables and Secrets).
    Routes
      POST /            beacon from the portfolio (Origin-checked): one row per page view
+     POST /e           event beacon (Origin-checked): lead clicks, Calendly bookings, reading time
      GET  /dashboard   sign-in page, or the dashboard once signed in
      POST /login       password → signed session cookie (5 failures per IP in 15 min → locked out)
      POST /logout      ends the session
-     GET  /api/visits  rows for the dashboard (session required)
+     GET  /api/visits  visit rows + event rows for the dashboard (session required)
      GET  /dash.js     dashboard script (session required)
-   Cron (daily): deletes visits older than 30 days and old login attempts.
-   Visitor-supplied fields (path, referrer, src, user agent, city, org) are only ever rendered with
+   Cron (daily): deletes visits and events older than 30 days and old login attempts.
+   Visitor-supplied fields (path, referrer, src, utm, event label, user agent, city, org) are only ever rendered with
    textContent on the dashboard — never as HTML. */
 
 const SITE = 'https://talhazafarjutt.github.io';
@@ -17,6 +18,8 @@ const MAX_FAILS = 5, LOCK_MINUTES = 15;
 const LEAFLET = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4';
 const LEAFLET_JS_SRI = 'sha512-puJW3E/qXDqYp9IfhAI54BJEaWIfloJ7JWs7OeD5i6ruC9JZL1gERT1wjtwXFlh7CjE7ZJ+/vcRZRkIYIb6p4g==';
 const LEAFLET_CSS_SRI = 'sha512-h9FcoyWjHcOcmEVkxOfTLnmZFWIH0iZhZT1H2TbOq55xssQGEJHEaIm+PgoUaZbRvQTNTluNOEfb1ZRy6D3BOw==';
+// what the site may report besides page views; anything else is dropped
+const EVENT_TYPES = new Set(['cta', 'calendly_open', 'booked', 'resume', 'email', 'phone', 'linkedin', 'github', 'engage']);
 
 export default {
   async fetch(request, env) {
@@ -26,6 +29,7 @@ export default {
       await ensureSchema(env.DB);
       switch (route) {
         case 'POST /': return logVisit(request, env);
+        case 'POST /e': return logEvent(request, env);
         case 'GET /dashboard': return (await signedIn(request, env)) ? page(DASHBOARD_HTML) : loginPage(env);
         case 'POST /login': return login(request, env, url);
         case 'POST /logout': return logout(request, url);
@@ -46,18 +50,24 @@ export default {
   async scheduled(event, env) {
     await ensureSchema(env.DB);
     await env.DB.prepare("DELETE FROM visits WHERE ts < strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-30 days')").run();
+    await env.DB.prepare("DELETE FROM events WHERE ts < strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-30 days')").run();
     await env.DB.prepare('DELETE FROM logins WHERE ts < ?').bind(Date.now() - 864e5).run();
   },
 };
 
-/* ── schema: add the map columns and the login-attempt table once per isolate ── */
+/* ── schema: add later columns and tables once per isolate ── */
 let schemaReady = null;
 function ensureSchema(db) {
   schemaReady ??= (async () => {
-    for (const sql of ['ALTER TABLE visits ADD COLUMN lat REAL', 'ALTER TABLE visits ADD COLUMN lon REAL']) {
+    // lat/lon: map · pv: page-view id that ties a visit to its events · utm: utm_source (ChatGPT adds utm_source=chatgpt.com)
+    for (const sql of ['ALTER TABLE visits ADD COLUMN lat REAL', 'ALTER TABLE visits ADD COLUMN lon REAL',
+                       'ALTER TABLE visits ADD COLUMN pv TEXT', 'ALTER TABLE visits ADD COLUMN utm TEXT']) {
       try { await db.prepare(sql).run(); } catch (e) { if (!/duplicate column/i.test(String(e && e.message || e))) throw e; }
     }
     await db.prepare('CREATE TABLE IF NOT EXISTS logins (ip TEXT NOT NULL, ts INTEGER NOT NULL)').run();
+    await db.prepare(`CREATE TABLE IF NOT EXISTS events (id INTEGER PRIMARY KEY AUTOINCREMENT, ts TEXT NOT NULL, pv TEXT,
+      ip TEXT, country TEXT, city TEXT, org TEXT, path TEXT, type TEXT NOT NULL, label TEXT, secs INTEGER, depth INTEGER)`).run();
+    await db.prepare('CREATE INDEX IF NOT EXISTS events_ts ON events (ts)').run();
   })().catch(e => { schemaReady = null; throw e; });
   return schemaReady;
 }
@@ -71,16 +81,41 @@ async function logVisit(request, env) {
   const cut = (v, n) => String(v || '').slice(0, n);
   const num = v => (Number.isFinite(parseFloat(v)) ? parseFloat(v) : null);
   await env.DB.prepare(
-    'INSERT INTO visits (ts, ip, country, region, city, org, lat, lon, path, referrer, src, ua) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+    'INSERT INTO visits (ts, ip, country, region, city, org, lat, lon, path, referrer, src, ua, pv, utm) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
   ).bind(
     new Date().toISOString(),
     request.headers.get('CF-Connecting-IP'),
     cf.country || null, cf.region || null, cf.city || null, cf.asOrganization || null,
     num(cf.latitude), num(cf.longitude),
     cut(data.path, 200), cut(data.ref, 300), cut(data.src, 60),
-    cut(request.headers.get('User-Agent'), 300)
+    cut(request.headers.get('User-Agent'), 300),
+    pvId(data.pv), cut(data.utm, 60) || null
   ).run();
   return new Response(null, { status: 204, headers: { 'Access-Control-Allow-Origin': SITE } });
+}
+
+const pvId = v => String(v || '').replace(/[^a-z0-9]/gi, '').slice(0, 32) || null;
+
+/* ── event beacon: lead clicks, Calendly bookings, reading time ── */
+async function logEvent(request, env) {
+  if (request.headers.get('Origin') !== SITE) return new Response('Not found', { status: 404 });
+  const done = new Response(null, { status: 204, headers: { 'Access-Control-Allow-Origin': SITE } });
+  let d = {};
+  try { d = JSON.parse((await request.text()).slice(0, 1000)); } catch { return done; }
+  if (!EVENT_TYPES.has(d.type)) return done;
+  const cf = request.cf || {};
+  const cut = (v, n) => String(v || '').slice(0, n);
+  const clamp = (v, lo, hi) => { const n = parseInt(v, 10); return Number.isFinite(n) ? Math.min(hi, Math.max(lo, n)) : null; };
+  const engage = d.type === 'engage';
+  await env.DB.prepare(
+    'INSERT INTO events (ts, pv, ip, country, city, org, path, type, label, secs, depth) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+  ).bind(
+    new Date().toISOString(), pvId(d.pv), request.headers.get('CF-Connecting-IP'),
+    cf.country || null, cf.city || null, cf.asOrganization || null,
+    cut(d.path, 200), d.type, engage ? null : cut(d.label, 80) || null,
+    engage ? clamp(d.secs, 0, 7200) : null, engage ? clamp(d.depth, 0, 100) : null
+  ).run();
+  return done;
 }
 
 /* ── auth ── */
@@ -144,10 +179,11 @@ async function sameSecret(a, b) {
 async function visits(env, url) {
   const days = Math.min(30, Math.max(1, parseInt(url.searchParams.get('days'), 10) || 7));
   const since = new Date(Date.now() - days * 864e5).toISOString();
-  const { results } = await env.DB.prepare(
-    'SELECT ts, ip, country, region, city, org, lat, lon, path, referrer, src, ua FROM visits WHERE ts >= ? ORDER BY id DESC LIMIT 5000'
-  ).bind(since).all();
-  return json({ days, rows: results });
+  const [visitRows, eventRows] = await env.DB.batch([
+    env.DB.prepare('SELECT ts, ip, country, region, city, org, lat, lon, path, referrer, src, ua, pv, utm FROM visits WHERE ts >= ? ORDER BY id DESC LIMIT 5000').bind(since),
+    env.DB.prepare('SELECT ts, pv, ip, country, city, org, path, type, label, secs, depth FROM events WHERE ts >= ? ORDER BY id DESC LIMIT 10000').bind(since),
+  ]);
+  return json({ days, rows: visitRows.results, events: eventRows.results });
 }
 
 /* ── responses ── */
@@ -202,12 +238,14 @@ select,.ctl button{background:#000;color:#fff;border:1px solid var(--line);paddi
 .ctl button:hover:not(:disabled){border-color:var(--cyan)}.ctl button:disabled{opacity:.55;cursor:progress}
 .ctl label{display:flex;gap:.35rem;align-items:center;cursor:pointer}
 main{padding:1.2rem 1.4rem 2rem;display:grid;gap:1rem}
-.kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.8rem}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.8rem}
 .kpi{background:var(--panel);border:1px solid var(--line);padding:.8rem 1rem}
 .kpi b{display:block;font:700 1.5rem var(--mono);font-variant-numeric:tabular-nums}
 .kpi span{font:600 .58rem var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
 .card{background:var(--panel);border:1px solid var(--line);min-width:0}
-.card h2{margin:0;padding:.7rem 1rem;font:600 .62rem var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--dim);border-bottom:1px solid var(--line);display:flex;justify-content:space-between}
+.card h2{margin:0;padding:.7rem 1rem;font:600 .62rem var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--dim);border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.card h2 span{letter-spacing:.04em;text-transform:none;font-weight:400}
+.lead-booked{color:var(--green);font-weight:700}
 #map{height:min(56vh,560px);background:#0b0d10}
 #map .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) brightness(.82) contrast(.92) saturate(.6)}  /* light OSM tiles → dark */
 .days{display:flex;align-items:flex-end;gap:3px;height:70px;padding:.6rem 1rem}
@@ -228,7 +266,8 @@ td.n{text-align:right;font-family:var(--mono);color:var(--cyan);white-space:nowr
 </style></head><body>
 <header><h1>Portfolio visitors <span>· talhazafarjutt.github.io</span></h1>
 <div class="ctl"><label>Range <select id="range"><option value="1">24 hours</option><option value="7" selected>7 days</option><option value="30">30 days</option></select></label>
-<label><input type="checkbox" id="bots" checked> Hide bots</label><span id="updated"></span>
+<label><input type="checkbox" id="bots" checked> Hide bots</label>
+<label title="Google, AWS, Azure, OVH, Hetzner, GTT and other hosting networks: mostly crawlers. May also hide a few VPN users."><input type="checkbox" id="cloud" checked> <span id="cloud-l">Hide cloud networks</span></label><span id="updated"></span>
 <button type="button" id="refresh" title="Fetch the latest visits from the database">Refresh</button>
 <form method="post" action="/logout"><button type="submit">Sign out</button></form></div></header>
 <main>
@@ -237,14 +276,20 @@ td.n{text-align:right;font-family:var(--mono);color:var(--cyan);white-space:nowr
 <div class="kpi"><b id="k-uniq">–</b><span>Unique visitors</span></div>
 <div class="kpi"><b id="k-cty">–</b><span>Countries</span></div>
 <div class="kpi"><b id="k-org">–</b><span>Networks / companies</span></div>
-<div class="kpi"><b id="k-src">–</b><span>Tagged links opened</span></div></section>
+<div class="kpi"><b id="k-src">–</b><span>Tagged links opened</span></div>
+<div class="kpi"><b id="k-lead">–</b><span>Lead actions</span></div>
+<div class="kpi"><b id="k-book">–</b><span>Calls booked</span></div>
+<div class="kpi"><b id="k-ai">–</b><span>From AI assistants</span></div>
+<div class="kpi"><b id="k-read">–</b><span>Avg. reading time</span></div></section>
 <section class="card"><h2>Where visitors are <span id="nogeo"></span></h2><div id="map"></div></section>
 <section class="card"><h2>Views per day</h2><div class="days" id="days"></div></section>
+<section class="card"><h2>Lead actions <span>booking clicks, bookings, resume, email, phone, LinkedIn, GitHub</span></h2><div class="scroll" id="t-leads"></div></section>
 <section class="grid2">
 <div class="card"><h2>Networks / companies</h2><div class="scroll" id="t-org"></div></div>
 <div class="card"><h2>Countries</h2><div class="scroll" id="t-country"></div></div>
 <div class="card"><h2>Pages</h2><div class="scroll" id="t-page"></div></div>
 <div class="card"><h2>Came from</h2><div class="scroll" id="t-from"></div></div></section>
+<section class="card"><h2>Reading per page <span>active time = tab visible and the visitor moved in the last minute</span></h2><div class="scroll" id="t-read"></div></section>
 <section class="card"><h2>Recent visits</h2><div class="scroll" id="t-recent"></div></section>
 </main>
 <script src="${LEAFLET}/leaflet.min.js" integrity="${LEAFLET_JS_SRI}" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -256,7 +301,16 @@ function dashboard() {
   const $ = id => document.getElementById(id);
   const BOT = /bot|crawl|spider|slurp|headless|lighthouse|preview|facebookexternalhit|whatsapp|curl|wget|python|go-http|okhttp|monitor|uptime/i;
   const OWN = 'talhazafarjutt.github.io';
-  let rows = [], fitted = false;
+  // hosting / cloud networks: real people rarely browse from these, crawlers usually do
+  const CLOUD = /\b(Google(?! Fiber)|Amazon|AWS|Microsoft|Azure|DigitalOcean|Linode|Akamai Connected Cloud|OVH|Hetzner|Oracle|Alibaba|Tencent|GTT|Leaseweb|M247|Choopa|Vultr|Constant Company|Contabo|Scaleway|Datacamp|Zenlayer|Hurricane Electric|Psychz|QuadraNet|ColoCrossing|IONOS|Hostinger|Kamatera|Hostwinds|Servers\.com|Equinix|Facebook|Meta Platforms|Yandex|Baidu|ByteDance|Censys|FranTech)\b/i;
+  // answer engines, matched on the referrer host or utm_source (ChatGPT adds utm_source=chatgpt.com)
+  const AI = [[/(^|\.)(chatgpt\.com|chat\.openai\.com|openai\.com)$/, 'ChatGPT'], [/(^|\.)perplexity\.ai$/, 'Perplexity'],
+    [/(^|\.)claude\.ai$/, 'Claude'], [/(^|\.)copilot\.microsoft\.com$/, 'Copilot'], [/(^|\.)gemini\.google\.com$/, 'Gemini'],
+    [/(^|\.)deepseek\.com$/, 'DeepSeek'], [/(^|\.)you\.com$/, 'You.com'], [/(^|\.)phind\.com$/, 'Phind'], [/(^|\.)meta\.ai$/, 'Meta AI'],
+    [/(^|\.)(grok\.com|x\.ai)$/, 'Grok'], [/(^|\.)mistral\.ai$/, 'Mistral'], [/(^|\.)poe\.com$/, 'Poe']];
+  const ACTION = { cta: 'Clicked “book a call” link', calendly_open: 'Opened booking calendar', booked: 'Booked a call',
+    resume: 'Downloaded resume', email: 'Clicked email', phone: 'Clicked phone', linkedin: 'Opened LinkedIn', github: 'Opened GitHub' };
+  let rows = [], events = [], fitted = false;
 
   // One copy of the world: no wrapping, panning stops at its edges, and zoom is bounded —
   // out to "world fills the box" (so no repeated maps or empty bands), in to city level
@@ -285,6 +339,19 @@ function dashboard() {
   const flag = cc => (cc && /^[A-Z]{2}$/i.test(cc) ? String.fromCodePoint(...[...cc.toUpperCase()].map(c => 127397 + c.charCodeAt(0))) : '');
   const place = r => [r.city, r.region && r.region !== r.city ? r.region : '', r.country].filter(Boolean).join(', ');
   const host = ref => { try { const h = new URL(ref).hostname; return h === OWN ? '' : h.replace(/^www\./, ''); } catch { return ''; } };
+  const aiName = r => {
+    const h = host(r.referrer), u = String(r.utm || '').toLowerCase().replace(/^https?:\/\//, '').replace(/\/.*$/, '');
+    for (const [re, name] of AI) if ((h && re.test(h)) || (u && re.test(u))) return name;
+    return '';
+  };
+  const source = r => {
+    if (r.src) return 'tag: ' + r.src;
+    const ai = aiName(r);
+    if (ai) return 'AI · ' + ai;
+    if (r.utm) return 'utm: ' + r.utm;
+    return host(r.referrer) || (r.referrer ? 'internal' : 'direct');
+  };
+  const dur = s => (s == null ? '—' : s < 60 ? Math.round(s) + 's' : Math.floor(s / 60) + 'm ' + String(Math.round(s % 60)).padStart(2, '0') + 's');
   const device = ua => {
     ua = ua || '';
     const os = /iPhone|iPad/.test(ua) ? 'iOS' : /Android/.test(ua) ? 'Android' : /Windows/.test(ua) ? 'Windows' : /Mac OS X/.test(ua) ? 'macOS' : /Linux/.test(ua) ? 'Linux' : '';
@@ -330,12 +397,31 @@ function dashboard() {
   }
 
   function render() {
-    const v = $('bots').checked ? rows.filter(r => !BOT.test(r.ua || '')) : rows;
+    const hideCloud = $('cloud').checked;
+    let v = $('bots').checked ? rows.filter(r => !BOT.test(r.ua || '')) : rows;
+    const cloudN = v.filter(r => CLOUD.test(r.org || '')).length;
+    if (hideCloud) v = v.filter(r => !CLOUD.test(r.org || ''));
+    $('cloud-l').textContent = 'Hide cloud networks' + (cloudN ? ' (' + cloudN + ')' : '');
+    const ev = hideCloud ? events.filter(e => !CLOUD.test(e.org || '')) : events;
+
+    // reading: the longest report per page view wins (one is sent each time the tab is hidden)
+    const read = new Map();
+    for (const e of ev) if (e.type === 'engage' && e.pv) {
+      const o = read.get(e.pv) || { secs: 0, depth: 0 };
+      read.set(e.pv, { secs: Math.max(o.secs, e.secs || 0), depth: Math.max(o.depth, e.depth || 0) });
+    }
+    const leads = ev.filter(e => e.type !== 'engage');
+    const seen = v.map(r => r.pv && read.get(r.pv)).filter(Boolean);
+
     $('k-views').textContent = v.length;
     $('k-uniq').textContent = new Set(v.map(r => r.ip)).size;
     $('k-cty').textContent = new Set(v.map(r => r.country).filter(Boolean)).size;
     $('k-org').textContent = new Set(v.map(r => r.org).filter(Boolean)).size;
     $('k-src').textContent = v.filter(r => r.src).length;
+    $('k-lead').textContent = leads.length;
+    $('k-book').textContent = leads.filter(e => e.type === 'booked').length;
+    $('k-ai').textContent = v.filter(r => aiName(r)).length;
+    $('k-read').textContent = seen.length ? dur(seen.reduce((a, x) => a + x.secs, 0) / seen.length) : '—';
 
     // map: one circle per ~10 km cell, sized by views
     layer.clearLayers();
@@ -377,10 +463,30 @@ function dashboard() {
     top('t-org', 'Network', v, r => r.org);
     top('t-country', 'Country', v, r => (r.country ? flag(r.country) + ' ' + r.country : null));
     top('t-page', 'Page', v, r => r.path || '/');
-    top('t-from', 'Source', v, r => (r.src ? 'tag: ' + r.src : host(r.referrer) || (r.referrer ? 'internal' : 'direct')));
-    table('t-recent', ['When', 'Where', 'Network', 'IP', 'Page', 'Tag', 'From', 'Device'], v.slice(0, 200).map(r => [
-      ago(r.ts), (flag(r.country) + ' ' + place(r)).trim(), r.org, r.ip, r.path, r.src, host(r.referrer), device(r.ua),
+    top('t-from', 'Source', v, source);
+
+    table('t-leads', ['When', 'Action', 'Detail', 'Page', 'Where', 'Network', 'IP'], leads.slice(0, 200).map(e => [
+      ago(e.ts), e.type === 'booked' ? el('span', 'lead-booked', '✓ ' + ACTION.booked) : ACTION[e.type] || e.type,
+      e.label, e.path, (flag(e.country) + ' ' + [e.city, e.country].filter(Boolean).join(', ')).trim(), e.org, e.ip,
     ]));
+
+    const pages = new Map();
+    for (const r of v) {
+      const k = r.path || '/', p = pages.get(k) || { views: 0, n: 0, secs: 0, depth: 0, deep: 0 };
+      p.views++;
+      const x = r.pv && read.get(r.pv);
+      if (x) { p.n++; p.secs += x.secs; p.depth += x.depth; if (x.depth >= 75) p.deep++; }
+      pages.set(k, p);
+    }
+    table('t-read', ['Page', 'Views', 'Measured', 'Avg. time', 'Avg. scroll', 'Scrolled ≥ 75%'],
+      [...pages].sort((a, b) => b[1].views - a[1].views).map(([k, p]) => [
+        k, p.views, p.n, p.n ? dur(p.secs / p.n) : '—', p.n ? Math.round(p.depth / p.n) + '%' : '—', p.n ? Math.round(p.deep / p.n * 100) + '%' : '—',
+      ]));
+
+    table('t-recent', ['When', 'Where', 'Network', 'IP', 'Page', 'Time', 'Scroll', 'From', 'Device'], v.slice(0, 200).map(r => {
+      const x = r.pv && read.get(r.pv);
+      return [ago(r.ts), (flag(r.country) + ' ' + place(r)).trim(), r.org, r.ip, r.path, x ? dur(x.secs) : '', x ? x.depth + '%' : '', source(r), device(r.ua)];
+    }));
   }
 
   let loading = null;
@@ -393,7 +499,8 @@ function dashboard() {
         const res = await fetch('/api/visits?days=' + $('range').value + '&t=' + Date.now(), { credentials: 'same-origin', cache: 'no-store' });
         if (res.status === 401) { location.reload(); return; }
         if (!res.ok) { $('updated').textContent = 'Load failed (' + res.status + ')'; return; }
-        rows = (await res.json()).rows || [];
+        const data = await res.json();
+        rows = data.rows || []; events = data.events || [];
         render();
         $('updated').textContent = 'updated ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
       } catch {
@@ -407,6 +514,7 @@ function dashboard() {
   $('refresh').addEventListener('click', load);
   $('range').addEventListener('change', () => { fitted = false; load(); });
   $('bots').addEventListener('change', render);
+  $('cloud').addEventListener('change', render);
   load();
   setInterval(load, 60000);
 }
