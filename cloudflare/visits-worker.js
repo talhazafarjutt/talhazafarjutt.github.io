@@ -3,13 +3,14 @@
    Routes
      POST /            beacon from the portfolio (Origin-checked): one row per page view
      POST /e           event beacon (Origin-checked): lead clicks, Calendly bookings, reading time
+     POST /contact     contact form (Origin-checked, JSON or form-encoded): validated, rate-limited, stored in messages
      GET  /dashboard   sign-in page, or the dashboard once signed in
      POST /login       password → signed session cookie (5 failures per IP in 15 min → locked out)
      POST /logout      ends the session
-     GET  /api/visits  visit rows + event rows for the dashboard (session required)
+     GET  /api/visits  visit rows + event rows + messages for the dashboard (session required)
      GET  /dash.js     dashboard script (session required)
-   Cron (daily): deletes visits and events older than 30 days and old login attempts.
-   Visitor-supplied fields (path, referrer, src, utm, event label, user agent, city, org) are only ever rendered with
+   Cron (daily): deletes visits and events older than 30 days, messages older than 180 days, old login attempts.
+   Visitor-supplied fields (path, referrer, src, utm, event label, message fields, user agent, city, org) are only ever rendered with
    textContent on the dashboard — never as HTML. */
 
 const SITE = 'https://talhazafarjutt.github.io';
@@ -20,6 +21,8 @@ const LEAFLET_JS_SRI = 'sha512-puJW3E/qXDqYp9IfhAI54BJEaWIfloJ7JWs7OeD5i6ruC9JZL
 const LEAFLET_CSS_SRI = 'sha512-h9FcoyWjHcOcmEVkxOfTLnmZFWIH0iZhZT1H2TbOq55xssQGEJHEaIm+PgoUaZbRvQTNTluNOEfb1ZRy6D3BOw==';
 // what the site may report besides page views; anything else is dropped
 const EVENT_TYPES = new Set(['cta', 'calendly_open', 'booked', 'resume', 'email', 'phone', 'linkedin', 'github', 'engage']);
+const MESSAGE_DAYS = 180, MESSAGES_PER_IP_HOUR = 5;
+const EMAIL_RE = /^[^\s@<>"'(),;:\\]+@[^\s@<>"'(),;:\\]+\.[^\s@<>"'(),;:\\]{2,}$/;
 
 export default {
   async fetch(request, env) {
@@ -30,6 +33,7 @@ export default {
       switch (route) {
         case 'POST /': return logVisit(request, env);
         case 'POST /e': return logEvent(request, env);
+        case 'POST /contact': return saveMessage(request, env);
         case 'GET /dashboard': return (await signedIn(request, env)) ? page(DASHBOARD_HTML) : loginPage(env);
         case 'POST /login': return login(request, env, url);
         case 'POST /logout': return logout(request, url);
@@ -51,6 +55,7 @@ export default {
     await ensureSchema(env.DB);
     await env.DB.prepare("DELETE FROM visits WHERE ts < strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-30 days')").run();
     await env.DB.prepare("DELETE FROM events WHERE ts < strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-30 days')").run();
+    await env.DB.prepare(`DELETE FROM messages WHERE ts < strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-${MESSAGE_DAYS} days')`).run();
     await env.DB.prepare('DELETE FROM logins WHERE ts < ?').bind(Date.now() - 864e5).run();
   },
 };
@@ -68,6 +73,9 @@ function ensureSchema(db) {
     await db.prepare(`CREATE TABLE IF NOT EXISTS events (id INTEGER PRIMARY KEY AUTOINCREMENT, ts TEXT NOT NULL, pv TEXT,
       ip TEXT, country TEXT, city TEXT, org TEXT, path TEXT, type TEXT NOT NULL, label TEXT, secs INTEGER, depth INTEGER)`).run();
     await db.prepare('CREATE INDEX IF NOT EXISTS events_ts ON events (ts)').run();
+    await db.prepare(`CREATE TABLE IF NOT EXISTS messages (id INTEGER PRIMARY KEY AUTOINCREMENT, ts TEXT NOT NULL, ip TEXT,
+      country TEXT, city TEXT, org TEXT, page TEXT, name TEXT NOT NULL, email TEXT NOT NULL, company TEXT, message TEXT NOT NULL)`).run();
+    await db.prepare('CREATE INDEX IF NOT EXISTS messages_ip_ts ON messages (ip, ts)').run();
   })().catch(e => { schemaReady = null; throw e; });
   return schemaReady;
 }
@@ -116,6 +124,41 @@ async function logEvent(request, env) {
     engage ? clamp(d.secs, 0, 7200) : null, engage ? clamp(d.depth, 0, 100) : null
   ).run();
   return done;
+}
+
+/* ── contact form ── JSON from contact.js, or a plain form post when JavaScript is off ── */
+async function saveMessage(request, env) {
+  if (request.headers.get('Origin') !== SITE) return new Response('Not found', { status: 404 });
+  const isForm = /application\/x-www-form-urlencoded/i.test(request.headers.get('Content-Type') || '');
+  const raw = (await request.text()).slice(0, 8000);
+  let d = {};
+  try { d = isForm ? Object.fromEntries(new URLSearchParams(raw)) : JSON.parse(raw); } catch { d = {}; }
+  const reply = (status, error) => isForm
+    ? new Response(formReplyPage(status === 200 ? '' : error), { status, headers: PAGE_HEADERS })
+    : json(error ? { error } : { ok: true }, status, { 'Access-Control-Allow-Origin': SITE });
+  const clean = (v, n) => String(v || '').replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g, '').trim().slice(0, n);
+  const name = clean(d.name, 80), email = clean(d.email, 120), company = clean(d.company, 100);
+  const message = clean(d.message, 2000), page = clean(d.page, 200);
+  // spam traps: the hidden "website" field is left empty by people; bots that fill it get a quiet "ok"
+  if (clean(d.website, 200)) return reply(200);
+  if (!isForm && Number(d.t) < 2500) return reply(200);          // filled in faster than a person can type
+  if (!name) return reply(400, 'Please add your name.');
+  if (!EMAIL_RE.test(email)) return reply(400, 'Please check your email address.');
+  if (message.length < 10) return reply(400, 'Please add a sentence about what you need.');
+  const ip = request.headers.get('CF-Connecting-IP');
+  const recent = await env.DB.prepare("SELECT COUNT(*) AS n FROM messages WHERE ip = ? AND ts > strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-1 hour')").bind(ip).first();
+  if (recent && recent.n >= MESSAGES_PER_IP_HOUR) return reply(429, 'Too many messages from this connection. Please email talha.zafar.j@gmail.com instead.');
+  const cf = request.cf || {};
+  await env.DB.prepare('INSERT INTO messages (ts, ip, country, city, org, page, name, email, company, message) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+    .bind(new Date().toISOString(), ip, cf.country || null, cf.city || null, cf.asOrganization || null, page || null, name, email, company || null, message).run();
+  return reply(200);
+}
+function formReplyPage(error) {
+  const title = error ? 'Message not sent' : 'Message received';
+  const body = error ? escapeHtml(error) : 'Thanks — I reply within 24 hours.';
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${title}</title>
+<style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#FFF4D6;color:#161E4D;font:16px/1.6 system-ui,sans-serif}main{max-width:520px;padding:2rem}h1{color:#263BAA}a{color:#263BAA;font-weight:700}</style></head>
+<body><main><h1>${title}</h1><p>${body}</p><p><a href="${SITE}/#contact">← Back to the site</a></p></main></body></html>`;
 }
 
 /* ── auth ── */
@@ -179,11 +222,13 @@ async function sameSecret(a, b) {
 async function visits(env, url) {
   const days = Math.min(30, Math.max(1, parseInt(url.searchParams.get('days'), 10) || 7));
   const since = new Date(Date.now() - days * 864e5).toISOString();
-  const [visitRows, eventRows] = await env.DB.batch([
+  const [visitRows, eventRows, messageRows] = await env.DB.batch([
     env.DB.prepare('SELECT ts, ip, country, region, city, org, lat, lon, path, referrer, src, ua, pv, utm FROM visits WHERE ts >= ? ORDER BY id DESC LIMIT 5000').bind(since),
     env.DB.prepare('SELECT ts, pv, ip, country, city, org, path, type, label, secs, depth FROM events WHERE ts >= ? ORDER BY id DESC LIMIT 10000').bind(since),
+    // messages are leads: always all of them (kept 180 days), whatever the range
+    env.DB.prepare('SELECT ts, ip, country, city, org, page, name, email, company, message FROM messages ORDER BY id DESC LIMIT 1000'),
   ]);
-  return json({ days, rows: visitRows.results, events: eventRows.results });
+  return json({ days, rows: visitRows.results, events: eventRows.results, messages: messageRows.results });
 }
 
 /* ── responses ── */
@@ -197,8 +242,8 @@ const PAGE_HEADERS = {
   'X-Content-Type-Options': 'nosniff',
 };
 const page = (body, status = 200) => new Response(body, { status, headers: PAGE_HEADERS });
-const json = (data, status = 200) => new Response(JSON.stringify(data), {
-  status, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' },
+const json = (data, status = 200, extra = {}) => new Response(JSON.stringify(data), {
+  status, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff', ...extra },
 });
 
 function loginPage(env, error = '', status = 200) {
@@ -256,6 +301,8 @@ main{padding:1.2rem 1.4rem 2rem;display:grid;gap:1rem}
 .card h2{margin:0;padding:.7rem 1rem;font:600 .62rem var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--dim);border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap}
 .card h2 span{letter-spacing:.04em;text-transform:none;font-weight:400}
 .lead-booked{color:var(--green);font-weight:700}
+.msg-text{white-space:pre-wrap;max-width:46ch;display:block}
+td a{color:var(--cyan)}
 #map{height:min(56vh,560px);background:#0b0d10}
 #map .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) brightness(.82) contrast(.92) saturate(.6)}  /* light OSM tiles → dark */
 .days{display:flex;align-items:flex-end;gap:3px;height:70px;padding:.6rem 1rem}
@@ -287,13 +334,16 @@ td.n{text-align:right;font-family:var(--mono);color:var(--cyan);white-space:nowr
 <div class="kpi"><b id="k-cty">–</b><span>Countries</span></div>
 <div class="kpi"><b id="k-org">–</b><span>Networks / companies</span></div>
 <div class="kpi"><b id="k-src">–</b><span>Tagged links opened</span></div>
+<div class="kpi"><b id="k-msg">–</b><span>Messages</span></div>
 <div class="kpi"><b id="k-lead">–</b><span>Lead actions</span></div>
 <div class="kpi"><b id="k-book">–</b><span>Calls booked</span></div>
 <div class="kpi"><b id="k-ai">–</b><span>From AI assistants</span></div>
 <div class="kpi"><b id="k-read">–</b><span>Avg. reading time</span></div></section>
+<section class="card"><h2>Messages <span>from the contact form · kept 180 days · all shown, whatever the range</span></h2><div class="scroll paged" id="t-msgs"></div><div class="pager" id="p-msgs"></div></section>
 <section class="card"><h2>Where visitors are <span><span id="nogeo"></span> click a row in the tables to zoom to that visitor · <label><input type="checkbox" id="dark" checked> Dark map</label></span></h2><div id="map"></div></section>
 <section class="card"><h2>Views per day</h2><div class="days" id="days"></div></section>
 <section class="card"><h2>Lead actions <span>booking clicks, bookings, resume, email, phone, LinkedIn, GitHub</span></h2><div class="scroll paged" id="t-leads"></div><div class="pager" id="p-leads"></div></section>
+<section class="card"><h2>Companies &amp; organisations <span>networks that are not home/mobile ISPs, clouds or VPNs — research these, don't mention the visit</span></h2><div class="scroll paged" id="t-cos"></div><div class="pager" id="p-cos"></div></section>
 <section class="grid2">
 <div class="card"><h2>Networks / companies</h2><div class="scroll" id="t-org"></div></div>
 <div class="card"><h2>Countries</h2><div class="scroll" id="t-country"></div></div>
@@ -318,9 +368,12 @@ function dashboard() {
     [/(^|\.)claude\.ai$/, 'Claude'], [/(^|\.)copilot\.microsoft\.com$/, 'Copilot'], [/(^|\.)gemini\.google\.com$/, 'Gemini'],
     [/(^|\.)deepseek\.com$/, 'DeepSeek'], [/(^|\.)you\.com$/, 'You.com'], [/(^|\.)phind\.com$/, 'Phind'], [/(^|\.)meta\.ai$/, 'Meta AI'],
     [/(^|\.)(grok\.com|x\.ai)$/, 'Grok'], [/(^|\.)mistral\.ai$/, 'Mistral'], [/(^|\.)poe\.com$/, 'Poe']];
+  // home / mobile internet providers and privacy relays/VPNs: a visit from these says nothing about an employer
+  const ISP = /\b(Telecom|Telekom|Telecommunications?|Communications?|Broadband|Cable|Kabel|Internet|Wireless|Mobile|Mobil|Cellular|Fiber|Fibre|DSL|ISP|Vodafone|Comcast|Charter|Spectrum|Verizon|AT&T|T-Mobile|Sprint|Cox|RCN|Frontier|CenturyLink|Lumen|Virgin|Sky|BT|TalkTalk|Orange|Bouygues|SFR|Free SAS|Telefonica|Movistar|Telia|Telenor|Jazz|Zong|Ufone|PTCL|Nayatel|Wateen|Storm ?Fiber|Jio|Airtel|Etisalat|STC|Mobily|Rogers|Bell Canada|Telus|Shaw|Optus|Telstra|Swisscom|KPN|Ziggo|Proximus|Liberty Global|UPC|Eir|O2|Deutsche Telekom|1&1|Versatel|NetCologne|M-net|Ooredoo|Zain|Turkcell|Vivo|Claro|Tigo|Digi|Iliad|Fastweb|Tele2|Elisa|Starlink)\b/i;
+  const RELAY = /\b(Apple|iCloud|Private Relay|Akamai|Cloudflare|Fastly|Nord|Mullvad|Proton|Surfshark|ExpressVPN|Tefincom|Packethub|Datacamp|M247|Zscaler)\b/i;
   const ACTION = { cta: 'Clicked “book a call” link', calendly_open: 'Opened booking calendar', booked: 'Booked a call',
     resume: 'Downloaded resume', email: 'Clicked email', phone: 'Clicked phone', linkedin: 'Opened LinkedIn', github: 'Opened GitHub' };
-  let rows = [], events = [], fitted = false;
+  let rows = [], events = [], messages = [], fitted = false;
 
   // One copy of the world: no wrapping, panning stops at its edges, and zoom is bounded —
   // out to "world fills the box" (so no repeated maps or empty bands), in to neighbourhood level.
@@ -492,6 +545,8 @@ function dashboard() {
     $('k-cty').textContent = new Set(v.map(r => r.country).filter(Boolean)).size;
     $('k-org').textContent = new Set(v.map(r => r.org).filter(Boolean)).size;
     $('k-src').textContent = v.filter(r => r.src).length;
+    const since = Date.now() - (+$('range').value) * 864e5;
+    $('k-msg').textContent = messages.filter(m => Date.parse(m.ts) >= since).length;
     $('k-lead').textContent = leads.length;
     $('k-book').textContent = leads.filter(e => e.type === 'booked').length;
     $('k-ai').textContent = v.filter(r => aiName(r)).length;
@@ -568,6 +623,40 @@ function dashboard() {
         k, p.views, p.n, p.n ? dur(p.secs / p.n) : '—', p.n ? Math.round(p.depth / p.n) + '%' : '—', p.n ? Math.round(p.deep / p.n * 100) + '%' : '—',
       ]));
 
+    // messages: reply goes to the address they typed (validated by the Worker), text only ever as textContent
+    const SAFE_EMAIL = /^[^\s@<>"'(),;:\\]+@[^\s@<>"'(),;:\\]+\.[^\s@<>"'(),;:\\]{2,}$/;
+    pagedTable('msgs', ['When', 'Name', 'Email', 'Company', 'Message', 'Page', 'Where', 'Network'], messages, m => {
+      let mail = m.email;
+      if (SAFE_EMAIL.test(m.email || '')) {
+        mail = el('a', null, m.email);
+        mail.href = 'mailto:' + m.email + '?subject=' + encodeURIComponent('Re: your message on talhazafarjutt.github.io');
+      }
+      return [ago(m.ts), m.name, mail, m.company, el('span', 'msg-text', m.message), m.page,
+        (flag(m.country) + ' ' + [m.city, m.country].filter(Boolean).join(', ')).trim(), m.org];
+    }, m => byIp.get(m.ip) || null);
+
+    // companies: organisation networks only (not home/mobile ISPs, clouds, relays/VPNs)
+    const cos = new Map();
+    for (const r of v) {
+      const org = r.org || '';
+      if (!org || ISP.test(org) || RELAY.test(org) || CLOUD.test(org)) continue;
+      const c = cos.get(org) || { org, views: 0, ips: new Set(), pages: new Set(), secs: 0, last: r.ts, where: (flag(r.country) + ' ' + place(r)).trim(), lat: r.lat, lon: r.lon, leads: 0 };
+      c.views++; c.ips.add(r.ip); c.pages.add(r.path || '/');
+      const x = r.pv && read.get(r.pv); if (x) c.secs += x.secs;
+      if (r.ts > c.last) c.last = r.ts;
+      if (c.lat == null && r.lat != null) { c.lat = r.lat; c.lon = r.lon; }
+      cos.set(org, c);
+    }
+    for (const e of leads) { const c = cos.get(e.org || ''); if (c) c.leads++; }
+    pagedTable('cos', ['Organisation', 'Views', 'Visitors', 'Pages read', 'Reading time', 'Lead actions', 'Last seen', 'Where', 'Research'],
+      [...cos.values()].sort((a, b) => b.leads - a.leads || b.secs - a.secs || b.views - a.views), c => {
+        const look = el('a', null, 'LinkedIn ↗');
+        look.href = 'https://www.linkedin.com/search/results/companies/?keywords=' + encodeURIComponent(c.org);
+        look.target = '_blank'; look.rel = 'noopener noreferrer';
+        look.addEventListener('click', e => e.stopPropagation());     // don't also fly the map
+        return [c.org, c.views, c.ips.size, [...c.pages].join(', '), c.secs ? dur(c.secs) : '—', c.leads, ago(c.last), c.where, look];
+      }, c => (c.lat != null ? [c.lat, c.lon] : null));
+
     const q = $('q').value.trim().toLowerCase();
     const list = q ? v.filter(r => [place(r), r.country, r.org, r.ip, r.path, source(r), device(r.ua)].join(' ').toLowerCase().includes(q)) : v;
     pagedTable('recent', ['When', 'Where', 'Network', 'IP', 'Page', 'Time', 'Scroll', 'From', 'Device'], list, r => {
@@ -587,7 +676,7 @@ function dashboard() {
         if (res.status === 401) { location.reload(); return; }
         if (!res.ok) { $('updated').textContent = 'Load failed (' + res.status + ')'; return; }
         const data = await res.json();
-        rows = data.rows || []; events = data.events || [];
+        rows = data.rows || []; events = data.events || []; messages = data.messages || [];
         render();
         $('updated').textContent = 'updated ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
       } catch {
