@@ -105,7 +105,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=2026102501">
+<link rel="stylesheet" href="css/style.css?v=2026102601">
 </head>
 <body>
 
@@ -135,7 +135,7 @@
   <div class="shape" id="s0">
     <picture class="s0-photo">
       <source type="image/webp" srcset="img/talha-zafar-330.webp?v=2026101502 330w, img/talha-zafar.webp?v=2026101502 600w" sizes="(max-width: 700px) 178px, 294px">
-      <img src="img/talha-zafar.jpg?v=2026102501" srcset="img/talha-zafar-330.jpg?v=2026101502 330w, img/talha-zafar.jpg?v=2026101502 600w" sizes="(max-width: 700px) 178px, 294px" alt="Talha Zafar, Backend &amp; DevOps Engineer" width="600" height="600" fetchpriority="high" decoding="async">
+      <img src="img/talha-zafar.jpg?v=2026102601" srcset="img/talha-zafar-330.jpg?v=2026101502 330w, img/talha-zafar.jpg?v=2026101502 600w" sizes="(max-width: 700px) 178px, 294px" alt="Talha Zafar, Backend &amp; DevOps Engineer" width="600" height="600" fetchpriority="high" decoding="async">
     </picture>
   </div>
   <div class="shape" id="s1" aria-hidden="true"></div>
@@ -534,6 +534,25 @@
         </div>
       </div>
     </div>
+    <form class="msg-form ri" id="msgForm" action="https://visits.talha-zafar-j.workers.dev/contact" method="post">
+      <div class="mf-head">
+        <h3 class="mf-title">Prefer writing? Tell me what's breaking.</h3>
+        <p class="mf-sub">One or two lines is enough — what you run, what's breaking or what you need built. I reply within 24 hours.</p>
+      </div>
+      <div class="mf-grid">
+        <label class="mf-field"><span>Name</span><input name="name" required maxlength="80" autocomplete="name"></label>
+        <label class="mf-field"><span>Email</span><input name="email" type="email" required maxlength="120" autocomplete="email"></label>
+        <label class="mf-field mf-wide"><span>Company <em>(optional)</em></span><input name="company" maxlength="100" autocomplete="organization"></label>
+        <label class="mf-field mf-wide"><span>What do you need?</span><textarea name="message" required minlength="10" maxlength="2000" rows="4"></textarea></label>
+      </div>
+      <div class="mf-trap" aria-hidden="true"><label>Leave this empty<input name="website" tabindex="-1" autocomplete="off"></label></div>
+      <input type="hidden" name="page" value="/">
+      <div class="mf-foot">
+        <button type="submit" class="btn btn-fill">Send message →</button>
+        <p class="mf-note">Goes only to me and is used only to reply. Deleted after 180 days.</p>
+      </div>
+      <p class="mf-status" role="status" aria-live="polite"></p>
+    </form>
   </div>
 </section>
 </main>
@@ -553,7 +572,8 @@
   </div>
 </footer>
 
-<script src="js/main.js?v=2026102501" defer></script>
-<script src="js/visit.js?v=2026102501" defer></script>
+<script src="js/main.js?v=2026102601" defer></script>
+<script src="js/visit.js?v=2026102601" defer></script>
+<script src="js/contact.js?v=2026102601" defer></script>
 </body>
 </html>

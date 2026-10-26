@@ -96,9 +96,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../css/style.css?v=2026102501">
-<link rel="stylesheet" href="../css/scene3d.css?v=2026102501">
-<link rel="stylesheet" href="../css/civitas.css?v=2026102501">
+<link rel="stylesheet" href="../css/style.css?v=2026102601">
+<link rel="stylesheet" href="../css/scene3d.css?v=2026102601">
+<link rel="stylesheet" href="../css/civitas.css?v=2026102601">
 </head>
 <body>
 <div id="prog"></div>
@@ -375,6 +375,26 @@ WITHOUT it          Sort (full scan)  2.79 ms</code></pre>
     <p class="bp-p">I fixed the symptom — the missing package, the setuptools configuration — and CI went green. I did not fix the cause. There are still two lists, and nothing prevents them from diverging again the next time someone adds a dependency in a hurry. The correct fix is one source of truth with the Dockerfile installing from <code>pyproject.toml</code> directly, and I know that, and it is not done.</p>
     <p class="bp-p">That is the honest answer to "what would you change," because it is the one thing on this list that is still a known open weakness rather than a solved problem. Everything else in this article either shipped or got reverted with a measurement attached.</p>
 
+    <form class="msg-form mf-article" id="msgForm" action="https://visits.talha-zafar-j.workers.dev/contact" method="post">
+      <div class="mf-head">
+        <h2 class="mf-title">Dealing with something similar? Tell me about it.</h2>
+        <p class="mf-sub">One or two lines is enough — what you run, what's breaking or what you need built. I reply within 24 hours.</p>
+      </div>
+      <div class="mf-grid">
+        <label class="mf-field"><span>Name</span><input name="name" required maxlength="80" autocomplete="name"></label>
+        <label class="mf-field"><span>Email</span><input name="email" type="email" required maxlength="120" autocomplete="email"></label>
+        <label class="mf-field mf-wide"><span>Company <em>(optional)</em></span><input name="company" maxlength="100" autocomplete="organization"></label>
+        <label class="mf-field mf-wide"><span>What do you need?</span><textarea name="message" required minlength="10" maxlength="2000" rows="4"></textarea></label>
+      </div>
+      <div class="mf-trap" aria-hidden="true"><label>Leave this empty<input name="website" tabindex="-1" autocomplete="off"></label></div>
+      <input type="hidden" name="page" value="/blog/civitas-fraud-platform.html">
+      <div class="mf-foot">
+        <button type="submit" class="btn btn-fill">Send message →</button>
+        <p class="mf-note">Goes only to me and is used only to reply. Deleted after 180 days.</p>
+      </div>
+      <p class="mf-status" role="status" aria-live="polite"></p>
+    </form>
+
     <div class="bp-footer-nav">
       <a href="/#blog">← All articles</a>
       <a href="/#contact">Work with me →</a>
@@ -394,10 +414,11 @@ WITHOUT it          Sort (full scan)  2.79 ms</code></pre>
     <p class="ft-privacy">This site logs visits — IP address, approximate location, page, reading time and clicks on contact links — for 30 days to understand who reads it. No cookies. Browsers that send Do Not Track or Global Privacy Control are not logged.</p>
   </div>
 </footer>
-<script src="../js/blog.js?v=2026102501" defer></script>
-<script src="../js/visit.js?v=2026102501" defer></script>
-<script src="../js/scene3d.js?v=2026102501" defer></script>
-<script src="../js/scenes/civitas.js?v=2026102501" defer></script>
-<script src="../js/civitas3d.js?v=2026102501" defer></script>
+<script src="../js/blog.js?v=2026102601" defer></script>
+<script src="../js/visit.js?v=2026102601" defer></script>
+<script src="../js/contact.js?v=2026102601" defer></script>
+<script src="../js/scene3d.js?v=2026102601" defer></script>
+<script src="../js/scenes/civitas.js?v=2026102601" defer></script>
+<script src="../js/civitas3d.js?v=2026102601" defer></script>
 </body>
 </html>

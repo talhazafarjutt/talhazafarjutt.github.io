@@ -429,6 +429,33 @@ section{position:relative;padding:100px 0}
 #calBtn:focus-visible{outline-color:var(--vanilla)}
 .cal-note{font-family:var(--mono);font-size:.75rem;color:rgba(255,244,214,.75);text-align:center}
 
+/* ── CONTACT FORM (homepage + articles) ── */
+.msg-form{margin-top:2.5rem;background:var(--paper);border:1px solid var(--line);padding:1.8rem}
+.mf-article{margin:3rem 0 0}
+.mf-title{font-size:1.25rem;font-weight:800;color:var(--fg);letter-spacing:-.01em;margin-bottom:.35rem}
+.mf-sub{font-size:.92rem;color:var(--t2);line-height:1.6;margin-bottom:1.3rem}
+.mf-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.mf-field{display:flex;flex-direction:column;gap:.35rem}
+.mf-field span{font-size:.8rem;font-weight:600;color:var(--fg)}
+.mf-field em{font-style:normal;font-weight:400;color:var(--t3)}
+.mf-wide{grid-column:1/-1}
+.mf-field input,.mf-field textarea{
+  font:inherit;font-size:.95rem;color:var(--fg);background:#fff;
+  border:1px solid rgba(38,59,170,.3);padding:.7rem .8rem;width:100%;
+  transition:border-color .2s,box-shadow .2s;
+}
+.mf-field textarea{resize:vertical;min-height:110px;line-height:1.55}
+.mf-field input:focus,.mf-field textarea:focus{outline:none;border-color:var(--indigo);box-shadow:0 0 0 3px rgba(38,59,170,.15)}
+.mf-trap{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+.mf-foot{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-top:1.2rem}
+.mf-foot .btn{border:2px solid var(--indigo)}
+.mf-foot .btn:disabled{opacity:.6;cursor:progress}
+.mf-note{font-size:.8rem;color:var(--t3)}
+.mf-status{margin-top:.8rem;font-size:.92rem;font-weight:600;min-height:1.4em}
+.mf-status.ok{color:var(--ok)}
+.mf-status.err{color:var(--bad)}
+@media(max-width:700px){.mf-grid{grid-template-columns:1fr}.msg-form{padding:1.3rem}}
+
 /* ── FOOTER ── */
 footer{background:var(--night);color:var(--vanilla);padding:1.5rem 0}
 .ft{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.8rem}
