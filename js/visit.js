@@ -2,6 +2,9 @@
    One beacon per page view, plus small event beacons for: clicks that mean "I might hire you"
    (book-a-call links, the Calendly button, a completed Calendly booking, resume, email, phone,
    LinkedIn, GitHub) and active reading time + scroll depth when the tab is hidden.
+   Person / bot / agent: the visit carries automation flags (navigator.webdriver, HeadlessChrome,
+   no languages) and the reading report carries which kinds of real input happened — no content of
+   that input, only yes/no per kind.
    The Worker adds IP, country, city and network on its side; rows are kept 30 days.
    No cookies. Skipped for visitors who send Global Privacy Control or Do Not Track.
    Owner opt-out: open any page once with ?notrack to stop logging this browser (?track undoes it). */
@@ -22,7 +25,11 @@
   const path = location.pathname;
   const send = (route, data) => navigator.sendBeacon(ENDPOINT + route, new Blob([JSON.stringify(data)], { type: 'text/plain' }));
 
-  send('/', { pv, path, ref: document.referrer, src: q.get('src') || '', utm: q.get('utm_source') || '' });
+  const auto = [];
+  if (navigator.webdriver) auto.push('webdriver');
+  if (/HeadlessChrome/.test(navigator.userAgent)) auto.push('headless');
+  if (!navigator.languages || !navigator.languages.length) auto.push('no-languages');
+  send('/', { pv, path, ref: document.referrer, src: q.get('src') || '', utm: q.get('utm_source') || '', auto: auto.join(',') });
 
   /* ── lead actions ── */
   const text = el => (el.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 60);
@@ -61,15 +68,29 @@
     if (d > depth) depth = d;
   };
   ['scroll', 'mousemove', 'keydown', 'touchstart', 'click'].forEach(t =>
-    addEventListener(t, () => { lastInput = Date.now(); if (t === 'scroll') measure(); }, { passive: true }));
+    addEventListener(t, e => { if (!e.isTrusted) return; lastInput = Date.now(); if (t === 'scroll') measure(); }, { passive: true }));
   measure();
   setInterval(() => {
     if (document.visibilityState === 'visible' && Date.now() - lastInput < 60000) active += 5;
   }, 5000);
+
+  // evidence of a person (bitmask): 1 pointer moved across 8+ spots, 2 touch, 4 wheel, 8 typing.
+  // Only trusted (browser-generated) events count; scripts dispatching fake events are ignored.
+  let human = 0, spots = 0, lastSpot = '';
+  addEventListener('mousemove', e => {
+    if (!e.isTrusted || human & 1) return;
+    const spot = (e.clientX >> 5) + ',' + (e.clientY >> 5);   // 32px cells: jitter in place doesn't count
+    if (spot !== lastSpot) { lastSpot = spot; if (++spots >= 8) human |= 1; }
+  }, { passive: true });
+  addEventListener('touchstart', e => { if (e.isTrusted) human |= 2; }, { passive: true });
+  addEventListener('wheel', e => { if (e.isTrusted) human |= 4; }, { passive: true });
+  addEventListener('keydown', e => { if (e.isTrusted) human |= 8; }, { passive: true });
+
+  let sentHuman = 0;
   function flush() {
-    if (active < 5 || active === sentSecs) return;   // nothing new since the last report
-    sentSecs = active;
-    send('/e', { pv, path, type: 'engage', secs: active, depth });
+    if ((active < 5 && !human) || (active === sentSecs && human === sentHuman)) return;   // nothing new
+    sentSecs = active; sentHuman = human;
+    send('/e', { pv, path, type: 'engage', secs: active, depth, h: human });
   }
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') flush(); });
   addEventListener('pagehide', flush);

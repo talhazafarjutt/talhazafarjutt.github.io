@@ -65,14 +65,18 @@ let schemaReady = null;
 function ensureSchema(db) {
   schemaReady ??= (async () => {
     // lat/lon: map · pv: page-view id that ties a visit to its events · utm: utm_source (ChatGPT adds utm_source=chatgpt.com)
+    // sig: automation signals (see visitSignals) · events.human: bitmask of real-input evidence from the page
     for (const sql of ['ALTER TABLE visits ADD COLUMN lat REAL', 'ALTER TABLE visits ADD COLUMN lon REAL',
-                       'ALTER TABLE visits ADD COLUMN pv TEXT', 'ALTER TABLE visits ADD COLUMN utm TEXT']) {
+                       'ALTER TABLE visits ADD COLUMN pv TEXT', 'ALTER TABLE visits ADD COLUMN utm TEXT',
+                       'ALTER TABLE visits ADD COLUMN sig TEXT']) {
       try { await db.prepare(sql).run(); } catch (e) { if (!/duplicate column/i.test(String(e && e.message || e))) throw e; }
     }
     await db.prepare('CREATE TABLE IF NOT EXISTS logins (ip TEXT NOT NULL, ts INTEGER NOT NULL)').run();
     await db.prepare(`CREATE TABLE IF NOT EXISTS events (id INTEGER PRIMARY KEY AUTOINCREMENT, ts TEXT NOT NULL, pv TEXT,
       ip TEXT, country TEXT, city TEXT, org TEXT, path TEXT, type TEXT NOT NULL, label TEXT, secs INTEGER, depth INTEGER)`).run();
     await db.prepare('CREATE INDEX IF NOT EXISTS events_ts ON events (ts)').run();
+    try { await db.prepare('ALTER TABLE events ADD COLUMN human INTEGER').run(); }
+    catch (e) { if (!/duplicate column/i.test(String(e && e.message || e))) throw e; }
     await db.prepare(`CREATE TABLE IF NOT EXISTS messages (id INTEGER PRIMARY KEY AUTOINCREMENT, ts TEXT NOT NULL, ip TEXT,
       country TEXT, city TEXT, org TEXT, page TEXT, name TEXT NOT NULL, email TEXT NOT NULL, company TEXT, message TEXT NOT NULL)`).run();
     await db.prepare('CREATE INDEX IF NOT EXISTS messages_ip_ts ON messages (ip, ts)').run();
@@ -89,7 +93,7 @@ async function logVisit(request, env) {
   const cut = (v, n) => String(v || '').slice(0, n);
   const num = v => (Number.isFinite(parseFloat(v)) ? parseFloat(v) : null);
   await env.DB.prepare(
-    'INSERT INTO visits (ts, ip, country, region, city, org, lat, lon, path, referrer, src, ua, pv, utm) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+    'INSERT INTO visits (ts, ip, country, region, city, org, lat, lon, path, referrer, src, ua, pv, utm, sig) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
   ).bind(
     new Date().toISOString(),
     request.headers.get('CF-Connecting-IP'),
@@ -97,9 +101,30 @@ async function logVisit(request, env) {
     num(cf.latitude), num(cf.longitude),
     cut(data.path, 200), cut(data.ref, 300), cut(data.src, 60),
     cut(request.headers.get('User-Agent'), 300),
-    pvId(data.pv), cut(data.utm, 60) || null
+    pvId(data.pv), cut(data.utm, 60) || null,
+    visitSignals(request, data.auto) || null
   ).run();
   return new Response(null, { status: 204, headers: { 'Access-Control-Allow-Origin': SITE } });
+}
+
+/* ── automation signals for one page view, as comma-separated tokens ──
+   from the page (visit.js): webdriver (navigator.webdriver), headless (HeadlessChrome), no-languages
+   from the request:         signed-agent:<who> (Web Bot Auth "Signature-Agent" header, e.g. ChatGPT agent),
+                             ua-mismatch (claims Chrome 90+ but sends no client hints), no-accept-language,
+                             verified-bot / bot-score:<n> (only on plans with Cloudflare Bot Management) */
+const PAGE_SIGNALS = new Set(['webdriver', 'headless', 'no-languages']);
+function visitSignals(request, auto) {
+  const h = request.headers, ua = h.get('User-Agent') || '', out = [];
+  for (const t of String(auto || '').split(',')) if (PAGE_SIGNALS.has(t) && !out.includes(t)) out.push(t);
+  const agent = h.get('Signature-Agent');
+  if (agent) out.push('signed-agent:' + agent.replace(/[^a-z0-9.:\/_-]/gi, '').replace(/^https?:\/\//i, '').slice(0, 60));
+  const chrome = /Chrome\/(\d+)/.exec(ua);
+  if (chrome && +chrome[1] >= 90 && !/CriOS|FxiOS/.test(ua) && !h.get('sec-ch-ua')) out.push('ua-mismatch');
+  if (!h.get('Accept-Language')) out.push('no-accept-language');
+  const bm = request.cf && request.cf.botManagement;
+  if (bm && bm.verifiedBot) out.push('verified-bot');
+  if (bm && Number.isFinite(bm.score)) out.push('bot-score:' + bm.score);
+  return out.join(',').slice(0, 300);
 }
 
 const pvId = v => String(v || '').replace(/[^a-z0-9]/gi, '').slice(0, 32) || null;
@@ -116,12 +141,13 @@ async function logEvent(request, env) {
   const clamp = (v, lo, hi) => { const n = parseInt(v, 10); return Number.isFinite(n) ? Math.min(hi, Math.max(lo, n)) : null; };
   const engage = d.type === 'engage';
   await env.DB.prepare(
-    'INSERT INTO events (ts, pv, ip, country, city, org, path, type, label, secs, depth) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+    'INSERT INTO events (ts, pv, ip, country, city, org, path, type, label, secs, depth, human) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
   ).bind(
     new Date().toISOString(), pvId(d.pv), request.headers.get('CF-Connecting-IP'),
     cf.country || null, cf.city || null, cf.asOrganization || null,
     cut(d.path, 200), d.type, engage ? null : cut(d.label, 80) || null,
-    engage ? clamp(d.secs, 0, 7200) : null, engage ? clamp(d.depth, 0, 100) : null
+    engage ? clamp(d.secs, 0, 7200) : null, engage ? clamp(d.depth, 0, 100) : null,
+    engage ? clamp(d.h, 0, 15) : null
   ).run();
   return done;
 }
@@ -223,8 +249,8 @@ async function visits(env, url) {
   const days = Math.min(30, Math.max(1, parseInt(url.searchParams.get('days'), 10) || 7));
   const since = new Date(Date.now() - days * 864e5).toISOString();
   const [visitRows, eventRows, messageRows] = await env.DB.batch([
-    env.DB.prepare('SELECT ts, ip, country, region, city, org, lat, lon, path, referrer, src, ua, pv, utm FROM visits WHERE ts >= ? ORDER BY id DESC LIMIT 5000').bind(since),
-    env.DB.prepare('SELECT ts, pv, ip, country, city, org, path, type, label, secs, depth FROM events WHERE ts >= ? ORDER BY id DESC LIMIT 10000').bind(since),
+    env.DB.prepare('SELECT ts, ip, country, region, city, org, lat, lon, path, referrer, src, ua, pv, utm, sig FROM visits WHERE ts >= ? ORDER BY id DESC LIMIT 5000').bind(since),
+    env.DB.prepare('SELECT ts, pv, ip, country, city, org, path, type, label, secs, depth, human FROM events WHERE ts >= ? ORDER BY id DESC LIMIT 10000').bind(since),
     // messages are leads: always all of them (kept 180 days), whatever the range
     env.DB.prepare('SELECT ts, ip, country, city, org, page, name, email, company, message FROM messages ORDER BY id DESC LIMIT 1000'),
   ]);
@@ -302,6 +328,8 @@ main{padding:1.2rem 1.4rem 2rem;display:grid;gap:1rem}
 .card h2 span{letter-spacing:.04em;text-transform:none;font-weight:400}
 .lead-booked{color:var(--green);font-weight:700}
 .msg-text{white-space:pre-wrap;max-width:46ch;display:block}
+.ty{font:700 .7rem var(--mono);letter-spacing:.04em;white-space:nowrap}
+.ty-human{color:var(--green)}.ty-unverified{color:var(--dim)}.ty-agent{color:#c4a1ff}.ty-bot{color:#ff6b81}.ty-likely{color:#f5b041}
 td a{color:var(--cyan)}
 #map{height:min(56vh,560px);background:#0b0d10}
 #map .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) brightness(.82) contrast(.92) saturate(.6)}  /* light OSM tiles → dark */
@@ -323,14 +351,17 @@ td.n{text-align:right;font-family:var(--mono);color:var(--cyan);white-space:nowr
 </style></head><body>
 <header><h1>Portfolio visitors <span>· talhazafarjutt.github.io</span></h1>
 <div class="ctl"><label>Range <select id="range"><option value="1">24 hours</option><option value="7">7 days</option><option value="30" selected>30 days (everything kept)</option></select></label>
-<label><input type="checkbox" id="bots" checked> Hide bots</label>
-<label title="Google, AWS, Azure, OVH, Hetzner, GTT and other hosting networks: mostly crawlers. May also hide a few VPN users."><input type="checkbox" id="cloud" checked> <span id="cloud-l">Hide cloud networks</span></label><span id="updated"></span>
+<label title="How each visit is classified: see the Visitor types panel">Show <select id="who">
+<option value="people" selected>People (humans + unverified)</option><option value="humans">Verified humans only</option>
+<option value="all">Everyone</option><option value="machines">Bots &amp; agents only</option></select></label><span id="updated"></span>
 <button type="button" id="refresh" class="primary" title="Fetch the latest visits from the database">↻ Refresh</button>
 <form method="post" action="/logout"><button type="submit">Sign out</button></form></div></header>
 <main>
 <section class="kpis">
 <div class="kpi"><b id="k-views">–</b><span>Page views</span></div>
 <div class="kpi"><b id="k-uniq">–</b><span>Unique visitors</span></div>
+<div class="kpi"><b id="k-human">–</b><span>Verified humans</span></div>
+<div class="kpi"><b id="k-bots">–</b><span>Bots &amp; agents seen</span></div>
 <div class="kpi"><b id="k-cty">–</b><span>Countries</span></div>
 <div class="kpi"><b id="k-org">–</b><span>Networks / companies</span></div>
 <div class="kpi"><b id="k-src">–</b><span>Tagged links opened</span></div>
@@ -344,6 +375,7 @@ td.n{text-align:right;font-family:var(--mono);color:var(--cyan);white-space:nowr
 <section class="card"><h2>Views per day</h2><div class="days" id="days"></div></section>
 <section class="card"><h2>Lead actions <span>booking clicks, bookings, resume, email, phone, LinkedIn, GitHub</span></h2><div class="scroll paged" id="t-leads"></div><div class="pager" id="p-leads"></div></section>
 <section class="card"><h2>Companies &amp; organisations <span>networks that are not home/mobile ISPs, clouds or VPNs — research these, don't mention the visit</span></h2><div class="scroll paged" id="t-cos"></div><div class="pager" id="p-cos"></div></section>
+<section class="card"><h2>Visitor types <span>all visits in range, whatever the Show filter · only visitors that run JavaScript are logged</span></h2><div class="scroll" id="t-types"></div></section>
 <section class="grid2">
 <div class="card"><h2>Networks / companies</h2><div class="scroll" id="t-org"></div></div>
 <div class="card"><h2>Countries</h2><div class="scroll" id="t-country"></div></div>
@@ -371,6 +403,18 @@ function dashboard() {
   // home / mobile internet providers and privacy relays/VPNs: a visit from these says nothing about an employer
   const ISP = /\b(Telecom|Telekom|Telecommunications?|Communications?|Broadband|Cable|Kabel|Internet|Wireless|Mobile|Mobil|Cellular|Fiber|Fibre|DSL|ISP|Vodafone|Comcast|Charter|Spectrum|Verizon|AT&T|T-Mobile|Sprint|Cox|RCN|Frontier|CenturyLink|Lumen|Virgin|Sky|BT|TalkTalk|Orange|Bouygues|SFR|Free SAS|Telefonica|Movistar|Telia|Telenor|Jazz|Zong|Ufone|PTCL|Nayatel|Wateen|Storm ?Fiber|Jio|Airtel|Etisalat|STC|Mobily|Rogers|Bell Canada|Telus|Shaw|Optus|Telstra|Swisscom|KPN|Ziggo|Proximus|Liberty Global|UPC|Eir|O2|Deutsche Telekom|1&1|Versatel|NetCologne|M-net|Ooredoo|Zain|Turkcell|Vivo|Claro|Tigo|Digi|Iliad|Fastweb|Tele2|Elisa|Starlink)\b/i;
   const RELAY = /\b(Apple|iCloud|Private Relay|Akamai|Cloudflare|Fastly|Nord|Mullvad|Proton|Surfshark|ExpressVPN|Tefincom|Packethub|Datacamp|M247|Zscaler)\b/i;
+  // AI crawlers and agents by user agent (most do not run JavaScript, so few ever reach this log)
+  const AGENT = /GPTBot|ChatGPT-User|OAI-SearchBot|ClaudeBot|Claude-User|Claude-SearchBot|anthropic-ai|PerplexityBot|Perplexity-User|Amazonbot|Bytespider|CCBot|Meta-External(Agent|Fetcher)|MistralAI-User|DuckAssistBot|cohere-ai|YouBot|Diffbot|Google-CloudVertexBot/i;
+  const TYPES = { human: 'Human ✓', unverified: 'Unverified', agent: 'AI agent', bot: 'Bot', likely: 'Likely bot' };
+  const TYPE_HELP = {
+    human: 'Real input seen on the page: mouse moved across it, touch, wheel or typing',
+    unverified: 'Normal browser, but no input seen (left within seconds, or logged before this check existed)',
+    agent: 'AI crawler/agent name in the user agent, or a signed agent such as ChatGPT agent',
+    bot: 'Bot or crawler name, headless browser, or automation flag with no real input',
+    likely: 'No real input, plus a cloud/hosting network or browser headers that do not match its claims',
+  };
+  const SHOW = { people: k => k === 'human' || k === 'unverified', humans: k => k === 'human', all: () => true,
+    machines: k => k === 'agent' || k === 'bot' || k === 'likely' };
   const ACTION = { cta: 'Clicked “book a call” link', calendly_open: 'Opened booking calendar', booked: 'Booked a call',
     resume: 'Downloaded resume', email: 'Clicked email', phone: 'Clicked phone', linkedin: 'Opened LinkedIn', github: 'Opened GitHub' };
   let rows = [], events = [], messages = [], fitted = false;
@@ -524,19 +568,33 @@ function dashboard() {
   }
 
   function render() {
-    const hideCloud = $('cloud').checked;
-    let v = $('bots').checked ? rows.filter(r => !BOT.test(r.ua || '')) : rows;
-    const cloudN = v.filter(r => CLOUD.test(r.org || '')).length;
-    if (hideCloud) v = v.filter(r => !CLOUD.test(r.org || ''));
-    $('cloud-l').textContent = 'Hide cloud networks' + (cloudN ? ' (' + cloudN + ')' : '');
-    const ev = hideCloud ? events.filter(e => !CLOUD.test(e.org || '')) : events;
-
-    // reading: the longest report per page view wins (one is sent each time the tab is hidden)
+    // reading + input evidence per page view: the longest report wins, input bits accumulate
     const read = new Map();
-    for (const e of ev) if (e.type === 'engage' && e.pv) {
-      const o = read.get(e.pv) || { secs: 0, depth: 0 };
-      read.set(e.pv, { secs: Math.max(o.secs, e.secs || 0), depth: Math.max(o.depth, e.depth || 0) });
+    for (const e of events) if (e.type === 'engage' && e.pv) {
+      const o = read.get(e.pv) || { secs: 0, depth: 0, h: 0 };
+      read.set(e.pv, { secs: Math.max(o.secs, e.secs || 0), depth: Math.max(o.depth, e.depth || 0), h: o.h | (e.human || 0) });
     }
+    // classify every visit: agent > bot > human > likely bot > unverified
+    for (const r of rows) {
+      const ua = r.ua || '', sig = r.sig || '', x = r.pv && read.get(r.pv), input = !!(x && x.h);
+      r.kind = AGENT.test(ua) || sig.includes('signed-agent') ? 'agent'
+        : BOT.test(ua) || sig.includes('headless') || sig.includes('verified-bot') || (sig.includes('webdriver') && !input) ? 'bot'
+        : input ? 'human'
+        : CLOUD.test(r.org || '') || /ua-mismatch|no-accept-language|no-languages/.test(sig) ? 'likely'
+        : 'unverified';
+    }
+    const who = $('who').value;
+    let v = rows.filter(r => SHOW[who](r.kind));
+    // events follow their page view; old events without one fall back to the network
+    const shownPv = new Set(v.map(r => r.pv).filter(Boolean));
+    const ev = events.filter(e => (e.pv ? shownPv.has(e.pv) : who === 'all' || !CLOUD.test(e.org || '')));
+
+    const types = new Map(Object.keys(TYPES).map(k => [k, { n: 0, ips: new Set() }]));
+    for (const r of rows) { const t = types.get(r.kind); t.n++; t.ips.add(r.ip); }
+    table('t-types', ['Type', 'Views', 'Visitors', 'How it is decided'],
+      [...types].map(([k, t]) => [el('span', 'ty ty-' + k, TYPES[k]), t.n, t.ips.size, TYPE_HELP[k]]));
+    $('k-human').textContent = types.get('human').ips.size;
+    $('k-bots').textContent = types.get('agent').n + types.get('bot').n + types.get('likely').n;
     const leads = ev.filter(e => e.type !== 'engage');
     const seen = v.map(r => r.pv && read.get(r.pv)).filter(Boolean);
 
@@ -658,10 +716,12 @@ function dashboard() {
       }, c => (c.lat != null ? [c.lat, c.lon] : null));
 
     const q = $('q').value.trim().toLowerCase();
-    const list = q ? v.filter(r => [place(r), r.country, r.org, r.ip, r.path, source(r), device(r.ua)].join(' ').toLowerCase().includes(q)) : v;
-    pagedTable('recent', ['When', 'Where', 'Network', 'IP', 'Page', 'Time', 'Scroll', 'From', 'Device'], list, r => {
+    const list = q ? v.filter(r => [TYPES[r.kind], place(r), r.country, r.org, r.ip, r.path, source(r), device(r.ua)].join(' ').toLowerCase().includes(q)) : v;
+    pagedTable('recent', ['When', 'Type', 'Where', 'Network', 'IP', 'Page', 'Time', 'Scroll', 'From', 'Device'], list, r => {
       const x = r.pv && read.get(r.pv);
-      return [ago(r.ts), (flag(r.country) + ' ' + place(r)).trim(), r.org, r.ip, r.path, x ? dur(x.secs) : '', x ? x.depth + '%' : '', source(r), device(r.ua)];
+      const type = el('span', 'ty ty-' + r.kind, TYPES[r.kind]);
+      if (r.sig) type.title = 'signals: ' + r.sig;
+      return [ago(r.ts), type, (flag(r.country) + ' ' + place(r)).trim(), r.org, r.ip, r.path, x ? dur(x.secs) : '', x ? x.depth + '%' : '', source(r), device(r.ua)];
     }, r => (r.lat != null && r.lon != null ? [r.lat, r.lon] : null));
   }
 
@@ -690,8 +750,7 @@ function dashboard() {
   $('refresh').addEventListener('click', load);
   $('range').addEventListener('change', () => { fitted = false; for (const k in paging) paging[k].page = 0; load(); });
   $('q').addEventListener('input', () => { if (paging.recent) paging.recent.page = 0; render(); });
-  $('bots').addEventListener('change', render);
-  $('cloud').addEventListener('change', render);
+  $('who').addEventListener('change', () => { for (const k in paging) paging[k].page = 0; render(); });
   load();
   setInterval(load, 60000);
 }
