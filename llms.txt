@@ -9,6 +9,11 @@
 - Backend APIs: Python and Node microservices holding sub-100ms P95 at 10k+ daily requests; gRPC between six services (40% less internal API overhead than REST); Redis caching that cut database load 60%.
 - Security and DevOps: zero-trust secrets with HashiCorp Vault, GitHub Actions CI/CD with SAST, container and secret scanning; stopped a live Stripe carding attack (fraud rate 12% → 0.02%).
 
+## Packages (https://talhazafarjutt.github.io/packages.html)
+- Discovery call: Free 30-minute video call: your system, the biggest risks and quick wins, and whether I'm the right fit.
+- Security & infrastructure audit: Fixed-price review of Kubernetes, ingress and TLS, secrets, CI/CD, API security and payments, with a written report and fix plan.
+- LLM infrastructure (LLMOps): Long-term or full-time: self-hosted vLLM inference on GPUs and Kubernetes, an API gateway with keys and rate limits, monitoring and cost control.
+
 ## Case studies
 - [How a Fraud Platform Can Look Healthy While Catching Nothing](https://talhazafarjutt.github.io/blog/civitas-fraud-platform.html): How a fraud-detection platform looked healthy while scoring 0 of 61 transactions — async scoring, build-enforced security and measured performance work.
 - [Replacing ingress-nginx in Production Without Breaking Anything](https://talhazafarjutt.github.io/blog/ingress-nginx-migration.html): ingress-nginx hit end of life in March 2026: no more security patches. The exact Gateway API cutover I ran, one hostname at a time, zero dropped requests.

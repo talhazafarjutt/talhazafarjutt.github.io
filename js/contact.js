@@ -1,11 +1,22 @@
 /* ── CONTACT FORM — posts to the Cloudflare Worker (/contact), shows the result in place ──
    Without JavaScript the form still works: it posts to the same URL and the Worker answers with a
-   small confirmation page. Spam traps: the hidden "website" field and a minimum fill time (t). */
+   small confirmation page. Spam traps: the hidden "website" field and a minimum fill time (t).
+   Forms with a "topic" select (packages page) prefix the message with the chosen package;
+   links with data-topic="audit|llmops|…" pick that package and jump to the form. */
 (function () {
   'use strict';
   const ENDPOINT = 'https://visits.talha-zafar-j.workers.dev/contact';
   const FALLBACK = 'Could not send. Please email talha.zafar.j@gmail.com instead.';
   const opened = Date.now();
+
+  document.addEventListener('click', e => {
+    const link = e.target.closest && e.target.closest('[data-topic]');
+    const select = document.querySelector('form.msg-form select[name="topic"]');
+    if (!link || !select) return;
+    select.value = link.dataset.topic;
+    // let the #request anchor scroll, then put the cursor in the first empty field
+    setTimeout(() => { const f = select.form.querySelector('input[name="name"]'); if (f) f.focus({ preventScroll: true }); }, 400);
+  });
 
   document.querySelectorAll('form.msg-form').forEach(form => {
     const status = form.querySelector('.mf-status');
@@ -16,8 +27,10 @@
       e.preventDefault();
       if (!form.reportValidity()) return;
       const f = new FormData(form);
+      const topic = form.querySelector('select[name="topic"]');
+      const interest = topic ? '[Interested in: ' + topic.options[topic.selectedIndex].text + '] ' : '';
       const body = {
-        name: f.get('name'), email: f.get('email'), company: f.get('company'), message: f.get('message'),
+        name: f.get('name'), email: f.get('email'), company: f.get('company'), message: interest + f.get('message'),
         website: f.get('website'), page: location.pathname, t: Date.now() - opened,
       };
       button.disabled = true;

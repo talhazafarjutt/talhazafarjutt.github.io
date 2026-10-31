@@ -45,6 +45,7 @@ new HTML with stale CSS/JS/images. Every local asset link carries `?v=YYYYMMDDnn
   JSON-LD: ProfilePage/Person/WebSite on home, BlogPosting + BreadcrumbList on articles) and regenerates `sitemap.xml` and
   `llms.txt` (plain-text summary for AI assistants; its facts must match the site). Idempotent.
 - `python3 tools/seo/cards.py` renders the 1200×630 share cards in `img/og/` + favicon PNGs (headless Chrome).
+- Page types in `seo_pages.py`: `website` (home), `article` (BlogPosting) and `page` (WebPage + OfferCatalog from `offers`, used by `packages.html`).
 - **New article:** add it to `seo_pages.py` → run `cards.py` and `inject.py` → add its card to the homepage blog grid → bump `?v=`.
 - Keep titles ≤ ~65 chars and descriptions ≤ ~155; only state facts the page itself contains.
 - `robots.txt` blocks `/cloudflare/`, `/tools/`, `blog/*.md`, `resume_source.html`. `404.html` is served by GitHub Pages for unknown URLs.
@@ -91,6 +92,12 @@ All content is in `index.html`. A fixed top bar (`#site-nav`, links highlight th
 7. **Skills** (`#skills`) — four tag panels
 8. **Process** (`#process`) — four steps, first call to handover
 9. **Contact** (`#contact`) — contact links + Calendly button + contact form (`js/contact.js`)
+
+**`packages.html`** — the shareable offers page (linked from the top bar, the Services section and every article's nav):
+Free discovery call (`$0`, opens Calendly via `data-calendly`), Security & infrastructure audit (fixed price, quoted after the
+call) and LLM infrastructure / LLMOps (monthly retainer or full-time). Buttons with `data-topic` pre-select the package in the
+request form, and `contact.js` prefixes the message with it. **No prices are shown until Talha gives real figures** — put
+them in the `.pkg-price` lines and in `offers` in `seo_pages.py` (the Offer `price` field) together.
 
 Keep it professional: no custom cursor, no typing effects, no fake terminal chrome; text ≥ 12px (`.75rem`).
 Every number on the page must come from an article or the resume; no invented testimonials, clients or prices.

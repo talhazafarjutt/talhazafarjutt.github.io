@@ -75,7 +75,8 @@ window.addEventListener('resize', syncNav);
 syncNav();
 
 /* ── CALENDLY — loaded on demand (≈ a third-party script per page view saved) ── */
-const calBtn = document.getElementById('calBtn');
+// the contact card's button, plus any element marked data-calendly (packages page, top bar)
+const calButtons = [...document.querySelectorAll('#calBtn, [data-calendly]')];
 let calendlyReady = null;
 function loadCalendly() {
   calendlyReady ??= new Promise((resolve, reject) => {
@@ -88,16 +89,18 @@ function loadCalendly() {
   });
   return calendlyReady;
 }
-if (calBtn) {
-  // warm it up once the contact section is close, so the click opens instantly
-  new IntersectionObserver((es, o) => {
-    if (es[0].isIntersecting) { loadCalendly().catch(() => {}); o.disconnect(); }
-  }, { rootMargin: '600px 0px' }).observe(calBtn);
+if (calButtons.length) {
+  // warm it up once a booking button is close, so the click opens instantly
+  const warm = new IntersectionObserver(es => {
+    if (es.some(e => e.isIntersecting)) { loadCalendly().catch(() => {}); warm.disconnect(); }
+  }, { rootMargin: '600px 0px' });
+  calButtons.forEach(b => warm.observe(b));
   // themed to the site palette (vanilla background, indigo ink + buttons)
   const CAL_URL = 'https://calendly.com/talha-zafar-j/30min?background_color=fff4d6&text_color=161e4d&primary_color=263baa';
-  calBtn.addEventListener('click', () => {
+  calButtons.forEach(b => b.addEventListener('click', e => {
+    e.preventDefault();          // links marked data-calendly fall back to their href without JS
     loadCalendly()
       .then(() => Calendly.initPopupWidget({ url: CAL_URL }))
       .catch(() => window.open(CAL_URL, '_blank', 'noopener'));
-  });
+  }));
 }

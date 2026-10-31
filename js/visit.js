@@ -27,7 +27,8 @@
   /* ── lead actions ── */
   const text = el => (el.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 60);
   function action(el) {
-    if (el.id === 'calBtn') return ['calendly_open', text(el)];
+    if (el.id === 'calBtn' || el.hasAttribute('data-calendly')) return ['calendly_open', text(el)];
+    if (el.dataset.topic) return ['cta', text(el)];
     const href = el.getAttribute('href') || '';
     if (/^mailto:/i.test(href)) return ['email', href.slice(7)];
     if (/^tel:/i.test(href)) return ['phone', href.slice(4)];
@@ -41,7 +42,7 @@
     return null;
   }
   document.addEventListener('click', e => {
-    const el = e.target.closest && e.target.closest('a[href], #calBtn');
+    const el = e.target.closest && e.target.closest('a[href], #calBtn, [data-calendly], [data-topic]');
     const hit = el && action(el);
     if (hit) send('/e', { pv, path, type: hit[0], label: hit[1] });
   }, { capture: true, passive: true });

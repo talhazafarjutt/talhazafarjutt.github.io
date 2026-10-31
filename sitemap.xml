@@ -2,37 +2,42 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url>
     <loc>https://talhazafarjutt.github.io/</loc>
-    <lastmod>2026-10-15</lastmod>
+    <lastmod>2026-10-31</lastmod>
     <image:image><image:loc>https://talhazafarjutt.github.io/img/og/home.jpg</image:loc></image:image>
   </url>
   <url>
     <loc>https://talhazafarjutt.github.io/blog/civitas-fraud-platform.html</loc>
-    <lastmod>2026-10-15</lastmod>
+    <lastmod>2026-10-31</lastmod>
     <image:image><image:loc>https://talhazafarjutt.github.io/img/og/civitas-fraud-platform.jpg</image:loc></image:image>
   </url>
   <url>
     <loc>https://talhazafarjutt.github.io/blog/ingress-nginx-migration.html</loc>
-    <lastmod>2026-10-15</lastmod>
+    <lastmod>2026-10-31</lastmod>
     <image:image><image:loc>https://talhazafarjutt.github.io/img/og/ingress-nginx-migration.jpg</image:loc></image:image>
   </url>
   <url>
     <loc>https://talhazafarjutt.github.io/blog/gpu-inference.html</loc>
-    <lastmod>2026-10-15</lastmod>
+    <lastmod>2026-10-31</lastmod>
     <image:image><image:loc>https://talhazafarjutt.github.io/img/og/gpu-inference.jpg</image:loc></image:image>
   </url>
   <url>
     <loc>https://talhazafarjutt.github.io/blog/stripe-carding.html</loc>
-    <lastmod>2026-10-15</lastmod>
+    <lastmod>2026-10-31</lastmod>
     <image:image><image:loc>https://talhazafarjutt.github.io/img/og/stripe-carding.jpg</image:loc></image:image>
   </url>
   <url>
     <loc>https://talhazafarjutt.github.io/blog/grpc-vs-rest.html</loc>
-    <lastmod>2026-10-15</lastmod>
+    <lastmod>2026-10-31</lastmod>
     <image:image><image:loc>https://talhazafarjutt.github.io/img/og/grpc-vs-rest.jpg</image:loc></image:image>
   </url>
   <url>
     <loc>https://talhazafarjutt.github.io/blog/vault-gdpr.html</loc>
-    <lastmod>2026-10-15</lastmod>
+    <lastmod>2026-10-31</lastmod>
     <image:image><image:loc>https://talhazafarjutt.github.io/img/og/vault-gdpr.jpg</image:loc></image:image>
+  </url>
+  <url>
+    <loc>https://talhazafarjutt.github.io/packages.html</loc>
+    <lastmod>2026-10-31</lastmod>
+    <image:image><image:loc>https://talhazafarjutt.github.io/img/og/packages.jpg</image:loc></image:image>
   </url>
 </urlset>

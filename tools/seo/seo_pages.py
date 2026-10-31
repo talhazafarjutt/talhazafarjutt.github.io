@@ -1,6 +1,6 @@
 """SEO metadata for every page — titles ≤ ~65 chars, descriptions ≤ ~155 chars, facts from the pages themselves."""
 SITE = "https://talhazafarjutt.github.io"
-TODAY = "2026-10-15"
+TODAY = "2026-10-31"
 
 PAGES = [
     dict(file="index.html", url=SITE + "/", og="img/og/home.jpg", type="website",
@@ -45,6 +45,16 @@ PAGES = [
          desc="Why use HashiCorp Vault? How we replaced .env files with AppRole auth, least-privilege policies, CI/CD secrets and on-prem audit logs for GDPR Article 32.",
          tags=["HashiCorp Vault", "Security", "GDPR", "AppRole", "DevOps"],
          card=dict(kicker="Security · GDPR", sub="Least-privilege secrets · interactive 3D")),
+    # plain page (type="page"): WebPage + BreadcrumbList + the three packages as an OfferCatalog
+    dict(file="packages.html", og="img/og/packages.jpg", type="page",
+         headline="Three ways to work together",
+         title="Packages: Free Call, Infra Audit, LLMOps — Talha Zafar",
+         desc="Work with me three ways: a free 30-minute call, a fixed-price security & infrastructure audit, or long-term / full-time LLMOps and LLM infrastructure.",
+         offers=[("Discovery call", "Free 30-minute video call: your system, the biggest risks and quick wins, and whether I'm the right fit.", "0"),
+                 ("Security & infrastructure audit", "Fixed-price review of Kubernetes, ingress and TLS, secrets, CI/CD, API security and payments, with a written report and fix plan.", None),
+                 ("LLM infrastructure (LLMOps)", "Long-term or full-time: self-hosted vLLM inference on GPUs and Kubernetes, an API gateway with keys and rate limits, monitoring and cost control.", None)],
+         card=dict(kicker="Work with me", title="Free call · Infra audit · LLMOps", size=64,
+                   sub="Three ways to work together", tags=["Free call", "Audit", "LLMOps"])),
 ]
 for p in PAGES:
     p.setdefault("url", f"{SITE}/{p['file']}")

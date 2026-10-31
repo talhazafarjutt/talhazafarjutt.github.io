@@ -28,6 +28,23 @@ def ld(page):
             {"@type": "WebSite", "@id": SITE + "/#website", "url": SITE + "/", "name": "Talha Zafar",
              "inLanguage": "en", "publisher": {"@id": SITE + "/#person"}},
         ]
+    elif page["type"] == "page":
+        offers = []
+        for name, desc, price in page.get("offers", []):
+            o = {"@type": "Offer", "itemOffered": {"@type": "Service", "name": name, "description": desc,
+                                                   "provider": {"@id": SITE + "/#person"}}}
+            if price is not None:
+                o.update(price=price, priceCurrency="USD")
+            offers.append(o)
+        graph = [
+            {"@type": "WebPage", "@id": page["url"] + "#page", "url": page["url"], "name": page["title"],
+             "description": page["desc"], "inLanguage": "en", "dateModified": TODAY,
+             "isPartOf": {"@id": SITE + "/#website"}, "about": {"@id": SITE + "/#person"},
+             "mainEntity": {"@type": "OfferCatalog", "name": page["headline"], "itemListElement": offers}},
+            {"@type": "BreadcrumbList", "itemListElement": [
+                {"@type": "ListItem", "position": 1, "name": "Talha Zafar", "item": SITE + "/"},
+                {"@type": "ListItem", "position": 2, "name": "Packages", "item": page["url"]}]},
+        ]
     else:
         graph = [
             {"@type": "BlogPosting", "@id": page["url"] + "#article", "headline": page["headline"],
@@ -57,7 +74,7 @@ def block(page):
         '<link rel="apple-touch-icon" href="/apple-touch-icon.png">',
         '<meta property="og:site_name" content="Talha Zafar">',
         '<meta property="og:locale" content="en_US">',
-        f'<meta property="og:type" content="{page["type"]}">',
+        f'<meta property="og:type" content="{"article" if page["type"] == "article" else "website"}">',
         f'<meta property="og:title" content="{esc(page.get("headline", page["title"]))}">',
         f'<meta property="og:description" content="{esc(page["desc"])}">',
         f'<meta property="og:url" content="{page["url"]}">',
@@ -106,7 +123,8 @@ open(f"{R}/sitemap.xml", "w").write('<?xml version="1.0" encoding="UTF-8"?>\n'
 print("sitemap.xml:", len(PAGES), "URLs")
 
 # llms.txt (llmstxt.org): a plain summary for AI assistants and answer engines. Facts only from the site.
-articles = "\n".join(f"- [{p['headline']}]({p['url']}): {p['desc']}" for p in PAGES if p["type"] != "website")
+articles = "\n".join(f"- [{p['headline']}]({p['url']}): {p['desc']}" for p in PAGES if p["type"] == "article")
+packages = "\n".join(f"- {n}: {d}" for p in PAGES if p["type"] == "page" for n, d, _ in p.get("offers", []))
 open(f"{R}/llms.txt", "w").write(f"""# Talha Zafar — Freelance Backend, DevOps & LLMOps Engineer
 
 > Freelance backend, DevOps and LLMOps engineer based in Lahore, Pakistan (PKT, UTC+5), working remotely worldwide.
@@ -117,6 +135,9 @@ open(f"{R}/llms.txt", "w").write(f"""# Talha Zafar — Freelance Backend, DevOps
 - LLMOps / self-hosted LLM inference: vLLM on bare-metal K3s, a FastAPI load balancer and an nginx API gateway with key auth and rate limits. One 4× Tesla V100 (32 GB) cluster served 10k+ requests a day at ~$180/month, against ~$8,800/month for AWS's closest 4× V100 instance.
 - Backend APIs: Python and Node microservices holding sub-100ms P95 at 10k+ daily requests; gRPC between six services (40% less internal API overhead than REST); Redis caching that cut database load 60%.
 - Security and DevOps: zero-trust secrets with HashiCorp Vault, GitHub Actions CI/CD with SAST, container and secret scanning; stopped a live Stripe carding attack (fraud rate 12% → 0.02%).
+
+## Packages ({SITE}/packages.html)
+{packages}
 
 ## Case studies
 {articles}
