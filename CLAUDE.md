@@ -37,7 +37,7 @@ Just push `index.html` — no `gh-pages` branch or Actions workflow needed.
 **Cache busting:** GitHub Pages serves assets with `cache-control: max-age=600`, so a returning visitor can get
 new HTML with stale CSS/JS/images. Every local asset link carries `?v=YYYYMMDDnn` (date + sequence) — bump it in all pages
 (`index.html`, `blog/*.html`) whenever you change a CSS, JS or image file:
-`sed -i 's/?v=[0-9]*"/?v=NEWDATE"/g' index.html blog/*.html`
+`sed -i 's/?v=[0-9]*"/?v=NEWDATE"/g' index.html blog/*.html 404.html packages.html call.html audit.html llmops.html`
 
 ## SEO
 - Page titles, descriptions, publish dates and share-card text live in **`tools/seo/seo_pages.py`** (single source of truth).
@@ -93,11 +93,16 @@ All content is in `index.html`. A fixed top bar (`#site-nav`, links highlight th
 8. **Process** (`#process`) — four steps, first call to handover
 9. **Contact** (`#contact`) — contact links + Calendly button + contact form (`js/contact.js`)
 
+**Packages — single source `tools/seo/offers.py`.** Edit offers there, then run `python3 tools/seo/offers_build.py`
+(rebuilds the grid + form inside `packages.html` between `PKG`/`FORM` markers and regenerates `call.html`, `audit.html`,
+`llmops.html` from `packages.html`'s shell — never hand-edit those three), then `inject.py` and `cards.py`
+(banners `img/og/{packages,call,audit,llmops}.jpg`: these are the LinkedIn Featured images, one per link).
+
 **`packages.html`** — the shareable offers page (linked from the top bar, the Services section and every article's nav):
 Free discovery call (`$0`, opens Calendly via `data-calendly`), Security & infrastructure audit (fixed price, quoted after the
 call) and LLM infrastructure / LLMOps (monthly retainer or full-time). Buttons with `data-topic` pre-select the package in the
 request form, and `contact.js` prefixes the message with it. **No prices are shown until Talha gives real figures** — put
-them in the `.pkg-price` lines and in `offers` in `seo_pages.py` (the Offer `price` field) together.
+them in `offers.py` (`price`, `price_note`, `schema_price`, `banner.price`) and rebuild.
 
 Keep it professional: no custom cursor, no typing effects, no fake terminal chrome; text ≥ 12px (`.75rem`).
 Every number on the page must come from an article or the resume; no invented testimonials, clients or prices.

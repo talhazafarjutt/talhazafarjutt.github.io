@@ -5,6 +5,8 @@ import os, sys
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 R = os.path.abspath(os.path.join(HERE, "..", ".."))
 from seo_pages import PAGES, SITE, TODAY
+from offers import OFFERS
+from html import unescape
 esc = lambda s: html.escape(s, quote=True)
 PERSON = {
     "@type": "Person", "@id": SITE + "/#person", "name": "Talha Zafar", "url": SITE + "/",
@@ -42,8 +44,8 @@ def ld(page):
              "isPartOf": {"@id": SITE + "/#website"}, "about": {"@id": SITE + "/#person"},
              "mainEntity": {"@type": "OfferCatalog", "name": page["headline"], "itemListElement": offers}},
             {"@type": "BreadcrumbList", "itemListElement": [
-                {"@type": "ListItem", "position": 1, "name": "Talha Zafar", "item": SITE + "/"},
-                {"@type": "ListItem", "position": 2, "name": "Packages", "item": page["url"]}]},
+                {"@type": "ListItem", "position": n, "name": name, "item": url} for n, (name, url) in enumerate(
+                    [("Talha Zafar", SITE + "/")] + page.get("crumbs", []) + [(page.get("crumb", page["headline"]), page["url"])], 1)]},
         ]
     else:
         graph = [
@@ -124,7 +126,7 @@ print("sitemap.xml:", len(PAGES), "URLs")
 
 # llms.txt (llmstxt.org): a plain summary for AI assistants and answer engines. Facts only from the site.
 articles = "\n".join(f"- [{p['headline']}]({p['url']}): {p['desc']}" for p in PAGES if p["type"] == "article")
-packages = "\n".join(f"- {n}: {d}" for p in PAGES if p["type"] == "page" for n, d, _ in p.get("offers", []))
+packages = "\n".join(f"- [{unescape(o['name'])}]({SITE}/{o['file']}): {o['summary']}" for o in OFFERS)
 open(f"{R}/llms.txt", "w").write(f"""# Talha Zafar — Freelance Backend, DevOps & LLMOps Engineer
 
 > Freelance backend, DevOps and LLMOps engineer based in Lahore, Pakistan (PKT, UTC+5), working remotely worldwide.

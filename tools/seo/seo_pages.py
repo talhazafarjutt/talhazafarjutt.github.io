@@ -1,4 +1,6 @@
 """SEO metadata for every page — titles ≤ ~65 chars, descriptions ≤ ~155 chars, facts from the pages themselves."""
+from html import unescape
+from offers import OFFERS
 SITE = "https://talhazafarjutt.github.io"
 TODAY = "2026-10-31"
 
@@ -45,17 +47,24 @@ PAGES = [
          desc="Why use HashiCorp Vault? How we replaced .env files with AppRole auth, least-privilege policies, CI/CD secrets and on-prem audit logs for GDPR Article 32.",
          tags=["HashiCorp Vault", "Security", "GDPR", "AppRole", "DevOps"],
          card=dict(kicker="Security · GDPR", sub="Least-privilege secrets · interactive 3D")),
-    # plain page (type="page"): WebPage + BreadcrumbList + the three packages as an OfferCatalog
-    dict(file="packages.html", og="img/og/packages.jpg", type="page",
+    # plain page (type="page"): WebPage + BreadcrumbList + the packages as an OfferCatalog (from offers.py)
+    dict(file="packages.html", og="img/og/packages.jpg", type="page", crumb="Packages",
          headline="Three ways to work together",
          title="Packages: Free Call, Infra Audit, LLMOps — Talha Zafar",
          desc="Work with me three ways: a free 30-minute call, a fixed-price security & infrastructure audit, or long-term / full-time LLMOps and LLM infrastructure.",
-         offers=[("Discovery call", "Free 30-minute video call: your system, the biggest risks and quick wins, and whether I'm the right fit.", "0"),
-                 ("Security & infrastructure audit", "Fixed-price review of Kubernetes, ingress and TLS, secrets, CI/CD, API security and payments, with a written report and fix plan.", None),
-                 ("LLM infrastructure (LLMOps)", "Long-term or full-time: self-hosted vLLM inference on GPUs and Kubernetes, an API gateway with keys and rate limits, monitoring and cost control.", None)],
-         card=dict(kicker="Work with me", title="Free call · Infra audit · LLMOps", size=64,
-                   sub="Three ways to work together", tags=["Free call", "Audit", "LLMOps"])),
+         offers=[(unescape(o["name"]), o["summary"], o["schema_price"]) for o in OFFERS],
+         card=dict(style="overview", kicker="Work with me", title="Three ways to work together",
+                   offers=[dict(kicker=o["kicker"], name=unescape(o["name"]), price=o["banner"]["price"], dark=o["dark"]) for o in OFFERS],
+                   url="talhazafarjutt.github.io/packages.html")),
 ]
+# one page per package (call.html, audit.html, llmops.html), each with its own share banner
+for o in OFFERS:
+    PAGES.append(dict(file=o["file"], og=f"img/og/{o['slug']}.jpg", type="page",
+                      crumbs=[("Packages", SITE + "/packages.html")], headline=unescape(o["name"]),
+                      title=o["seo_title"], desc=o["seo_desc"],
+                      offers=[(unescape(o["name"]), o["summary"], o["schema_price"])],
+                      card=dict(style="pkg", kicker=o["kicker"], title=unescape(o["name"]), price=o["banner"]["price"],
+                                lines=o["banner"]["lines"], dark=o["dark"], url="talhazafarjutt.github.io/" + o["file"])))
 for p in PAGES:
     p.setdefault("url", f"{SITE}/{p['file']}")
     p.setdefault("type", "article")

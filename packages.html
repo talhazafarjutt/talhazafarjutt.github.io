@@ -113,7 +113,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=2026103101">
+<link rel="stylesheet" href="css/style.css?v=2026103102">
 </head>
 <body>
 
@@ -145,7 +145,7 @@
     <p class="sec-sub">Start with a free call. If there's a fit, pick a fixed-price audit — or bring me in long-term for your LLM infrastructure.</p>
 
     <div class="pkg-grid">
-
+      <!-- PKG:start -->
       <article class="pkg ri">
         <p class="pkg-kicker">Free</p>
         <h2 class="pkg-name">Discovery call</h2>
@@ -158,9 +158,10 @@
           <li>No obligation</li>
         </ul>
         <button type="button" class="btn btn-out pkg-cta" data-calendly>Book a free call →</button>
+        <a class="pkg-more" href="call.html">More about this package →</a>
       </article>
 
-      <article class="pkg ri" style="transition-delay:.08s">
+      <article class="pkg ri">
         <p class="pkg-kicker">Fixed price</p>
         <h2 class="pkg-name">Security &amp; infrastructure audit</h2>
         <p class="pkg-price"><b>Fixed price</b>quoted after the free call</p>
@@ -181,9 +182,10 @@
         </ul>
         <a href="#request" class="btn btn-fill pkg-cta" data-topic="audit">Request an audit →</a>
         <p class="pkg-proof">Based on work like <a href="blog/vault-gdpr.html">Vault &amp; GDPR</a>, <a href="blog/stripe-carding.html">a live carding attack</a> and <a href="blog/ingress-nginx-migration.html">the ingress-nginx migration</a>.</p>
+        <a class="pkg-more" href="audit.html">More about this package →</a>
       </article>
 
-      <article class="pkg pkg-dark ri" style="transition-delay:.16s">
+      <article class="pkg pkg-dark ri">
         <p class="pkg-kicker">Long-term</p>
         <h2 class="pkg-name">LLM infrastructure (LLMOps)</h2>
         <p class="pkg-price"><b>Monthly retainer or full-time</b>let's talk</p>
@@ -197,10 +199,11 @@
           <li>The backend and DevOps around it: FastAPI services, CI/CD, secrets</li>
         </ul>
         <p class="pkg-for">Long-term contract or full-time role · remote · PKT (UTC+5)</p>
-        <a href="#request" class="btn pkg-cta pkg-cta-light" data-topic="llmops">Discuss LLM work →</a>
+        <a href="#request" class="btn pkg-cta-light pkg-cta" data-topic="llmops">Discuss LLM work →</a>
         <p class="pkg-proof">Case study: <a href="blog/gpu-inference.html">LLM inference on 4× Tesla V100</a>.</p>
+        <a class="pkg-more" href="llmops.html">More about this package →</a>
       </article>
-
+      <!-- PKG:end -->
     </div>
   </div>
 </section>
@@ -221,6 +224,7 @@
 <!-- ══════════ REQUEST ══════════ -->
 <section id="request">
   <div class="sec-wrap">
+    <!-- FORM:start -->
     <form class="msg-form" id="msgForm" action="https://visits.talha-zafar-j.workers.dev/contact" method="post">
       <div class="mf-head">
         <h2 class="mf-title">Tell me what you need</h2>
@@ -229,7 +233,7 @@
       <div class="mf-grid">
         <label class="mf-field mf-wide"><span>I'm interested in</span>
           <select name="topic">
-            <option value="call">Free discovery call</option>
+            <option value="call" selected>Free discovery call</option>
             <option value="audit">Security &amp; infrastructure audit</option>
             <option value="llmops">LLM infrastructure (long-term / full-time)</option>
             <option value="other">Something else</option>
@@ -248,6 +252,7 @@
       </div>
       <p class="mf-status" role="status" aria-live="polite"></p>
     </form>
+    <!-- FORM:end -->
   </div>
 </section>
 </main>
@@ -267,8 +272,8 @@
   </div>
 </footer>
 
-<script src="js/main.js?v=2026103101" defer></script>
-<script src="js/visit.js?v=2026103101" defer></script>
-<script src="js/contact.js?v=2026103101" defer></script>
+<script src="js/main.js?v=2026103102" defer></script>
+<script src="js/visit.js?v=2026103102" defer></script>
+<script src="js/contact.js?v=2026103102" defer></script>
 </body>
 </html>

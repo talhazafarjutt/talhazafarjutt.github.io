@@ -69,6 +69,86 @@ function card(c) {
   return cv.toDataURL('image/jpeg', 0.86);
 }
 
+// ── package banners (LinkedIn Featured / share image of call.html, audit.html, llmops.html) ──
+function dots(x, color) {
+  x.fillStyle = color;
+  for (let i = 12; i < W; i += 24) for (let j = 12; j < H; j += 24) { x.beginPath(); x.arc(i, j, 1.2, 0, 7); x.fill(); }
+}
+function portrait(x, cx, cy, R, back, ring) {
+  x.fillStyle = back; x.beginPath(); x.arc(cx, cy, R, 0, 7); x.fill();
+  const r = R - 16;
+  x.save(); x.beginPath(); x.arc(cx + 10, cy + 10, r, 0, 7); x.closePath(); x.clip();
+  x.drawImage(photo, cx + 10 - r, cy + 10 - r, r * 2, r * 2); x.restore();
+  x.strokeStyle = ring; x.lineWidth = 6; x.beginPath(); x.arc(cx + 10, cy + 10, r, 0, 7); x.stroke();
+}
+function fit(x, text, weight, size, maxW, family) {
+  do { x.font = `${weight} ${size}px ${family}`; } while (x.measureText(text).width > maxW && --size > 14);
+  return size;
+}
+function pkgCard(c) {
+  const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+  const x = cv.getContext('2d');
+  const bg = c.dark ? '#263BAA' : '#FFF4D6', ink = c.dark ? '#FFF4D6' : '#161E4D';
+  const accent = c.dark ? '#FFD98A' : '#263BAA', muted = c.dark ? 'rgba(255,244,214,.82)' : 'rgba(22,30,77,.74)';
+  x.fillStyle = bg; x.fillRect(0, 0, W, H);
+  dots(x, c.dark ? 'rgba(255,244,214,.10)' : 'rgba(38,59,170,.13)');
+  portrait(x, 990, 250, 165, c.dark ? '#4B5FCC' : '#263BAA', c.dark ? '#263BAA' : '#FFF4D6');
+  // kicker
+  x.fillStyle = accent; x.fillRect(64, 70, 34, 5);
+  x.font = '700 22px "JetBrains Mono"'; x.fillStyle = accent;
+  x.fillText((c.kicker + ' · package').toUpperCase(), 112, 80);
+  // title (≤ 2 lines)
+  let size = 66, lines;
+  do { size -= 2; x.font = `800 ${size}px "Space Grotesk"`; lines = wrap(x, c.title, 720); } while (lines.length > 2 && size > 36);
+  x.fillStyle = ink;
+  const lh = size * 1.1;
+  lines.forEach((l, i) => x.fillText(l, 64, 135 + size + i * lh));
+  let y = 135 + size + (lines.length - 1) * lh + 72;
+  // price
+  fit(x, c.price, 800, 48, 720, '"Space Grotesk"'); x.fillStyle = accent; x.fillText(c.price, 64, y);
+  y += 62;
+  // three highlights
+  for (const t of c.lines) {
+    const s = fit(x, t, 500, 27, 690, '"Space Grotesk"');
+    x.fillStyle = accent; x.font = `800 ${s}px "Space Grotesk"`; x.fillText('✓', 64, y);
+    x.fillStyle = muted; x.font = `500 ${s}px "Space Grotesk"`; x.fillText(t, 100, y);
+    y += 44;
+  }
+  // footer: who + where
+  x.font = '700 21px "JetBrains Mono"'; x.fillStyle = ink;
+  x.fillText('Talha Zafar · Backend, DevOps & LLMOps', 64, 588);
+  x.font = '700 20px "JetBrains Mono"'; x.fillStyle = accent;
+  x.fillText(c.url, 1136 - x.measureText(c.url).width, 588);
+  return cv.toDataURL('image/jpeg', 0.88);
+}
+function overview(c) {
+  const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+  const x = cv.getContext('2d');
+  x.fillStyle = '#FFF4D6'; x.fillRect(0, 0, W, H);
+  dots(x, 'rgba(38,59,170,.13)');
+  portrait(x, 1050, 128, 92, '#263BAA', '#FFF4D6');
+  x.fillStyle = '#263BAA'; x.fillRect(64, 70, 34, 5);
+  x.font = '700 22px "JetBrains Mono"'; x.fillText(c.kicker.toUpperCase(), 112, 80);
+  fit(x, c.title, 800, 62, 860, '"Space Grotesk"'); x.fillStyle = '#161E4D'; x.fillText(c.title, 64, 178);
+  const bw = 340, gap = 24, top = 238, bh = 290;
+  c.offers.forEach((o, i) => {
+    const bx = 64 + i * (bw + gap);
+    x.fillStyle = o.dark ? '#263BAA' : '#FFFAEA'; x.fillRect(bx, top, bw, bh);
+    if (!o.dark) { x.strokeStyle = 'rgba(38,59,170,.35)'; x.lineWidth = 2; x.strokeRect(bx + 1, top + 1, bw - 2, bh - 2); }
+    const ink = o.dark ? '#FFF4D6' : '#161E4D', accent = o.dark ? '#FFD98A' : '#263BAA';
+    x.font = '700 18px "JetBrains Mono"'; x.fillStyle = accent; x.fillText(o.kicker.toUpperCase(), bx + 28, top + 48);
+    x.font = '700 32px "Space Grotesk"'; x.fillStyle = ink;
+    wrap(x, o.name, bw - 56).slice(0, 3).forEach((l, k) => x.fillText(l, bx + 28, top + 98 + k * 38));
+    const ps = fit(x, o.price, 800, 34, bw - 56, '"Space Grotesk"');
+    x.fillStyle = accent; x.font = `800 ${ps}px "Space Grotesk"`; x.fillText(o.price, bx + 28, top + bh - 34);
+  });
+  x.font = '700 21px "JetBrains Mono"'; x.fillStyle = '#161E4D';
+  x.fillText('Talha Zafar · Backend, DevOps & LLMOps', 64, 588);
+  x.font = '700 20px "JetBrains Mono"'; x.fillStyle = '#263BAA';
+  x.fillText(c.url, 1136 - x.measureText(c.url).width, 588);
+  return cv.toDataURL('image/jpeg', 0.88);
+}
+
 function icon(size) {
   const cv = document.createElement('canvas'); cv.width = cv.height = size;
   const x = cv.getContext('2d'), u = size / 64;
@@ -81,11 +161,11 @@ function icon(size) {
 window.addEventListener('load', async () => {
   await Promise.all([
     document.fonts.load('800 60px "Space Grotesk"'), document.fonts.load('500 26px "Space Grotesk"'),
-    document.fonts.load('700 20px "JetBrains Mono"'),
+    document.fonts.load('700 20px "JetBrains Mono"'), document.fonts.load('700 32px "Space Grotesk"'),
     photo.decode(),
   ]);
   const out = { 'favicon-96.png': icon(96), 'apple-touch-icon.png': icon(180) };
-  for (const c of CARDS) out[c.file] = card(c);
+  for (const c of CARDS) out[c.file] = c.style === 'pkg' ? pkgCard(c) : c.style === 'overview' ? overview(c) : card(c);
   const pre = document.createElement('pre'); pre.id = 'out'; pre.textContent = JSON.stringify(out);
   document.body.appendChild(pre);
 });

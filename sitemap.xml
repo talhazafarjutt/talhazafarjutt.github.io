@@ -40,4 +40,19 @@
     <lastmod>2026-10-31</lastmod>
     <image:image><image:loc>https://talhazafarjutt.github.io/img/og/packages.jpg</image:loc></image:image>
   </url>
+  <url>
+    <loc>https://talhazafarjutt.github.io/call.html</loc>
+    <lastmod>2026-10-31</lastmod>
+    <image:image><image:loc>https://talhazafarjutt.github.io/img/og/call.jpg</image:loc></image:image>
+  </url>
+  <url>
+    <loc>https://talhazafarjutt.github.io/audit.html</loc>
+    <lastmod>2026-10-31</lastmod>
+    <image:image><image:loc>https://talhazafarjutt.github.io/img/og/audit.jpg</image:loc></image:image>
+  </url>
+  <url>
+    <loc>https://talhazafarjutt.github.io/llmops.html</loc>
+    <lastmod>2026-10-31</lastmod>
+    <image:image><image:loc>https://talhazafarjutt.github.io/img/og/llmops.jpg</image:loc></image:image>
+  </url>
 </urlset>

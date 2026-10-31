@@ -468,7 +468,20 @@ section{position:relative;padding:100px 0}
 #request .msg-form{margin-top:0}
 .mf-field select{font:inherit;font-size:.95rem;color:var(--fg);background:#fff;border:1px solid rgba(38,59,170,.3);padding:.7rem .8rem;width:100%}
 .mf-field select:focus{outline:none;border-color:var(--indigo);box-shadow:0 0 0 3px rgba(38,59,170,.15)}
-@media(max-width:1000px){.pkg-grid,.faq{grid-template-columns:1fr}.pkg-page{padding-top:110px}}
+.pkg-more{display:inline-block;margin-top:.9rem;font-size:.85rem;font-weight:700;color:var(--indigo);text-decoration:underline;text-underline-offset:3px}
+.pkg-dark .pkg-more{color:var(--vanilla)}
+.sec-label a{color:inherit;text-decoration:underline;text-underline-offset:3px}
+/* one-package pages (call.html, audit.html, llmops.html) */
+.offer-grid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:2rem;align-items:start}
+.pkg-single{padding:2.2rem 2.2rem 2rem}
+.pkg-single .pkg-cta{align-self:flex-start;margin-top:.4rem}
+.offer-aside{background:var(--paper);border:1px solid var(--line);padding:1.6rem}
+.offer-aside p{font-size:.9rem;line-height:1.7;color:var(--t2);margin-bottom:1.2rem}
+.offer-others{list-style:none;margin-bottom:.4rem}
+.offer-others a{display:block;padding:.75rem 0;border-top:1px solid var(--line);font-size:.95rem;font-weight:600;color:var(--fg)}
+.offer-others a:hover{color:var(--indigo)}
+.offer-others b{display:block;font-family:var(--mono);font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--indigo);margin-bottom:.15rem}
+@media(max-width:1000px){.pkg-grid,.faq,.offer-grid{grid-template-columns:1fr}.pkg-page{padding-top:110px}}
 
 /* ── CONTACT FORM (homepage + articles) ── */
 .msg-form{margin-top:2.5rem;background:var(--paper);border:1px solid var(--line);padding:1.8rem}
